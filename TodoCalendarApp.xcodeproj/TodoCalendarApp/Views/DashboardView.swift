@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @State private var selectedTab = 0
+    @State private var showingGoogleCalendar = false
     
     var body: some View {
         NavigationView {
@@ -28,6 +29,9 @@ struct DashboardView: View {
                 
                 // Floating Action Button
                 floatingActionButton
+                
+                // Google Calendar Integration Button
+                googleCalendarButton
             }
             .navigationBarHidden(true)
         }
@@ -36,6 +40,9 @@ struct DashboardView: View {
         }
         .sheet(isPresented: $viewModel.showingAddAlarm) {
             AddAlarmView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingGoogleCalendar) {
+            GoogleCalendarSelectionView()
         }
     }
     
@@ -187,6 +194,38 @@ struct DashboardView: View {
                 .foregroundColor(Color(.separator)),
             alignment: .top
         )
+    }
+    
+    // MARK: - Google Calendar Button
+    
+    private var googleCalendarButton: some View {
+        VStack {
+            Spacer()
+            
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    showingGoogleCalendar = true
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "calendar.badge.plus")
+                            .font(.title3)
+                        Text("Import Calendar")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.green)
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                }
+                .padding(.trailing, 20)
+                .padding(.bottom, 180) // Above floating action button
+            }
+        }
     }
     
     // MARK: - Floating Action Button
