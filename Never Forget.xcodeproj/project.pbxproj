@@ -6,6 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CC1F3DDB2E58080700FC027A /* PersistentAlarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DD92E58080700FC027A /* PersistentAlarm.swift */; };
+		CC1F3DDC2E58080700FC027A /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DDA2E58080700FC027A /* Todo.swift */; };
+		CC1F3DDE2E58086300FC027A /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */; };
+		CC1F3DE22E58094F00FC027A /* GoogleCalendarSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DE12E58094F00FC027A /* GoogleCalendarSelectionView.swift */; };
+		CC1F3DE32E58094F00FC027A /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DDF2E58094F00FC027A /* DashboardView.swift */; };
+		CC1F3DE42E58094F00FC027A /* EventImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DE02E58094F00FC027A /* EventImportView.swift */; };
+		CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */; };
+		CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */; };
+		CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */; };
+		CC1F3DF52E580A4F00FC027A /* TodoCalendarAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF42E580A4F00FC027A /* TodoCalendarAppApp.swift */; };
+		CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF32E580A4F00FC027A /* ContentView.swift */; };
+		CC1F3DF92E580BC700FC027A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC1F3DF82E580BC700FC027A /* GoogleSignIn */; };
+		CC1F3DFB2E580BC700FC027A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CC1F3DFA2E580BC700FC027A /* GoogleSignInSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CC1F3DBD2E58076500FC027A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +43,21 @@
 		CC1F3DAF2E58076400FC027A /* Never Forget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Never Forget.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC1F3DBC2E58076500FC027A /* Never ForgetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Never ForgetTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC1F3DC62E58076500FC027A /* Never ForgetUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Never ForgetUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC1F3DD92E58080700FC027A /* PersistentAlarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentAlarm.swift; sourceTree = "<group>"; };
+		CC1F3DDA2E58080700FC027A /* Todo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Todo.swift; sourceTree = "<group>"; };
+		CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		CC1F3DDF2E58094F00FC027A /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		CC1F3DE02E58094F00FC027A /* EventImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventImportView.swift; sourceTree = "<group>"; };
+		CC1F3DE12E58094F00FC027A /* GoogleCalendarSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarSelectionView.swift; sourceTree = "<group>"; };
+		CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarEvent.swift; sourceTree = "<group>"; };
+
+
+
+
+		CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarService.swift; sourceTree = "<group>"; };
+		CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarConfig.swift; sourceTree = "<group>"; };
+		CC1F3DF32E580A4F00FC027A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CC1F3DF42E580A4F00FC027A /* TodoCalendarAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarAppApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +83,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC1F3DF92E580BC700FC027A /* GoogleSignIn in Frameworks */,
+				CC1F3DFB2E580BC700FC027A /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,10 +108,25 @@
 		CC1F3DA62E58076400FC027A = {
 			isa = PBXGroup;
 			children = (
+				CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */,
+				CC1F3DDF2E58094F00FC027A /* DashboardView.swift */,
+				CC1F3DE02E58094F00FC027A /* EventImportView.swift */,
+				CC1F3DE12E58094F00FC027A /* GoogleCalendarSelectionView.swift */,
+				CC1F3DD92E58080700FC027A /* PersistentAlarm.swift */,
+				CC1F3DDA2E58080700FC027A /* Todo.swift */,
 				CC1F3DB12E58076400FC027A /* Never Forget */,
 				CC1F3DBF2E58076500FC027A /* Never ForgetTests */,
 				CC1F3DC92E58076500FC027A /* Never ForgetUITests */,
 				CC1F3DB02E58076400FC027A /* Products */,
+				CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */,
+
+
+
+
+				CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */,
+				CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */,
+				CC1F3DF32E580A4F00FC027A /* ContentView.swift */,
+				CC1F3DF42E580A4F00FC027A /* TodoCalendarAppApp.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +160,8 @@
 			);
 			name = "Never Forget";
 			packageProductDependencies = (
+				CC1F3DF82E580BC700FC027A /* GoogleSignIn */,
+				CC1F3DFA2E580BC700FC027A /* GoogleSignInSwift */,
 			);
 			productName = "Never Forget";
 			productReference = CC1F3DAF2E58076400FC027A /* Never Forget.app */;
@@ -175,6 +225,7 @@
 				TargetAttributes = {
 					CC1F3DAE2E58076400FC027A = {
 						CreatedOnToolsVersion = 16.4;
+						LastSwiftMigration = 1640;
 					};
 					CC1F3DBB2E58076500FC027A = {
 						CreatedOnToolsVersion = 16.4;
@@ -195,6 +246,9 @@
 			);
 			mainGroup = CC1F3DA62E58076400FC027A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CC1F3DF72E580BC700FC027A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CC1F3DB02E58076400FC027A /* Products */;
 			projectDirPath = "";
@@ -236,6 +290,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC1F3DDE2E58086300FC027A /* DashboardViewModel.swift in Sources */,
+				CC1F3DE22E58094F00FC027A /* GoogleCalendarSelectionView.swift in Sources */,
+				CC1F3DE32E58094F00FC027A /* DashboardView.swift in Sources */,
+
+				CC1F3DE42E58094F00FC027A /* EventImportView.swift in Sources */,
+				CC1F3DDB2E58080700FC027A /* PersistentAlarm.swift in Sources */,
+				CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */,
+				CC1F3DDC2E58080700FC027A /* Todo.swift in Sources */,
+				CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */,
+
+
+				CC1F3DF52E580A4F00FC027A /* TodoCalendarAppApp.swift in Sources */,
+				CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */,
+				CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */,
+
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +464,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = STT3M8T8MQ;
@@ -413,6 +483,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.NeverForgetApp.NeverForget.Never-Forget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -423,6 +494,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = STT3M8T8MQ;
@@ -558,6 +630,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CC1F3DF72E580BC700FC027A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CC1F3DF82E580BC700FC027A /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC1F3DF72E580BC700FC027A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		CC1F3DFA2E580BC700FC027A /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC1F3DF72E580BC700FC027A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CC1F3DA72E58076400FC027A /* Project object */;
 }
