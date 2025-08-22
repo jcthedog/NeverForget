@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Google Calendar API Configuration
-// 
+//
 // To use Google Calendar integration, you need to:
 //
 // 1. Go to Google Cloud Console (https://console.cloud.google.com/)
