@@ -3,6 +3,7 @@ import SwiftUI
 struct EventImportView: View {
     let events: [GoogleCalendarEvent]
     let calendarService: GoogleCalendarService
+    let viewModel: DashboardViewModel  // Add view model parameter
     @Environment(\.dismiss) private var dismiss
     @State private var selectedEvents: Set<String> = []
     @State private var importOptions = ImportOptions()
@@ -43,9 +44,7 @@ struct EventImportView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Import") {
-                        Task {
-                            await importSelectedEvents()
-                        }
+                        importSelectedEvents()
                     }
                     .disabled(selectedEvents.isEmpty || isImporting)
                 }
@@ -111,15 +110,47 @@ struct EventImportView: View {
             }
             .padding(.horizontal)
             
-            List {
-                ForEach(filteredEvents) { event in
-                    EventImportRowView(
-                        event: event,
-                        isSelected: selectedEvents.contains(event.id),
-                        importOptions: importOptions
-                    ) {
-                        toggleEventSelection(event.id)
+            if events.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "calendar.badge.exclamationmark")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+                    
+                    Text("No Events Available")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Text("Connect your Google Calendar to import events")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Connect Calendar") {
+                        calendarService.signIn()
                     }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 8) {
+                        ForEach(events) { event in
+                            EventImportRowView(
+                                event: event,
+                                isSelected: selectedEvents.contains(event.id),
+                                importOptions: importOptions,
+                                onToggle: {
+                                    if selectedEvents.contains(event.id) {
+                                        selectedEvents.remove(event.id)
+                                    } else {
+                                        selectedEvents.insert(event.id)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal)
                 }
             }
         }
@@ -129,108 +160,58 @@ struct EventImportView: View {
     
     private var importProgressSection: some View {
         VStack(spacing: 16) {
-            ProgressView(value: importProgress, total: 1.0)
+            ProgressView(value: importProgress)
                 .progressViewStyle(LinearProgressViewStyle())
-                .padding(.horizontal)
+                .scaleEffect(x: 1, y: 2, anchor: .center)
             
             Text("Importing events... \(Int(importProgress * 100))%")
-                .font(.caption)
+                .font(.subheadline)
                 .foregroundColor(.secondary)
         }
         .padding()
         .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .padding()
     }
     
-    // MARK: - Computed Properties
+    // MARK: - Import Logic
     
-    private var filteredEvents: [GoogleCalendarEvent] {
-        events.filter { event in
-            var shouldInclude = true
-            
-            if !importOptions.includeAllDayEvents && event.isAllDay {
-                shouldInclude = false
-            }
-            
-            if !importOptions.includeRecurringEvents && event.recurringEventId != nil {
-                shouldInclude = false
-            }
-            
-            if !importOptions.includeEventsWithAttendees && !event.attendees.isEmpty {
-                shouldInclude = false
-            }
-            
-            return shouldInclude
-        }
-    }
-    
-    // MARK: - Event Selection
-    
-    private func toggleEventSelection(_ eventId: String) {
-        if selectedEvents.contains(eventId) {
-            selectedEvents.remove(eventId)
-        } else {
-            selectedEvents.insert(eventId)
-        }
-    }
-    
-    // MARK: - Import Process
-    
-    private func importSelectedEvents() async {
-        await MainActor.run {
-            isImporting = true
-            importProgress = 0.0
-        }
+    private func importSelectedEvents() {
+        guard !selectedEvents.isEmpty else { return }
         
-        let eventsToImport = filteredEvents.filter { selectedEvents.contains($0.id) }
+        isImporting = true
+        importProgress = 0.0
+        
+        let eventsToImport = events.filter { selectedEvents.contains($0.id) }
         let totalEvents = eventsToImport.count
         
-        for (index, event) in eventsToImport.enumerated() {
-            // Convert event to todo
-            let todo = convertEventToTodo(event)
-            
-            // Add to dashboard (you'll need to inject the dashboard view model)
-            // For now, we'll just simulate the import
-            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second delay
-            
-            await MainActor.run {
-                importProgress = Double(index + 1) / Double(totalEvents)
+        // Import events in batches to avoid blocking the UI
+        DispatchQueue.global(qos: .userInitiated).async {
+            for (index, event) in eventsToImport.enumerated() {
+                // Convert event to todo and save it
+                let todo = convertEventToTodo(event)
+                
+                // Save to view model on main thread
+                DispatchQueue.main.async {
+                    viewModel.addTodo(todo)
+                    importProgress = Double(index + 1) / Double(totalEvents)
+                }
+                
+                // Small delay to prevent UI blocking
+                Thread.sleep(forTimeInterval: 0.05)
             }
-        }
-        
-        await MainActor.run {
-            isImporting = false
-            dismiss()
+            
+            // Import complete
+            DispatchQueue.main.async {
+                isImporting = false
+                dismiss()
+            }
         }
     }
     
     private func convertEventToTodo(_ event: GoogleCalendarEvent) -> Todo {
-        var tags: [String] = []
-        
-        if importOptions.addCalendarSourceAsTag {
-            tags.append(event.calendarName)
-        }
-        
-        if importOptions.addEventTypeAsTag {
-            if event.isAllDay {
-                tags.append("All Day")
-            }
-            if event.location != nil && !event.location!.isEmpty {
-                tags.append("Location")
-            }
-            if !event.attendees.isEmpty {
-                tags.append("Meeting")
-            }
-        }
-        
-        // Use event priority or default priority
-        let priority = event.attendees.count > 5 ? .high : importOptions.defaultPriority
-        
-        return Todo(
-            title: event.title,
-            description: event.description ?? "",
-            priority: priority,
-            dueDate: event.dueDate
-        )
+        // Use the built-in conversion method which already handles priority and other properties
+        return event.toTodo()
     }
 }
 
@@ -357,6 +338,7 @@ struct EventImportRowView: View {
                 originalStartTime: nil
             )
         ],
-        calendarService: GoogleCalendarService()
+        calendarService: GoogleCalendarService(),
+        viewModel: DashboardViewModel() // Pass a mock or dummy view model for preview
     )
 }

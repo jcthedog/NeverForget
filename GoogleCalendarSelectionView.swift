@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GoogleCalendarSelectionView: View {
     @StateObject private var calendarService = GoogleCalendarService()
+    let viewModel: DashboardViewModel  // Add view model parameter
     @Environment(\.dismiss) private var dismiss
     @State private var showingEventImport = false
     @State private var selectedEvents: [GoogleCalendarEvent] = []
@@ -82,12 +83,13 @@ struct GoogleCalendarSelectionView: View {
         .sheet(isPresented: $showingEventImport) {
             EventImportView(
                 events: selectedEvents,
-                calendarService: calendarService
+                calendarService: calendarService,
+                viewModel: viewModel  // Pass the view model
             )
         }
         .task {
             if calendarService.isAuthenticated {
-                await calendarService.fetchCalendars()
+                calendarService.fetchCalendars()
             }
         }
     }
@@ -114,9 +116,7 @@ struct GoogleCalendarSelectionView: View {
             }
             
             Button(action: {
-                Task {
-                    await calendarService.signIn()
-                }
+                calendarService.signIn()
             }) {
                 HStack(spacing: 12) {
                     Image(systemName: "person.crop.circle.fill")
@@ -226,14 +226,17 @@ struct GoogleCalendarSelectionView: View {
     // MARK: - Event Import
     
     private func importEvents() async {
-        let events = await calendarService.fetchEventsFromSelectedCalendars(
-            startDate: importDateRange.startDate,
-            endDate: importDateRange.endDate
-        )
-        
-        await MainActor.run {
-            selectedEvents = events
-            showingEventImport = true
+        await withCheckedContinuation { continuation in
+            calendarService.fetchEventsFromSelectedCalendars(
+                startDate: importDateRange.startDate,
+                endDate: importDateRange.endDate
+            ) { events in
+                Task { @MainActor in
+                    selectedEvents = events
+                    showingEventImport = true
+                    continuation.resume()
+                }
+            }
         }
     }
 }
@@ -305,5 +308,5 @@ struct CalendarRowView: View {
 }
 
 #Preview {
-    GoogleCalendarSelectionView()
+    GoogleCalendarSelectionView(viewModel: DashboardViewModel())
 }

@@ -1,10 +1,12 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject private var viewModel = DashboardViewModel()
+    @ObservedObject var viewModel: DashboardViewModel
+    @StateObject private var googleCalendarService = GoogleCalendarService()
     @State private var showingAddTodo = false
     @State private var showingCalendar = false
     @State private var showingSearch = false
+    @State private var showingGoogleCalendar = false
     
     var body: some View {
         NavigationView {
@@ -17,8 +19,12 @@ struct DashboardView: View {
                     QuickActionsSection(
                         showingAddTodo: $showingAddTodo,
                         showingCalendar: $showingCalendar,
-                        showingSearch: $showingSearch
+                        showingSearch: $showingSearch,
+                        showingGoogleCalendar: $showingGoogleCalendar
                     )
+                    
+                    // Google Calendar Status Section
+                    GoogleCalendarStatusSection(service: googleCalendarService)
                     
                     // Today's Focus Section
                     TodaysFocusSection(
@@ -36,13 +42,20 @@ struct DashboardView: View {
                 viewModel.loadDashboardData()
             }
             .sheet(isPresented: $showingAddTodo) {
-                AddTodoView(viewModel: viewModel)
+                AddTodoFormView(viewModel: viewModel)
             }
             .sheet(isPresented: $showingCalendar) {
-                CalendarView()
+                // TODO: Add CalendarView back once it's properly added to the project
+                Text("Calendar View - Coming Soon")
+                    .font(.title)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .sheet(isPresented: $showingSearch) {
-                SearchView()
+                SearchView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingGoogleCalendar) {
+                GoogleCalendarSelectionView(viewModel: viewModel)
             }
         }
     }
@@ -201,30 +214,14 @@ struct ActiveAlarmCard: View {
     }
 }
 
-struct EmptyAlarmsView: View {
-    var body: some View {
-        HStack {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
-                .font(.title2)
-            
-            Text("All caught up! No active alarms.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Spacer()
-        }
-        .padding()
-        .background(Color(.tertiarySystemBackground))
-        .cornerRadius(12)
-    }
-}
+
 
 // MARK: - Quick Actions Section
 struct QuickActionsSection: View {
     @Binding var showingAddTodo: Bool
     @Binding var showingCalendar: Bool
     @Binding var showingSearch: Bool
+    @Binding var showingGoogleCalendar: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -255,6 +252,14 @@ struct QuickActionsSection: View {
                     color: .orange
                 ) {
                     showingSearch = true
+                }
+                
+                QuickActionButton(
+                    title: "Google Calendar",
+                    icon: "calendar.badge.plus",
+                    color: .purple
+                ) {
+                    showingGoogleCalendar = true
                 }
             }
         }
@@ -385,7 +390,7 @@ struct UpcomingTodoRow: View {
     var body: some View {
         HStack {
             Button(action: {
-                viewModel.completeTodo(todo)
+                viewModel.toggleTodoCompletion(todo)
             }) {
                 Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(todo.isCompleted ? .green : .secondary)
@@ -430,28 +435,69 @@ struct UpcomingTodoRow: View {
     }
 }
 
-// MARK: - Placeholder Views
-struct AddTodoView: View {
-    let viewModel: DashboardViewModel
+
+
+
+
+// MARK: - Google Calendar Status Section
+struct GoogleCalendarStatusSection: View {
+    @ObservedObject var service: GoogleCalendarService
     
     var body: some View {
-        NavigationView {
-            Text("Add Todo View")
-                .navigationTitle("Add Todo")
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Google Calendar Status", systemImage: "calendar.badge.plus")
+                .font(.headline)
+                .foregroundColor(.purple)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: service.isAuthenticated ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundColor(service.isAuthenticated ? .green : .red)
+                    
+                    Text(service.isAuthenticated ? "Connected to Google Calendar" : "Not connected to Google Calendar")
+                        .font(.subheadline)
+                        .foregroundColor(service.isAuthenticated ? .green : .red)
+                    
+                    Spacer()
+                }
+                
+                if service.isLoading {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Connecting...")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                if let errorMessage = service.errorMessage {
+                    Text("Error: \(errorMessage)")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                
+                if service.isAuthenticated {
+                    Text("Calendars available: \(service.calendars.count)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
-    }
-}
-
-struct CalendarView: View {
-    var body: some View {
-        NavigationView {
-            Text("Calendar View")
-                .navigationTitle("Calendar")
-        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
 struct SearchView: View {
+    @ObservedObject var viewModel: DashboardViewModel
+    
     var body: some View {
         NavigationView {
             Text("Search View")
@@ -460,19 +506,9 @@ struct SearchView: View {
     }
 }
 
-// MARK: - Extensions
-extension NotificationType {
-    var displayName: String {
-        switch self {
-        case .standard: return "Standard"
-        case .repeating: return "Repeating"
-        case .sound: return "Sound"
-        case .soundAndVibration: return "Sound + Vibration"
-        case .fullScreen: return "Full Screen"
-        }
-    }
-}
+
 
 #Preview {
-    DashboardView()
+    let viewModel = DashboardViewModel()
+    return DashboardView(viewModel: viewModel)
 }

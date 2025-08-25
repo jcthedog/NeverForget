@@ -36,7 +36,7 @@ struct GoogleCalendarConfig {
     ]
     
     // App bundle identifier for URL scheme
-    static let bundleID = "com.yourcompany.NeverForget"
+    static let bundleID = "com.NeverForgetApp.NeverForget.Never-Forget"
     
     // Google Calendar API base URL
     static let apiBaseURL = "https://www.googleapis.com/calendar/v3"

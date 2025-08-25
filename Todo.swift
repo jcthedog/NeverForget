@@ -1,4 +1,96 @@
 import Foundation
+import SwiftUI
+
+// MARK: - Notification Type
+enum NotificationType: String, CaseIterable, Codable {
+    case standard = "standard"
+    case repeating = "repeating"
+    case sound = "sound"
+    case soundAndVibration = "soundAndVibration"
+    case fullScreen = "fullScreen"
+    
+    var displayName: String {
+        switch self {
+        case .standard: return "Standard"
+        case .repeating: return "Repeating"
+        case .sound: return "Sound"
+        case .soundAndVibration: return "Sound + Vibration"
+        case .fullScreen: return "Full Screen"
+        }
+    }
+}
+
+// MARK: - Alarm Settings
+struct AlarmSettings: Codable, Equatable {
+    var isEnabled: Bool
+    var reminderTime: Date?
+    var notificationType: NotificationType
+    var soundEnabled: Bool
+    var vibrationEnabled: Bool
+    
+    init(
+        isEnabled: Bool = false,
+        reminderTime: Date? = nil,
+        notificationType: NotificationType = .standard,
+        soundEnabled: Bool = true,
+        vibrationEnabled: Bool = true
+    ) {
+        self.isEnabled = isEnabled
+        self.reminderTime = reminderTime
+        self.notificationType = notificationType
+        self.soundEnabled = soundEnabled
+        self.vibrationEnabled = vibrationEnabled
+    }
+}
+
+// MARK: - Recurring Pattern
+enum RecurringPattern: Codable, Equatable {
+    case daily(interval: Int)
+    case weekly(interval: Int, days: Set<Int>)
+    case monthly(interval: Int)
+    case yearly(interval: Int)
+    
+    var displayName: String {
+        switch self {
+        case .daily(let interval):
+            return interval == 1 ? "Daily" : "Every \(interval) days"
+        case .weekly(let interval, _):
+            return interval == 1 ? "Weekly" : "Every \(interval) weeks"
+        case .monthly(let interval):
+            return interval == 1 ? "Monthly" : "Every \(interval) months"
+        case .yearly(let interval):
+            return interval == 1 ? "Yearly" : "Every \(interval) years"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .daily(let interval):
+            return interval == 1 ? "Daily" : "Every \(interval) days"
+        case .weekly(let interval, let days):
+            let dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+            let sortedDays = days.sorted()
+            if sortedDays.count == 7 {
+                return interval == 1 ? "Daily" : "Every \(interval) days"
+            } else if sortedDays == [1, 2, 3, 4, 5] {
+                return interval == 1 ? "Weekdays" : "Every \(interval) weeks on weekdays"
+            } else if sortedDays == [0, 6] {
+                return interval == 1 ? "Weekends" : "Every \(interval) weeks on weekends"
+            } else {
+                let dayList = sortedDays.map { dayNames[$0] }.joined(separator: ", ")
+                return interval == 1 ? "Weekly on \(dayList)" : "Every \(interval) weeks on \(dayList)"
+            }
+        case .monthly(let interval):
+            return interval == 1 ? "Monthly" : "Every \(interval) months"
+        case .yearly(let interval):
+            return interval == 1 ? "Yearly" : "Every \(interval) years"
+        }
+    }
+    
+
+    
+
+}
 
 struct Todo: Identifiable, Codable, Equatable {
     let id: UUID
@@ -56,19 +148,19 @@ enum Priority: String, CaseIterable, Codable {
         }
     }
     
-    var color: String {
-        switch self {
-        case .low: return "priorityLow"
-        case .medium: return "priorityMedium"
-        case .high: return "priorityHigh"
-        }
-    }
-    
     var icon: String {
         switch self {
         case .low: return "🟢"
         case .medium: return "🟡"
         case .high: return "🔴"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .low: return .green
+        case .medium: return .orange
+        case .high: return .red
         }
     }
 }
@@ -105,6 +197,18 @@ enum Category: String, CaseIterable, Codable {
         case .other: return "📝"
         }
     }
+    
+    var color: Color {
+        switch self {
+        case .work: return .blue
+        case .personal: return .purple
+        case .health: return .green
+        case .finance: return .orange
+        case .shopping: return .pink
+        case .travel: return .cyan
+        case .other: return .gray
+        }
+    }
 }
 
 struct Subtask: Identifiable, Codable, Equatable {
@@ -119,18 +223,6 @@ struct Subtask: Identifiable, Codable, Equatable {
     }
 }
 
-enum RecurringPattern: String, CaseIterable, Codable {
-    case daily = "daily"
-    case weekly = "weekly"
-    case monthly = "monthly"
-    case yearly = "yearly"
-    
-    var displayName: String {
-        switch self {
-        case .daily: return "Daily"
-        case .weekly: return "Weekly"
-        case .monthly: return "Monthly"
-        case .yearly: return "Yearly"
-        }
-    }
-}
+
+
+
