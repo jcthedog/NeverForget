@@ -711,7 +711,7 @@ struct GoogleCalendarMultiDayView: View {
                             calendarEvents: calendarEvents,
                             onEventTap: onEventTap
                         )
-                        .frame(width: 140)
+                        .frame(width: 150) // Increased from 140 to ensure colored bars have enough space
                         .id("3day-\(dayOffset)-\(currentDate.timeIntervalSince1970)")
                     } else {
                         // 7-Day View: Traditional day columns
@@ -770,7 +770,7 @@ struct GoogleCalendarCompactDayColumn: View {
             .background(Color(.systemBackground))
             
             // Time-based events for 3-day view (like Today view)
-            LazyVStack(spacing: 1) {
+            LazyVStack(spacing: 2) { // Increased spacing from 1 to 2 for better colored bar visibility
                 ForEach(hourSlots, id: \.self) { hour in
                     GoogleCalendarCompactTimeSlot(
                         hour: hour,
@@ -782,7 +782,7 @@ struct GoogleCalendarCompactDayColumn: View {
                     .id("compact-\(date.timeIntervalSince1970)-\(hour)")
                 }
             }
-            .padding(.horizontal, 2)
+            .padding(.horizontal, 4) // Increased from 2 to 4 for better colored bar display
             .frame(maxWidth: .infinity)
             .background(Color(.systemBackground))
         }
@@ -835,11 +835,11 @@ struct GoogleCalendarCompactTimeSlot: View {
             Text(formatHour(hour))
                 .font(.caption2)
                 .foregroundColor(.secondary)
-                .frame(width: 30, alignment: .trailing)
-                .frame(height: 20)
+                .frame(width: 35, alignment: .trailing) // Increased from 30 to 35 for better spacing
+                .frame(minHeight: 24) // Increased from 20 to ensure proper spacing
             
             // Events and todos for this hour
-            VStack(spacing: 1) {
+            VStack(spacing: 2) { // Increased spacing from 1 to 2 for better visibility
                 ForEach(events, id: \.id) { event in
                     UnifiedCalendarEventBlock(event: event, onTap: { onEventTap(event) }, size: .compact)
                         .id("compact-event-\(event.id)-\(hour)")
@@ -851,7 +851,9 @@ struct GoogleCalendarCompactTimeSlot: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(height: 20)
+        .frame(minHeight: 24) // Increased from 20 to ensure colored bars are not clipped
+        .background(Color(.systemGray6).opacity(0.3)) // Added subtle background for better colored bar visibility
+        .cornerRadius(2) // Added subtle corner radius for better visual appeal
     }
     
     private func formatHour(_ hour: Int) -> String {
@@ -1462,7 +1464,7 @@ struct UnifiedCalendarEventBlock: View {
         
         var padding: EdgeInsets {
             switch self {
-            case .compact: return EdgeInsets(top: 1, leading: 4, bottom: 1, trailing: 4)
+            case .compact: return EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6) // Increased from 1,4,1,4 for better visibility
             case .standard: return EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
             case .large: return EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4)
             }
@@ -1470,7 +1472,7 @@ struct UnifiedCalendarEventBlock: View {
         
         var cornerRadius: CGFloat {
             switch self {
-            case .compact: return 2
+            case .compact: return 3 // Increased from 2 for better visual appeal
             case .standard: return 4
             case .large: return 2
             }
@@ -1492,6 +1494,7 @@ struct UnifiedCalendarEventBlock: View {
             .padding(size.padding)
             .background(Color.blue)
             .cornerRadius(size.cornerRadius)
+            .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1) // Added subtle shadow for better visibility
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -1517,7 +1520,7 @@ struct UnifiedCalendarTodoBlock: View {
         
         var padding: EdgeInsets {
             switch self {
-            case .compact: return EdgeInsets(top: 1, leading: 4, bottom: 1, trailing: 4)
+            case .compact: return EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6) // Increased from 1,4,1,4 for better visibility
             case .standard: return EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
             case .large: return EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4)
             }
@@ -1525,7 +1528,7 @@ struct UnifiedCalendarTodoBlock: View {
         
         var cornerRadius: CGFloat {
             switch self {
-            case .compact: return 2
+            case .compact: return 3 // Increased from 2 for better visual appeal
             case .standard: return 4
             case .large: return 2
             }
@@ -1554,5 +1557,6 @@ struct UnifiedCalendarTodoBlock: View {
         .padding(size.padding)
         .background(priorityColor)
         .cornerRadius(size.cornerRadius)
+        .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1) // Added subtle shadow for better visibility
     }
 }
