@@ -16,10 +16,21 @@
 		CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */; };
 		CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */; };
 		CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */; };
-		CC1F3DF52E580A4F00FC027A /* TodoCalendarAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF42E580A4F00FC027A /* TodoCalendarAppApp.swift */; };
 		CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF32E580A4F00FC027A /* ContentView.swift */; };
 		CC1F3DF92E580BC700FC027A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC1F3DF82E580BC700FC027A /* GoogleSignIn */; };
 		CC1F3DFB2E580BC700FC027A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CC1F3DFA2E580BC700FC027A /* GoogleSignInSwift */; };
+		CC5D15642E596D52007168FF /* GoogleAPIClientForRESTCore in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15632E596D52007168FF /* GoogleAPIClientForRESTCore */; };
+		CC5D15662E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15652E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS */; };
+		CC5D15682E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15672E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks */; };
+		CC5D156A2E596D52007168FF /* GoogleAPIClientForREST_APIGateway in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15692E596D52007168FF /* GoogleAPIClientForREST_APIGateway */; };
+		CC5D156C2E596D52007168FF /* GoogleAPIClientForREST_APIManagement in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D156B2E596D52007168FF /* GoogleAPIClientForREST_APIManagement */; };
+		CC5D156E2E596D52007168FF /* GoogleAPIClientForREST_APIhub in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D156D2E596D52007168FF /* GoogleAPIClientForREST_APIhub */; };
+		CC5D15702E596D52007168FF /* GoogleAPIClientForREST_AbusiveExperienceReport in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D156F2E596D52007168FF /* GoogleAPIClientForREST_AbusiveExperienceReport */; };
+		CC5D15722E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15712E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl */; };
+		CC5D15742E596D52007168FF /* GoogleAPIClientForREST_AccessApproval in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15732E596D52007168FF /* GoogleAPIClientForREST_AccessApproval */; };
+		CC5D15762E596D52007168FF /* GoogleAPIClientForREST_Calendar in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15752E596D52007168FF /* GoogleAPIClientForREST_Calendar */; };
+		CCF29A4D2E5AAF870036BABD /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A4C2E5AAF870036BABD /* CalendarView.swift */; };
+		CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,14 +61,12 @@
 		CC1F3DE02E58094F00FC027A /* EventImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventImportView.swift; sourceTree = "<group>"; };
 		CC1F3DE12E58094F00FC027A /* GoogleCalendarSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarSelectionView.swift; sourceTree = "<group>"; };
 		CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarEvent.swift; sourceTree = "<group>"; };
-
-
-
-
 		CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarService.swift; sourceTree = "<group>"; };
 		CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarConfig.swift; sourceTree = "<group>"; };
 		CC1F3DF32E580A4F00FC027A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		CC1F3DF42E580A4F00FC027A /* TodoCalendarAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarAppApp.swift; sourceTree = "<group>"; };
+		CC6F0B022E5983F4009CE3CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CCF29A4C2E5AAF870036BABD /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_ForgetApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -83,8 +92,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC5D156E2E596D52007168FF /* GoogleAPIClientForREST_APIhub in Frameworks */,
+				CC5D15702E596D52007168FF /* GoogleAPIClientForREST_AbusiveExperienceReport in Frameworks */,
 				CC1F3DF92E580BC700FC027A /* GoogleSignIn in Frameworks */,
+				CC5D156C2E596D52007168FF /* GoogleAPIClientForREST_APIManagement in Frameworks */,
+				CC5D156A2E596D52007168FF /* GoogleAPIClientForREST_APIGateway in Frameworks */,
+				CC5D15642E596D52007168FF /* GoogleAPIClientForRESTCore in Frameworks */,
+				CC5D15682E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks in Frameworks */,
+				CC5D15762E596D52007168FF /* GoogleAPIClientForREST_Calendar in Frameworks */,
+				CC5D15742E596D52007168FF /* GoogleAPIClientForREST_AccessApproval in Frameworks */,
 				CC1F3DFB2E580BC700FC027A /* GoogleSignInSwift in Frameworks */,
+				CC5D15722E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl in Frameworks */,
+				CC5D15662E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,6 +127,9 @@
 		CC1F3DA62E58076400FC027A = {
 			isa = PBXGroup;
 			children = (
+				CC6F0B022E5983F4009CE3CF /* Info.plist */,
+				CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */,
+				CCF29A4C2E5AAF870036BABD /* CalendarView.swift */,
 				CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */,
 				CC1F3DDF2E58094F00FC027A /* DashboardView.swift */,
 				CC1F3DE02E58094F00FC027A /* EventImportView.swift */,
@@ -119,14 +141,9 @@
 				CC1F3DC92E58076500FC027A /* Never ForgetUITests */,
 				CC1F3DB02E58076400FC027A /* Products */,
 				CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */,
-
-
-
-
 				CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */,
 				CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */,
 				CC1F3DF32E580A4F00FC027A /* ContentView.swift */,
-				CC1F3DF42E580A4F00FC027A /* TodoCalendarAppApp.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -162,6 +179,16 @@
 			packageProductDependencies = (
 				CC1F3DF82E580BC700FC027A /* GoogleSignIn */,
 				CC1F3DFA2E580BC700FC027A /* GoogleSignInSwift */,
+				CC5D15632E596D52007168FF /* GoogleAPIClientForRESTCore */,
+				CC5D15652E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS */,
+				CC5D15672E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks */,
+				CC5D15692E596D52007168FF /* GoogleAPIClientForREST_APIGateway */,
+				CC5D156B2E596D52007168FF /* GoogleAPIClientForREST_APIManagement */,
+				CC5D156D2E596D52007168FF /* GoogleAPIClientForREST_APIhub */,
+				CC5D156F2E596D52007168FF /* GoogleAPIClientForREST_AbusiveExperienceReport */,
+				CC5D15712E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl */,
+				CC5D15732E596D52007168FF /* GoogleAPIClientForREST_AccessApproval */,
+				CC5D15752E596D52007168FF /* GoogleAPIClientForREST_Calendar */,
 			);
 			productName = "Never Forget";
 			productReference = CC1F3DAF2E58076400FC027A /* Never Forget.app */;
@@ -248,6 +275,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				CC1F3DF72E580BC700FC027A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CC1F3DB02E58076400FC027A /* Products */;
@@ -292,19 +320,16 @@
 			files = (
 				CC1F3DDE2E58086300FC027A /* DashboardViewModel.swift in Sources */,
 				CC1F3DE22E58094F00FC027A /* GoogleCalendarSelectionView.swift in Sources */,
+				CCF29A4D2E5AAF870036BABD /* CalendarView.swift in Sources */,
 				CC1F3DE32E58094F00FC027A /* DashboardView.swift in Sources */,
-
 				CC1F3DE42E58094F00FC027A /* EventImportView.swift in Sources */,
 				CC1F3DDB2E58080700FC027A /* PersistentAlarm.swift in Sources */,
 				CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */,
 				CC1F3DDC2E58080700FC027A /* Todo.swift in Sources */,
 				CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */,
-
-
-				CC1F3DF52E580A4F00FC027A /* TodoCalendarAppApp.swift in Sources */,
 				CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */,
 				CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */,
-
+				CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,7 +494,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = STT3M8T8MQ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -499,7 +525,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = STT3M8T8MQ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -640,6 +667,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/google-api-objectivec-client-for-rest";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -652,6 +687,56 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CC1F3DF72E580BC700FC027A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		CC5D15632E596D52007168FF /* GoogleAPIClientForRESTCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForRESTCore;
+		};
+		CC5D15652E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_ACMEDNS;
+		};
+		CC5D15672E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_AIPlatformNotebooks;
+		};
+		CC5D15692E596D52007168FF /* GoogleAPIClientForREST_APIGateway */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_APIGateway;
+		};
+		CC5D156B2E596D52007168FF /* GoogleAPIClientForREST_APIManagement */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_APIManagement;
+		};
+		CC5D156D2E596D52007168FF /* GoogleAPIClientForREST_APIhub */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_APIhub;
+		};
+		CC5D156F2E596D52007168FF /* GoogleAPIClientForREST_AbusiveExperienceReport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_AbusiveExperienceReport;
+		};
+		CC5D15712E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_Acceleratedmobilepageurl;
+		};
+		CC5D15732E596D52007168FF /* GoogleAPIClientForREST_AccessApproval */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_AccessApproval;
+		};
+		CC5D15752E596D52007168FF /* GoogleAPIClientForREST_Calendar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC5D15622E596D52007168FF /* XCRemoteSwiftPackageReference "google-api-objectivec-client-for-rest" */;
+			productName = GoogleAPIClientForREST_Calendar;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

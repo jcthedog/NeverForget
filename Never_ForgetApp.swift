@@ -1,8 +1,22 @@
-//
-//  Never_ForgetApp.swift
-//  Never Forget
-//
-//  Created by Tomas Cora on 8/23/2025.
-//
+import SwiftUI
+import GoogleSignIn
 
-import Foundation
+@main
+struct Never_ForgetApp: App {
+    init() {
+        // Configure Google Sign-In
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+            if let error = error {
+                print("Google Sign-In restore error: \(error)")
+            }
+        }
+    }
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
+
+
