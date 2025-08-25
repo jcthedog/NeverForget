@@ -100,25 +100,29 @@ struct CalendarView: View {
                         }
                     )
                 case .threeDay:
-                    GoogleCalendarMultiDayView(
-                        viewModel: viewModel,
-                        calendarEvents: calendarEvents,
-                        daysCount: 3,
-                        onEventTap: { event in
-                            selectedEvent = event
-                            showingEventDetail = true
-                        }
-                    )
+                    ScrollView {
+                        GoogleCalendarMultiDayView(
+                            viewModel: viewModel,
+                            calendarEvents: calendarEvents,
+                            daysCount: 3,
+                            onEventTap: { event in
+                                selectedEvent = event
+                                showingEventDetail = true
+                            }
+                        )
+                    }
                 case .sevenDay:
-                    GoogleCalendarMultiDayView(
-                        viewModel: viewModel,
-                        calendarEvents: calendarEvents,
-                        daysCount: 7,
-                        onEventTap: { event in
-                            selectedEvent = event
-                            showingEventDetail = true
-                        }
-                    )
+                    ScrollView {
+                        GoogleCalendarMultiDayView(
+                            viewModel: viewModel,
+                            calendarEvents: calendarEvents,
+                            daysCount: 7,
+                            onEventTap: { event in
+                                selectedEvent = event
+                                showingEventDetail = true
+                            }
+                        )
+                    }
                 case .monthly:
                     GoogleCalendarMonthView(
                         viewModel: viewModel,
@@ -698,185 +702,94 @@ struct GoogleCalendarMultiDayView: View {
     }()
     
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 0) {
-                ForEach(0..<daysCount, id: \.self) { dayOffset in
-                    let currentDate = calendar.date(byAdding: .day, value: dayOffset, to: Date()) ?? Date()
-                    
-                    if daysCount == 3 {
-                        // 3-Day View: Compact horizontal layout with time slots
-                        GoogleCalendarCompactDayColumn(
-                            date: currentDate,
-                            viewModel: viewModel,
-                            calendarEvents: calendarEvents,
-                            onEventTap: onEventTap
+        HStack(spacing: 0) {
+            // Single time column on the left
+            VStack(spacing: 0) {
+                // Header for time column
+                VStack(spacing: 4) {
+                    Text("Time")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
+                .frame(width: 60)
+                .background(Color(.systemBackground))
+                
+                // Time slots
+                LazyVStack(spacing: 0) {
+                    ForEach(hourSlots, id: \.self) { hour in
+                        VStack {
+                            Text(formatHour(hour))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .frame(width: 60, height: 60, alignment: .topTrailing)
+                                .padding(.trailing, 8)
+                            Spacer()
+                        }
+                        .frame(height: 60)
+                        .overlay(
+                            Rectangle()
+                                .fill(Color(.systemGray5))
+                                .frame(height: 1),
+                            alignment: .top
                         )
-                        .frame(width: 150) // Increased from 140 to ensure colored bars have enough space
-                        .id("3day-\(dayOffset)-\(currentDate.timeIntervalSince1970)")
-                    } else {
-                        // 7-Day View: Traditional day columns
+                    }
+                }
+                .background(Color(.systemBackground))
+            }
+            .frame(width: 60)
+            
+            // Day columns
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    ForEach(0..<daysCount, id: \.self) { dayOffset in
+                        let currentDate = calendar.date(byAdding: .day, value: dayOffset, to: Date()) ?? Date()
+                        
                         GoogleCalendarDayColumn(
                             date: currentDate,
                             viewModel: viewModel,
                             calendarEvents: calendarEvents,
-                            onEventTap: onEventTap
+                            onEventTap: onEventTap,
+                            hourSlots: hourSlots
                         )
-                        .frame(width: 120)
-                        .id("7day-\(dayOffset)-\(currentDate.timeIntervalSince1970)")
+                        .frame(width: daysCount == 3 ? 150 : 120)
+                        .id("\(daysCount)day-\(dayOffset)-\(currentDate.timeIntervalSince1970)")
                     }
                 }
             }
         }
         .background(Color(.systemGroupedBackground))
     }
-}
-
-// MARK: - Google Calendar Style Compact Day Column (for 3-Day View)
-struct GoogleCalendarCompactDayColumn: View {
-    let date: Date
-    let viewModel: DashboardViewModel
-    let calendarEvents: [GoogleCalendarEvent]
-    let onEventTap: (GoogleCalendarEvent) -> Void
-    
-    private let calendar = Calendar.current
-    private let dayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEE"
-        return formatter
-    }()
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter
-    }()
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            // Day header - more compact for 3-day view
-            VStack(spacing: 2) {
-                Text(dayFormatter.string(from: date))
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-                
-                Text(dateFormatter.string(from: date))
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(calendar.isDateInToday(date) ? .blue : .primary)
-            }
-            .padding(.vertical, 6)
-            .frame(maxWidth: .infinity)
-            .background(Color(.systemBackground))
-            
-            // Time-based events for 3-day view (like Today view)
-            LazyVStack(spacing: 2) { // Increased spacing from 1 to 2 for better colored bar visibility
-                ForEach(hourSlots, id: \.self) { hour in
-                    GoogleCalendarCompactTimeSlot(
-                        hour: hour,
-                        date: date,
-                        events: eventsForHour(hour),
-                        todos: todosForHour(hour),
-                        onEventTap: onEventTap
-                    )
-                    .id("compact-\(date.timeIntervalSince1970)-\(hour)")
-                }
-            }
-            .padding(.horizontal, 4) // Increased from 2 to 4 for better colored bar display
-            .frame(maxWidth: .infinity)
-            .background(Color(.systemBackground))
-        }
-        .overlay(
-            Rectangle()
-                .fill(Color(.systemGray5))
-                .frame(width: 1),
-            alignment: .trailing
-        )
-    }
     
     private var hourSlots: [Int] {
-        Array(8...20) // Show business hours for 3-day view
-    }
-    
-    private func eventsForHour(_ hour: Int) -> [GoogleCalendarEvent] {
-        let startOfDay = calendar.startOfDay(for: date)
-        let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
-        
-        return calendarEvents.filter { event in
-            let eventStart = calendar.startOfDay(for: event.startDate)
-            let eventDate = calendar.startOfDay(for: event.startDate)
-            return eventDate == startOfDay && calendar.component(.hour, from: event.startDate) == hour
+        if daysCount == 3 {
+            return Array(8...20) // Business hours for 3-day view
+        } else {
+            return Array(0...23) // Full day for 7-day view
         }
-    }
-    
-    private func todosForHour(_ hour: Int) -> [Todo] {
-        let startOfDay = calendar.startOfDay(for: date)
-        let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
-        
-        return viewModel.todos.filter { todo in
-            guard let dueDate = todo.dueDate else { return false }
-            let todoDate = calendar.startOfDay(for: dueDate)
-            return todoDate == startOfDay && calendar.component(.hour, from: dueDate) == hour && !todo.isCompleted
-        }
-    }
-}
-
-// MARK: - Google Calendar Style Compact Time Slot (for 3-Day View)
-struct GoogleCalendarCompactTimeSlot: View {
-    let hour: Int
-    let date: Date
-    let events: [GoogleCalendarEvent]
-    let todos: [Todo]
-    let onEventTap: (GoogleCalendarEvent) -> Void
-    
-    var body: some View {
-        HStack(spacing: 0) {
-            // Time label - smaller for compact view
-            Text(formatHour(hour))
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .frame(width: 35, alignment: .trailing) // Increased from 30 to 35 for better spacing
-                .frame(minHeight: 24) // Increased from 20 to ensure proper spacing
-            
-            // Events and todos for this hour
-            VStack(spacing: 2) { // Increased spacing from 1 to 2 for better visibility
-                ForEach(events, id: \.id) { event in
-                    UnifiedCalendarEventBlock(event: event, onTap: { onEventTap(event) }, size: .compact)
-                        .id("compact-event-\(event.id)-\(hour)")
-                }
-                ForEach(todos, id: \.id) { todo in
-                    UnifiedCalendarTodoBlock(todo: todo, size: .compact)
-                        .id("compact-todo-\(todo.id)-\(hour)")
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .frame(minHeight: 24) // Increased from 20 to ensure colored bars are not clipped
-        .background(Color(.systemGray6).opacity(0.3)) // Added subtle background for better colored bar visibility
-        .cornerRadius(2) // Added subtle corner radius for better visual appeal
     }
     
     private func formatHour(_ hour: Int) -> String {
         if hour == 0 {
-            return "12A"
+            return "12 AM"
         } else if hour < 12 {
-            return "\(hour)A"
+            return "\(hour) AM"
         } else if hour == 12 {
-            return "12P"
+            return "12 PM"
         } else {
-            return "\(hour - 12)P"
+            return "\(hour - 12) PM"
         }
     }
 }
 
-
-
-// MARK: - Google Calendar Style Day Column
+// MARK: - Google Calendar Style Day Column (for Multi-Day Views)
 struct GoogleCalendarDayColumn: View {
     let date: Date
     let viewModel: DashboardViewModel
     let calendarEvents: [GoogleCalendarEvent]
     let onEventTap: (GoogleCalendarEvent) -> Void
+    let hourSlots: [Int]
     
     private let calendar = Calendar.current
     private let dayFormatter: DateFormatter = {
@@ -909,22 +822,20 @@ struct GoogleCalendarDayColumn: View {
             .frame(maxWidth: .infinity)
             .background(Color(.systemBackground))
             
-            // Events for this day
-            VStack(spacing: 2) {
-                ForEach(eventsForDay, id: \.id) { event in
-                    UnifiedCalendarEventBlock(event: event, onTap: { onEventTap(event) }, size: .standard)
-                        .id("day-event-\(event.id)-\(date.timeIntervalSince1970)")
-                }
-                ForEach(todosForDay, id: \.id) { todo in
-                    UnifiedCalendarTodoBlock(todo: todo, size: .standard)
-                        .id("day-todo-\(todo.id)-\(date.timeIntervalSince1970)")
-                }
-                
-                if eventsForDay.isEmpty && todosForDay.isEmpty {
-                    Spacer()
+            // Time-based events for this day
+            LazyVStack(spacing: 0) {
+                ForEach(hourSlots, id: \.self) { hour in
+                    GoogleCalendarMultiDayTimeSlot(
+                        hour: hour,
+                        date: date,
+                        events: eventsForHour(hour),
+                        todos: todosForHour(hour),
+                        onEventTap: onEventTap
+                    )
+                    .frame(height: 60)
+                    .id("time-slot-\(date.timeIntervalSince1970)-\(hour)")
                 }
             }
-            .padding(.horizontal, 4)
             .frame(maxWidth: .infinity)
             .background(Color(.systemBackground))
         }
@@ -936,27 +847,69 @@ struct GoogleCalendarDayColumn: View {
         )
     }
     
-    private var eventsForDay: [GoogleCalendarEvent] {
+    private func eventsForHour(_ hour: Int) -> [GoogleCalendarEvent] {
         let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay
+        let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
         
         return calendarEvents.filter { event in
             let eventStart = calendar.startOfDay(for: event.startDate)
-            return eventStart >= startOfDay && eventStart < endOfDay
+            let eventDate = calendar.startOfDay(for: event.startDate)
+            return eventDate == startOfDay && calendar.component(.hour, from: event.startDate) == hour
         }
     }
     
-    private var todosForDay: [Todo] {
+    private func todosForHour(_ hour: Int) -> [Todo] {
         let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay
+        let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
         
         return viewModel.todos.filter { todo in
             guard let dueDate = todo.dueDate else { return false }
             let todoDate = calendar.startOfDay(for: dueDate)
-            return todoDate >= startOfDay && todoDate < endOfDay && !todo.isCompleted
+            return todoDate == startOfDay && calendar.component(.hour, from: dueDate) == hour && !todo.isCompleted
         }
     }
 }
+
+// MARK: - Google Calendar Style Time Slot (for Multi-Day Views)
+struct GoogleCalendarMultiDayTimeSlot: View {
+    let hour: Int
+    let date: Date
+    let events: [GoogleCalendarEvent]
+    let todos: [Todo]
+    let onEventTap: (GoogleCalendarEvent) -> Void
+    
+    var body: some View {
+        VStack(spacing: 2) {
+            ForEach(events, id: \.id) { event in
+                UnifiedCalendarEventBlock(
+                    event: event, 
+                    onTap: { onEventTap(event) }, 
+                    size: .compact
+                )
+                .id("multi-day-event-\(event.id)-\(hour)")
+            }
+            ForEach(todos, id: \.id) { todo in
+                UnifiedCalendarTodoBlock(
+                    todo: todo, 
+                    size: .compact
+                )
+                .id("multi-day-todo-\(todo.id)-\(hour)")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 4)
+        .overlay(
+            Rectangle()
+                .fill(Color(.systemGray5))
+                .frame(height: 1),
+            alignment: .top
+        )
+    }
+}
+
+
+
+
 
 // MARK: - Google Calendar Event Row (for event details)
 struct GoogleCalendarEventRow: View {
