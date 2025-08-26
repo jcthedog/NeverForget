@@ -12,6 +12,7 @@ class DashboardViewModel: ObservableObject {
     @Published var todos: [Todo] = []
     @Published var isGoogleSignedIn = false
     @Published var lastSyncTime: String?
+    @Published var sampleCalendarEvents: [GoogleCalendarEvent] = []
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -137,6 +138,18 @@ class DashboardViewModel: ObservableObject {
         lastSyncTime = formatter.string(from: Date())
     }
     
+    // MARK: - Sample Calendar Events
+    func getSampleEventsForDateRange(startDate: Date, endDate: Date) -> [GoogleCalendarEvent] {
+        let calendar = Calendar.current
+        let filteredEvents = sampleCalendarEvents.filter { event in
+            let eventDate = calendar.startOfDay(for: event.startDate)
+            return eventDate >= calendar.startOfDay(for: startDate) && 
+                   eventDate <= calendar.startOfDay(for: endDate)
+        }
+        
+        return filteredEvents
+    }
+    
     func clearAllData() {
         todos.removeAll()
         activeAlarms.removeAll()
@@ -211,6 +224,102 @@ class DashboardViewModel: ObservableObject {
         ]
         
         activeAlarms = sampleAlarms
+        
+        // Sample Google Calendar events
+        let calendar = Calendar.current
+        let today = Date()
+        let startOfToday = calendar.startOfDay(for: today)
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: startOfToday) ?? today
+        let dayAfterTomorrow = calendar.date(byAdding: .day, value: 2, to: startOfToday) ?? today
+        
+        let sampleEvents = [
+            GoogleCalendarEvent(
+                id: "sample-event-1",
+                summary: "Team Standup",
+                description: "Daily team meeting to discuss progress and blockers",
+                startDate: calendar.date(bySettingHour: 9, minute: 0, second: 0, of: startOfToday) ?? today,
+                endDate: calendar.date(bySettingHour: 9, minute: 30, second: 0, of: startOfToday) ?? today,
+                isAllDay: false,
+                location: "Conference Room A",
+                attendees: ["john@company.com", "jane@company.com", "bob@company.com"],
+                calendarId: "primary",
+                calendarName: "Work Calendar",
+                recurringEventId: nil,
+                originalStartTime: nil
+            ),
+            GoogleCalendarEvent(
+                id: "sample-event-2",
+                summary: "Client Presentation",
+                description: "Present Q4 results to the client",
+                startDate: calendar.date(bySettingHour: 14, minute: 0, second: 0, of: startOfToday) ?? today,
+                endDate: calendar.date(bySettingHour: 15, minute: 0, second: 0, of: startOfToday) ?? today,
+                isAllDay: false,
+                location: "Zoom Meeting",
+                attendees: ["client@company.com", "manager@company.com"],
+                calendarId: "primary",
+                calendarName: "Work Calendar",
+                recurringEventId: nil,
+                originalStartTime: nil
+            ),
+            GoogleCalendarEvent(
+                id: "sample-event-3",
+                summary: "Lunch with Sarah",
+                description: "Catch up over lunch",
+                startDate: calendar.date(bySettingHour: 12, minute: 0, second: 0, of: startOfToday) ?? today,
+                endDate: calendar.date(bySettingHour: 13, minute: 0, second: 0, of: startOfToday) ?? today,
+                isAllDay: false,
+                location: "Downtown Cafe",
+                attendees: ["sarah@company.com"],
+                calendarId: "personal",
+                calendarName: "Personal Calendar",
+                recurringEventId: nil,
+                originalStartTime: nil
+            ),
+            GoogleCalendarEvent(
+                id: "sample-event-4",
+                summary: "Project Deadline",
+                description: "Final review and submission",
+                startDate: calendar.date(bySettingHour: 16, minute: 0, second: 0, of: startOfToday) ?? today,
+                endDate: calendar.date(bySettingHour: 17, minute: 0, second: 0, of: startOfToday) ?? today,
+                isAllDay: false,
+                location: nil,
+                attendees: [],
+                calendarId: "primary",
+                calendarName: "Work Calendar",
+                recurringEventId: nil,
+                originalStartTime: nil
+            ),
+            GoogleCalendarEvent(
+                id: "sample-event-5",
+                summary: "Tomorrow's Planning",
+                description: "Plan tasks for tomorrow",
+                startDate: calendar.date(bySettingHour: 10, minute: 0, second: 0, of: tomorrow) ?? tomorrow,
+                endDate: calendar.date(bySettingHour: 11, minute: 0, second: 0, of: tomorrow) ?? tomorrow,
+                isAllDay: false,
+                location: "Office",
+                attendees: ["team@company.com"],
+                calendarId: "primary",
+                calendarName: "Work Calendar",
+                recurringEventId: nil,
+                originalStartTime: nil
+            ),
+            GoogleCalendarEvent(
+                id: "sample-event-6",
+                summary: "Day After Meeting",
+                description: "Weekly team sync",
+                startDate: calendar.date(bySettingHour: 14, minute: 0, second: 0, of: dayAfterTomorrow) ?? dayAfterTomorrow,
+                endDate: calendar.date(bySettingHour: 15, minute: 0, second: 0, of: dayAfterTomorrow) ?? dayAfterTomorrow,
+                isAllDay: false,
+                location: "Conference Room B",
+                attendees: ["team@company.com"],
+                calendarId: "primary",
+                calendarName: "Work Calendar",
+                recurringEventId: nil,
+                originalStartTime: nil
+            )
+        ]
+        
+        sampleCalendarEvents = sampleEvents
         
         calculateTodayStats()
     }

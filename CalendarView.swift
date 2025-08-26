@@ -105,6 +105,7 @@ struct CalendarView: View {
                             viewModel: viewModel,
                             calendarEvents: calendarEvents,
                             daysCount: 3,
+                            selectedDate: selectedDate,
                             onEventTap: { event in
                                 selectedEvent = event
                                 showingEventDetail = true
@@ -117,6 +118,7 @@ struct CalendarView: View {
                             viewModel: viewModel,
                             calendarEvents: calendarEvents,
                             daysCount: 7,
+                            selectedDate: selectedDate,
                             onEventTap: { event in
                                 selectedEvent = event
                                 showingEventDetail = true
@@ -179,6 +181,9 @@ struct CalendarView: View {
             .onChange(of: calendarViewMode) { _ in
                 loadEventsForDate(selectedDate)
             }
+            .onChange(of: selectedDate) { _ in
+                loadEventsForDate(selectedDate)
+            }
             .sheet(isPresented: $showingAddTodo) {
                 AddTodoFormView(viewModel: viewModel, preselectedDate: selectedDate)
             }
@@ -213,22 +218,27 @@ struct CalendarView: View {
     }
     
     private func loadEventsForDate(_ date: Date) {
-        guard viewModel.isGoogleSignedIn else { return }
-        
-        isLoadingEvents = true
-        
-        // Get start and end dates based on view mode
-        let (startDate, endDate) = getDateRange(for: date, mode: calendarViewMode)
-        
-        calendarService.fetchEventsFromSelectedCalendars(startDate: startDate, endDate: endDate) { events in
-            DispatchQueue.main.async {
-                self.calendarEvents = events
-                self.isLoadingEvents = false
-                
-                if !events.isEmpty {
-                    self.viewModel.updateLastSyncTime()
+        if viewModel.isGoogleSignedIn {
+            isLoadingEvents = true
+            
+            // Get start and end dates based on view mode
+            let (startDate, endDate) = getDateRange(for: date, mode: calendarViewMode)
+            
+            calendarService.fetchEventsFromSelectedCalendars(startDate: startDate, endDate: endDate) { events in
+                DispatchQueue.main.async {
+                    self.calendarEvents = events
+                    self.isLoadingEvents = false
+                    
+                    if !events.isEmpty {
+                        self.viewModel.updateLastSyncTime()
+                    }
                 }
             }
+        } else {
+            // Use sample events when not authenticated with Google Calendar
+            let (startDate, endDate) = getDateRange(for: date, mode: calendarViewMode)
+            calendarEvents = viewModel.getSampleEventsForDateRange(startDate: startDate, endDate: endDate)
+            isLoadingEvents = false
         }
     }
     
@@ -480,17 +490,25 @@ struct GoogleCalendarTodayView: View {
     }
     
     private func eventsForHour(_ hour: Int) -> [GoogleCalendarEvent] {
+        let today = Date()
+        let startOfToday = calendar.startOfDay(for: today)
+        
         return calendarEvents.filter { event in
+            let eventDate = calendar.startOfDay(for: event.startDate)
             let eventHour = calendar.component(.hour, from: event.startDate)
-            return eventHour == hour
+            return eventDate == startOfToday && eventHour == hour
         }
     }
     
     private func todosForHour(_ hour: Int) -> [Todo] {
+        let today = Date()
+        let startOfToday = calendar.startOfDay(for: today)
+        
         return viewModel.todos.filter { todo in
             guard let dueDate = todo.dueDate else { return false }
+            let todoDate = calendar.startOfDay(for: dueDate)
             let todoHour = calendar.component(.hour, from: dueDate)
-            return todoHour == hour && !todo.isCompleted
+            return todoDate == startOfToday && todoHour == hour && !todo.isCompleted
         }
     }
 }
@@ -692,6 +710,7 @@ struct GoogleCalendarMultiDayView: View {
     let viewModel: DashboardViewModel
     let calendarEvents: [GoogleCalendarEvent]
     let daysCount: Int
+    let selectedDate: Date
     let onEventTap: (GoogleCalendarEvent) -> Void
     
     private let calendar = Calendar.current
@@ -740,22 +759,20 @@ struct GoogleCalendarMultiDayView: View {
             }
             .frame(width: 60)
             
-            // Day columns
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(0..<daysCount, id: \.self) { dayOffset in
-                        let currentDate = calendar.date(byAdding: .day, value: dayOffset, to: Date()) ?? Date()
-                        
-                        GoogleCalendarDayColumn(
-                            date: currentDate,
-                            viewModel: viewModel,
-                            calendarEvents: calendarEvents,
-                            onEventTap: onEventTap,
-                            hourSlots: hourSlots
-                        )
-                        .frame(width: daysCount == 3 ? 150 : 120)
-                        .id("\(daysCount)day-\(dayOffset)-\(currentDate.timeIntervalSince1970)")
-                    }
+            // Day columns - use full available width
+            HStack(spacing: 0) {
+                ForEach(0..<daysCount, id: \.self) { dayOffset in
+                    let currentDate = calendar.date(byAdding: .day, value: dayOffset, to: selectedDate) ?? selectedDate
+                    
+                    GoogleCalendarDayColumn(
+                        date: currentDate,
+                        viewModel: viewModel,
+                        calendarEvents: calendarEvents,
+                        onEventTap: onEventTap,
+                        hourSlots: hourSlots
+                    )
+                    .frame(maxWidth: .infinity)
+                    .id("\(daysCount)day-\(dayOffset)-\(currentDate.timeIntervalSince1970)")
                 }
             }
         }
@@ -851,11 +868,17 @@ struct GoogleCalendarDayColumn: View {
         let startOfDay = calendar.startOfDay(for: date)
         let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
         
-        return calendarEvents.filter { event in
+        let filteredEvents = calendarEvents.filter { event in
             let eventStart = calendar.startOfDay(for: event.startDate)
             let eventDate = calendar.startOfDay(for: event.startDate)
-            return eventDate == startOfDay && calendar.component(.hour, from: event.startDate) == hour
+            let eventHour = calendar.component(.hour, from: event.startDate)
+            let matchesDate = eventDate == startOfDay
+            let matchesHour = eventHour == hour
+            
+            return matchesDate && matchesHour
         }
+        
+        return filteredEvents
     }
     
     private func todosForHour(_ hour: Int) -> [Todo] {
