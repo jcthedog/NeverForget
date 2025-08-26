@@ -1,185 +1,228 @@
 # Never Forget - Quick Reference Guide
 
-## 🚀 **Project Status - December 24, 2024**
+## 🚀 **Core Features Overview**
 
-### **Current Version**: 1.0.0
-### **Development Phase**: Active Development
-### **Last Session**: Session 5 - Calendar View Event Clickability & Display Issues Fixed ✅
+### **Enhanced Todo Management**
+- **4-Level Priority System**: None (white) → Low (green) → Medium (yellow) → Urgent (red)
+- **Smart Categories**: Default (Personal, Work, Family) + User-defined custom categories
+- **Flexible Scheduling**: Optional due dates with custom calendar picker and time wheel
+- **Rich Metadata**: Description, priority, category, due date, and custom fields
 
----
+### **Advanced Data Input Screen**
+- **Modern Form Design**: Sections-based layout (Todo Details, Date & Time, Priority & Category, Recurring)
+- **Custom Calendar Picker**: Monthly calendar view with navigation
+- **Enhanced Time Selection**: Dedicated time picker wheel interface
+- **Visual Priority Selection**: Color-coded priority buttons with visual feedback
+- **Category Creation**: User can create custom categories with icons and colors
 
-## 📱 **Core Features Status**
+### **Google Calendar Integration**
+- **Seamless Event Import**: Convert calendar events to todos with one tap
+- **Multi-Calendar Support**: Access to all user's Google calendars
+- **Event Conversion**: Intelligent mapping of calendar events to todo properties
+- **Real-time Sync**: Live calendar data integration
 
-### ✅ **FULLY IMPLEMENTED & WORKING**
+### **Persistent Alarm System**
+- **Background Processing**: Alarms continue working when app is closed
+- **Flexible Scheduling**: Support for recurring and one-time alarms
+- **User Notifications**: Rich notification system with custom sounds
+- **Alarm Management**: Create, edit, and delete persistent alarms
 
-#### **1. Todo Management System**
-- **CRUD Operations**: Create, read, update, delete todos
-- **Priority System**: Low, Medium, High priority levels
-- **Categories**: Personal, Work, Shopping, Health, etc.
-- **Due Dates**: Optional due dates with smart formatting
-- **Recurring Patterns**: Daily, weekly, monthly, yearly recurring todos
-- **Subtasks**: Support for breaking down complex todos
-- **Search & Filtering**: By status, date, priority, category
-- **Smart Statistics**: Today's completion tracking
+## 🔧 **Technical Architecture**
 
-#### **2. Calendar System - COMPLETE & FUNCTIONAL**
-- **Multiple View Modes**: Today, 3-Day, 7-Day, and Monthly views
-- **Time-based Layouts**: Hour-by-hour time slots with colored bars
-- **Google Calendar Integration**: Full API integration with authentication
-- **Event Management**: View, edit, and convert calendar events to todos
-- **Unified Visual Design**: Consistent colored bars and interaction across all views
-- **Interactive Features**: Tap dates, navigate months, switch view modes
-- **Event Clickability**: All views now have consistent event tap functionality ✅
-- **Proper Event Display**: Events appear in correct time slots with proper filtering ✅
+### **Core Technologies**
+- **SwiftUI**: Modern declarative UI framework for iOS
+- **MVVM Architecture**: Clean separation of concerns with ObservableObject pattern
+- **Core Data**: Persistent storage for todos and alarms
+- **Google Calendar API**: Integration for event management
+- **iOS 17+**: Leverages latest iOS features and APIs
 
-#### **3. Alarm System**
-- **Persistent Alarms**: Reliable notification system
-- **Custom Schedules**: Daily, weekly, custom repeat patterns
-- **Multiple Notification Types**: Standard, gentle, urgent styles
-- **Snooze Functionality**: Multiple duration options
+### **Data Models**
+```swift
+// Enhanced Priority System
+enum Priority: CaseIterable, Codable {
+    case none, low, medium, urgent
+    
+    var displayName: String { ... }
+    var icon: String { ... }
+    var color: Color { ... }
+}
 
-#### **4. Dashboard**
-- **Overview Statistics**: Todo counts, upcoming deadlines, active alarms
-- **Quick Actions**: Add todos, view calendar, search, Google Calendar access
-- **Active Alarms Display**: Real-time alarm status
-- **Today's Focus Section**: Progress tracking and quick actions
+// Hybrid Category System
+enum Category: Codable {
+    case personal, work, family
+    case custom(CustomCategory)
+    
+    var displayName: String { ... }
+    var icon: String { ... }
+    var color: Color { ... }
+    var isDefault: Bool { ... }
+}
 
-#### **5. Google Calendar Integration**
-- **Authentication**: Google Sign-In integration
-- **Calendar Sync**: Fetch and display calendar events
-- **Event Import**: Convert calendar events to todos
-- **Multi-calendar Support**: Select and manage multiple calendars
-
----
-
-## 🔧 **Recent Major Fixes - Session 5**
-
-### **Calendar View Event Issues - RESOLVED ✅**
-
-#### **Issues Fixed**
-- **Today View**: Events now properly filtered by date and hour, making them clickable
-- **3-Day View**: Events now display with proper colored bars and are clickable
-- **7-Day View**: Events now display correctly and are clickable
-- **Event Filtering**: Proper date and hour filtering across all views
-
-#### **Technical Improvements**
-- **Sample Event System**: 6 realistic sample events for development and testing
-- **Date Handling**: Events created for specific dates instead of relative time
-- **Unified Interaction**: Consistent event tap functionality across all calendar views
-- **Visual Consistency**: All views show events with proper colored bars and styling
-
----
-
-## 📁 **File Structure & Key Components**
-
-### **Core Views**
-```
-ContentView.swift          - Main tab navigation (Home, Todos, Calendar, Alarms, Settings)
-DashboardView.swift       - Main dashboard with statistics and quick actions
-CalendarView.swift        - Complete calendar system with all view modes
-EventImportView.swift     - Event import functionality
+// Custom Category Support
+struct CustomCategory: Identifiable, Codable {
+    let id: UUID
+    var name: String
+    var icon: String
+    var color: Color
+}
 ```
 
-### **View Models**
-```
-DashboardViewModel.swift  - Main business logic, data management, sample data
-```
+### **Key UI Components**
+- **CalendarDatePickerView**: Custom monthly calendar picker
+- **TimePickerView**: Dedicated time selection component
+- **CreateCustomCategoryView**: Category creation interface
+- **UnifiedCalendarEventBlock**: Consistent event display
 
-### **Models**
-```
-Todo.swift               - Comprehensive todo data model with all features
-PersistentAlarm.swift    - Alarm system data model
-GoogleCalendarEvent.swift - Calendar integration data model
-SharedTypes.swift        - Shared enums and types
-```
+## 📱 **User Interface Guide**
 
-### **Services**
-```
-GoogleCalendarService.swift - Google Calendar API integration
-GoogleCalendarConfig.swift  - API configuration
-```
+### **Main Navigation**
+- **Dashboard Tab**: Todo list and management
+- **Calendar Tab**: Multiple calendar views and event integration
+- **Settings Tab**: App configuration and preferences
+
+### **Calendar Views**
+- **Today View**: Hour-by-hour time slots with events and todos
+- **3-Day View**: Compact view for short-term planning
+- **7-Day View**: Detailed view for weekly planning
+- **Monthly View**: Interactive calendar with event overlay
+
+### **Todo Creation Flow**
+1. **Tap + Button** on Dashboard or Calendar
+2. **Enter Todo Name** in title field
+3. **Set Due Date** using custom calendar picker (optional)
+4. **Select Time** using time picker wheel (if due date set)
+5. **Choose Priority** from 4-level color-coded system
+6. **Select Category** from defaults or create custom
+7. **Add Description** (optional)
+8. **Save Todo** to create and schedule
+
+### **Category Management**
+- **Default Categories**: Personal, Work, Family (non-deletable)
+- **Custom Categories**: User-created with icons and colors
+- **Category Creation**: Tap "Create New Category" button
+- **Category Editing**: Long press on custom categories
+
+## 🎨 **Design System**
+
+### **Color Palette**
+- **Priority Colors**: 
+  - None: White (#FFFFFF)
+  - Low: Green (#34C759)
+  - Medium: Yellow (#FFD60A)
+  - Urgent: Red (#FF3B30)
+- **Category Colors**: Dynamic based on user selection
+- **System Colors**: iOS native color system integration
+
+### **Typography**
+- **Headlines**: SF Pro Display, Large Title
+- **Body Text**: SF Pro Text, Body
+- **Captions**: SF Pro Text, Caption
+- **Labels**: SF Pro Text, Footnote
+
+### **Layout Principles**
+- **Sections**: Logical grouping of related fields
+- **Spacing**: Consistent 8pt grid system
+- **Padding**: 16pt standard margins
+- **Corner Radius**: 8pt for cards, 16pt for buttons
+
+## 🔒 **Security & Privacy**
+
+### **Data Protection**
+- **Local Storage**: All data stored locally on device
+- **No Analytics**: No user data collection or tracking
+- **Secure API**: OAuth 2.0 for Google Calendar integration
+- **Token Management**: Secure storage and refresh of access tokens
+
+### **Permissions Required**
+- **Calendar Access**: Read calendar events and create todos
+- **Notifications**: Local alarm notifications
+- **Network**: Google Calendar API access
+
+## 🧪 **Testing & Quality**
+
+### **Testing Checklist**
+- [ ] Todo creation with all priority levels
+- [ ] Custom category creation and management
+- [ ] Date and time selection accuracy
+- [ ] Google Calendar event conversion
+- [ ] Alarm system functionality
+- [ ] Calendar view consistency
+- [ ] Form validation and error handling
+
+### **Performance Metrics**
+- **App Launch**: <2 seconds
+- **Todo Creation**: <1 second
+- **Calendar Navigation**: <500ms
+- **Event Import**: <2 seconds
+- **Memory Usage**: <100MB typical
+
+## 🚧 **Development Status**
+
+### **✅ Completed Features**
+- Enhanced todo creation system
+- 4-level priority system
+- Custom category management
+- Advanced date and time selection
+- Google Calendar integration
+- Modern UI design and components
+
+### **🔄 In Progress**
+- Persistent alarm system integration
+- Advanced notification management
+- Performance optimization
+
+### **📋 Planned Features**
+- Recurring todo support
+- Advanced filtering and search
+- Data backup and sync
+- Widget support
+- Apple Watch companion app
+
+## 📚 **Documentation & Support**
+
+### **Key Documentation Files**
+- **PROJECT_DOCUMENTATION.md**: Comprehensive project overview
+- **DEVELOPMENT_SESSIONS.md**: Development progress tracking
+- **SAFEGUARD_PROTOCOLS.md**: File protection and change protocols
+- **QUICK_REFERENCE.md**: This quick reference guide
+
+### **Development Workflow**
+1. **Feature Planning**: Define requirements and scope
+2. **Implementation**: Develop with MVVM architecture
+3. **Testing**: Comprehensive testing and validation
+4. **Documentation**: Update all documentation files
+5. **Git Management**: Commit and push changes
+6. **Protection**: Ensure all files are properly protected
+
+### **File Protection Rules**
+- **Source Code**: All `.swift` files protected
+- **Project Files**: All `.xcodeproj` files protected
+- **Configuration**: All `.plist` files protected
+- **Documentation**: Only `.md` files can be updated
+- **Authorization**: All changes require explicit user approval
+
+## 🌟 **Best Practices**
+
+### **Code Quality**
+- **MVVM Pattern**: Maintain clean separation of concerns
+- **SwiftUI Best Practices**: Follow Apple's guidelines
+- **Error Handling**: Comprehensive error handling with user feedback
+- **Performance**: Optimize for smooth animations and responsiveness
+
+### **User Experience**
+- **Accessibility**: Full VoiceOver and accessibility support
+- **Dark Mode**: Full system theme integration
+- **Responsive Design**: Adaptive layout for all device sizes
+- **Intuitive Navigation**: Clear and consistent user flow
+
+### **Data Management**
+- **State Management**: Proper use of @State, @Binding, @ObservedObject
+- **Memory Management**: Efficient cleanup of observers and timers
+- **Persistence**: Reliable data storage and retrieval
+- **Sync**: Seamless integration with external services
 
 ---
 
-## 🎯 **Current Development Priorities**
-
-### **✅ COMPLETED IN SESSION 5**
-1. **Calendar View Event Clickability** - All views now have working event taps
-2. **Event Display Issues** - Events now appear correctly in all calendar views
-3. **Date Filtering** - Proper event filtering by date and hour
-4. **Sample Event System** - Realistic sample data for development
-
-### **🔄 NEXT STEPS**
-1. **Testing & Verification**: Test all calendar views in simulator
-2. **Event Interaction**: Verify consistent functionality across all views
-3. **Performance**: Optimize calendar view rendering
-4. **Documentation**: Update all project documentation
-
----
-
-## 🚨 **Known Issues - ALL RESOLVED ✅**
-
-### **Previously Identified Issues - NOW FIXED**
-- ~~3-Day view events not displaying~~ → **RESOLVED**
-- ~~7-Day view events not clickable~~ → **RESOLVED**  
-- ~~Today view events not clickable~~ → **RESOLVED**
-- ~~Event color coordination missing in 3-Day view~~ → **RESOLVED**
-
-### **Current Status**: No known issues - all calendar views fully functional
-
----
-
-## 🧪 **Testing & Development**
-
-### **Sample Data Available**
-- **6 Sample Calendar Events**: Distributed across today and next few days
-- **4 Sample Todos**: Various priorities and categories
-- **2 Sample Alarms**: Different notification types and schedules
-
-### **Calendar View Testing**
-- **Today View**: Shows events for current day with proper filtering
-- **3-Day View**: Displays 3 days across with business hours (8AM-8PM)
-- **7-Day View**: Shows full week with 24-hour time slots
-- **Monthly View**: Interactive calendar with event overlays
-
----
-
-## 📚 **Documentation Status**
-
-### **✅ UP TO DATE**
-- `PROJECT_DOCUMENTATION.md` - Complete project overview and recent changes
-- `DEVELOPMENT_SESSIONS.md` - All 5 sessions documented
-- `SAFEGUARD_PROTOCOLS.md` - File protection protocols established
-- `QUICK_REFERENCE.md` - This file, current status and quick access
-- `SESSION_1_SUMMARY.md` - Session summaries and progress tracking
-
----
-
-## 🔒 **Safeguard Protocols**
-
-### **File Protection Status**
-- **Source Code Files**: Protected from unauthorized changes
-- **Documentation Files**: Protected from unauthorized changes
-- **Configuration Files**: Protected from unauthorized changes
-- **All Changes**: Require explicit user approval before implementation
-
-### **Change Request Process**
-1. **Explain** what needs to be changed
-2. **List** all files that will be modified
-3. **Describe** purpose and impact
-4. **Wait** for explicit user approval
-5. **Only** proceed after receiving "APPROVED"
-
----
-
-## 🚀 **Ready for Production**
-
-### **Current Status**: Calendar system fully functional and ready for testing
-### **All Major Issues**: Resolved and documented
-### **Documentation**: Complete and up to date
-### **Next Phase**: Testing, optimization, and feature enhancement
-
----
-
-*Last Updated: December 24, 2024 - Session 5 Complete*
-*All calendar view issues resolved - system fully functional*
+*Last Updated: December 24, 2024*
+*Version: 2.0 - Enhanced Data Input System*
+*Status: Active Development*
