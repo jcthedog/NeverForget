@@ -78,9 +78,9 @@ struct EventImportView: View {
                         ForEach(Priority.allCases, id: \.self) { priority in
                             HStack {
                                 Circle()
-                                    .fill(Color(priority.color))
+                                    .fill(priority.color)
                                     .frame(width: 12, height: 12)
-                                Text(priority.rawValue)
+                                Text(priority.displayName)
                             }
                             .tag(priority)
                         }
@@ -308,10 +308,10 @@ struct EventImportRowView: View {
             // Priority Indicator
             VStack(spacing: 4) {
                 Circle()
-                    .fill(Color(event.priority.color))
+                    .fill(event.priority.color)
                     .frame(width: 12, height: 12)
                 
-                Text(event.priority.rawValue)
+                Text(event.priority.displayName)
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }

@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UserNotifications
 
 struct PersistentAlarm: Identifiable, Codable, Equatable {
     let id: UUID
@@ -10,6 +11,11 @@ struct PersistentAlarm: Identifiable, Codable, Equatable {
     var repeatDays: Set<Int>
     var isEnabled: Bool
     var createdAt: Date
+    var isPersistent: Bool
+    var persistentInterval: TimeInterval // Interval in seconds between notifications
+    var lastNotificationTime: Date?
+    var snoozeUntil: Date?
+    var isSnoozed: Bool { snoozeUntil != nil && Date() < snoozeUntil! }
     
     init(
         id: UUID = UUID(),
@@ -19,7 +25,9 @@ struct PersistentAlarm: Identifiable, Codable, Equatable {
         notificationType: NotificationType = .standard,
         repeatDays: Set<Int> = [],
         isEnabled: Bool = true,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        isPersistent: Bool = false,
+        persistentInterval: TimeInterval = 600 // Default: 10 minutes
     ) {
         self.id = id
         self.title = title
@@ -29,6 +37,135 @@ struct PersistentAlarm: Identifiable, Codable, Equatable {
         self.repeatDays = repeatDays
         self.isEnabled = isEnabled
         self.createdAt = createdAt
+        self.isPersistent = isPersistent
+        self.persistentInterval = persistentInterval
+        self.lastNotificationTime = nil
+        self.snoozeUntil = nil
+    }
+    
+    // MARK: - Persistent Alarm Methods
+    
+    /// Schedules the persistent alarm with UserNotifications
+    func schedule() {
+        guard isEnabled && !isSnoozed else { return }
+        
+        // Remove any existing notifications for this alarm
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
+        
+        if isPersistent {
+            schedulePersistentNotifications()
+        } else {
+            scheduleSingleNotification()
+        }
+    }
+    
+    /// Schedules persistent notifications every 10 minutes
+    private func schedulePersistentNotifications() {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = message
+        content.sound = .default
+        content.categoryIdentifier = "PERSISTENT_ALARM"
+        
+        // Schedule first notification at the specified time
+        let firstTrigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: time),
+            repeats: false
+        )
+        
+        let firstRequest = UNNotificationRequest(
+            identifier: "\(id.uuidString)_first",
+            content: content,
+            trigger: firstTrigger
+        )
+        
+        UNUserNotificationCenter.current().add(firstRequest)
+        
+        // Schedule recurring notifications every 10 minutes after the first one
+        scheduleRecurringNotifications(content: content)
+    }
+    
+    /// Schedules recurring notifications every 10 minutes
+    private func scheduleRecurringNotifications(content: UNNotificationContent) {
+        let interval = persistentInterval
+        
+        // Schedule notifications for the next 24 hours (144 notifications)
+        for i in 1...144 {
+            let nextTime = time.addingTimeInterval(TimeInterval(i) * interval)
+            
+            // Only schedule if it's within the next 24 hours
+            if nextTime.timeIntervalSinceNow > 0 && nextTime.timeIntervalSinceNow <= 86400 {
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: nextTime.timeIntervalSinceNow, repeats: false)
+                
+                let request = UNNotificationRequest(
+                    identifier: "\(id.uuidString)_recurring_\(i)",
+                    content: content,
+                    trigger: trigger
+                )
+                
+                UNUserNotificationCenter.current().add(request)
+            }
+        }
+    }
+    
+    /// Schedules a single notification
+    private func scheduleSingleNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = message
+        content.sound = .default
+        content.categoryIdentifier = "SINGLE_ALARM"
+        
+        let trigger = UNCalendarNotificationTrigger(
+            dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: time),
+            repeats: false
+        )
+        
+        let request = UNNotificationRequest(
+            identifier: id.uuidString,
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request)
+    }
+    
+    /// Snoozes the alarm for a specified duration
+    mutating func snooze(duration: TimeInterval) {
+        snoozeUntil = Date().addingTimeInterval(duration)
+        lastNotificationTime = Date()
+        
+        // Remove all pending notifications
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
+        
+        // Reschedule after snooze period
+        if let snoozeUntil = snoozeUntil {
+            let content = UNMutableNotificationContent()
+            content.title = title
+            content.body = message
+            content.sound = .default
+            content.categoryIdentifier = "PERSISTENT_ALARM"
+            
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: snoozeUntil.timeIntervalSinceNow, repeats: false)
+            
+            let request = UNNotificationRequest(
+                identifier: "\(id.uuidString)_snooze",
+                content: content,
+                trigger: trigger
+            )
+            
+            UNUserNotificationCenter.current().add(request)
+        }
+    }
+    
+    /// Marks the alarm as completed and removes all notifications
+    func complete() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
+    }
+    
+    /// Deletes the alarm and removes all notifications
+    func delete() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
     }
     
     // For backward compatibility with existing code
@@ -36,7 +173,6 @@ struct PersistentAlarm: Identifiable, Codable, Equatable {
     var dueDate: Date { time }
     var currentEscalationLevel: EscalationLevel { .gentle }
     var isActive: Bool { isEnabled }
-    var snoozeUntil: Date? { nil }
     var snoozeCount: Int { 0 }
     var lastEscalated: Date { createdAt }
     var escalationHistory: [EscalationEvent] { [] }
@@ -54,15 +190,7 @@ struct PersistentAlarm: Identifiable, Codable, Equatable {
         return false // Simplified for now
     }
     
-    var isSnoozed: Bool {
-        return false // Simplified for now
-    }
-    
     mutating func escalate() {
-        // Simplified for now
-    }
-    
-    mutating func snooze(duration: TimeInterval) {
         // Simplified for now
     }
     

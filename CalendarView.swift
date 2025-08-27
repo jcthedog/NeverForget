@@ -178,10 +178,10 @@ struct CalendarView: View {
             .onAppear {
                 loadEventsForDate(selectedDate)
             }
-            .onChange(of: calendarViewMode) { _ in
+            .onChange(of: calendarViewMode) { _, _ in
                 loadEventsForDate(selectedDate)
             }
-            .onChange(of: selectedDate) { _ in
+            .onChange(of: selectedDate) { _, _ in
                 loadEventsForDate(selectedDate)
             }
             .sheet(isPresented: $showingAddTodo) {
@@ -317,7 +317,7 @@ struct GoogleCalendarMonthView: View {
         let startOfFirstWeek = calendar.dateInterval(of: .weekOfYear, for: startOfMonth)?.start ?? startOfMonth
         
         let endOfMonth = calendar.dateInterval(of: .month, for: currentMonth)?.end ?? currentMonth
-        let endOfLastWeek = calendar.dateInterval(of: .weekOfYear, for: endOfMonth)?.end ?? endOfMonth
+        let _ = calendar.dateInterval(of: .weekOfYear, for: endOfMonth)?.end ?? endOfMonth
         
         var dates: [Date?] = []
         var currentDate = startOfFirstWeek
@@ -866,10 +866,9 @@ struct GoogleCalendarDayColumn: View {
     
     private func eventsForHour(_ hour: Int) -> [GoogleCalendarEvent] {
         let startOfDay = calendar.startOfDay(for: date)
-        let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
+        let _ = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
         
         let filteredEvents = calendarEvents.filter { event in
-            let eventStart = calendar.startOfDay(for: event.startDate)
             let eventDate = calendar.startOfDay(for: event.startDate)
             let eventHour = calendar.component(.hour, from: event.startDate)
             let matchesDate = eventDate == startOfDay
@@ -883,7 +882,7 @@ struct GoogleCalendarDayColumn: View {
     
     private func todosForHour(_ hour: Int) -> [Todo] {
         let startOfDay = calendar.startOfDay(for: date)
-        let targetDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
+        let _ = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: startOfDay) ?? startOfDay
         
         return viewModel.todos.filter { todo in
             guard let dueDate = todo.dueDate else { return false }
@@ -1153,7 +1152,7 @@ struct GoogleCalendarEventDetailView: View {
                             .font(.title)
                             .fontWeight(.bold)
                             .textFieldStyle(PlainTextFieldStyle())
-                            .onChange(of: editedTitle) { _ in
+                            .onChange(of: editedTitle) { _, _ in
                                 checkForChanges()
                             }
                         
@@ -1162,7 +1161,7 @@ struct GoogleCalendarEventDetailView: View {
                             .foregroundColor(.secondary)
                             .textFieldStyle(PlainTextFieldStyle())
                             .lineLimit(3...6)
-                            .onChange(of: editedDescription) { _ in
+                            .onChange(of: editedDescription) { _, _ in
                                 checkForChanges()
                             }
                     }
@@ -1171,7 +1170,7 @@ struct GoogleCalendarEventDetailView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         // All Day Toggle
                         Toggle("All Day Event", isOn: $editedIsAllDay)
-                            .onChange(of: editedIsAllDay) { _ in
+                            .onChange(of: editedIsAllDay) { _, _ in
                                 checkForChanges()
                             }
                         
@@ -1186,12 +1185,12 @@ struct GoogleCalendarEventDetailView: View {
                                         .font(.headline)
                                 } else {
                                     DatePicker("Start Time", selection: $editedStartDate, displayedComponents: [.date, .hourAndMinute])
-                                        .onChange(of: editedStartDate) { _ in
+                                        .onChange(of: editedStartDate) { _, _ in
                                             checkForChanges()
                                         }
                                     
                                     DatePicker("End Time", selection: $editedEndDate, displayedComponents: [.date, .hourAndMinute])
-                                        .onChange(of: editedEndDate) { _ in
+                                        .onChange(of: editedEndDate) { _, _ in
                                             checkForChanges()
                                         }
                                 }
@@ -1206,7 +1205,7 @@ struct GoogleCalendarEventDetailView: View {
                                 .frame(width: 20)
                             TextField("Location (optional)", text: $editedLocation)
                                 .textFieldStyle(PlainTextFieldStyle())
-                                .onChange(of: editedLocation) { _ in
+                                .onChange(of: editedLocation) { _, _ in
                                     checkForChanges()
                                 }
                             Spacer()
@@ -1341,6 +1340,9 @@ struct ConvertEventToTodoView: View {
     @State private var category: Category = .personal
     @State private var dueDate: Date
     @State private var hasDueDate: Bool
+    @State private var alarmEnabled: Bool = false
+    @State private var persistentAlarmEnabled: Bool = false
+    @State private var reminderTime: Date
     
     init(event: GoogleCalendarEvent, viewModel: DashboardViewModel) {
         self.event = event
@@ -1349,6 +1351,9 @@ struct ConvertEventToTodoView: View {
         self._description = State(initialValue: event.description ?? "")
         self._dueDate = State(initialValue: event.startDate)
         self._hasDueDate = State(initialValue: true)
+        self._reminderTime = State(initialValue: event.startDate)
+        self._alarmEnabled = State(initialValue: false)
+        self._persistentAlarmEnabled = State(initialValue: false)
     }
     
     var body: some View {
@@ -1361,24 +1366,40 @@ struct ConvertEventToTodoView: View {
                 }
                 
                 Section("Priority & Category") {
-                    Picker("Priority", selection: $priority) {
-                        ForEach(Priority.allCases, id: \.self) { priority in
-                            HStack {
-                                Text(priority.icon)
-                                Text(priority.displayName)
+                    // Priority Selection
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Priority")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        HStack(spacing: 8) {
+                            ForEach(priorityOptions, id: \.self) { priorityLevel in
+                                priorityButton(for: priorityLevel)
+                                    .onTapGesture {
+                                        priority = priorityLevel
+                                        updateAlarmSettingsForPriority(priorityLevel)
+                                    }
+                                
+                                if priorityLevel != .urgent {
+                                    Spacer()
+                                }
                             }
-                            .tag(priority)
                         }
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                     
-                    Picker("Category", selection: $category) {
-                        ForEach(Category.allCases, id: \.self) { category in
-                            HStack {
-                                Text(category.icon)
-                                Text(category.displayName)
+                    // Category Selection
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Category")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(categoryOptions, id: \.self) { categoryOption in
+                                    categoryButton(for: categoryOption)
+                                }
                             }
-                            .tag(category)
+                            .padding(.horizontal, 4)
                         }
                     }
                 }
@@ -1388,6 +1409,38 @@ struct ConvertEventToTodoView: View {
                     
                     if hasDueDate {
                         DatePicker("Due Date", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+                    }
+                }
+                
+                Section("Alarm Settings") {
+                    Toggle("Enable alarm", isOn: $alarmEnabled)
+                    
+                    if alarmEnabled {
+                        Toggle("Persistent Alarm", isOn: $persistentAlarmEnabled)
+                            .foregroundColor(persistentAlarmEnabled ? .orange : .primary)
+                        
+                        if persistentAlarmEnabled {
+                            HStack {
+                                Text("Notification Interval")
+                                Spacer()
+                                Text("Every 10 minutes")
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            if priority == .urgent {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                    Text("Auto-enabled for Urgent priority")
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                        }
+                        
+                        if hasDueDate {
+                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                        }
                     }
                 }
             }
@@ -1406,16 +1459,105 @@ struct ConvertEventToTodoView: View {
     }
     
     private func saveTodo() {
+        let alarmSettings = AlarmSettings(
+            isEnabled: alarmEnabled,
+            reminderTime: alarmEnabled ? reminderTime : nil,
+            notificationType: .standard,
+            soundEnabled: true,
+            vibrationEnabled: true,
+            isPersistentAlarm: persistentAlarmEnabled,
+            persistentAlarmInterval: 600 // 10 minutes
+        )
+        
         let newTodo = Todo(
             title: title,
             description: description.isEmpty ? nil : description,
             priority: priority,
             dueDate: hasDueDate ? dueDate : nil,
-            category: category
+            category: category,
+            alarmSettings: alarmSettings
         )
         
         viewModel.addTodo(newTodo)
         dismiss()
+    }
+    
+    private func updateAlarmSettingsForPriority(_ newPriority: Priority) {
+        if newPriority == .urgent {
+            // Auto-enable alarm and persistent alarm for urgent priority
+            alarmEnabled = true
+            persistentAlarmEnabled = true
+        }
+    }
+    
+    // Helper methods to break down complex expressions
+    private var priorityOptions: [Priority] {
+        Priority.allCases
+    }
+    
+    private var categoryOptions: [Category] {
+        Category.allCategories
+    }
+    
+    private func priorityStrokeColor(for priorityLevel: Priority) -> Color {
+        priority == priorityLevel ? Color.blue : Color.clear
+    }
+    
+    private func priorityTextColor(for priorityLevel: Priority) -> Color {
+        priority == priorityLevel ? Color.blue : Color.primary
+    }
+    
+    private func backgroundColor(for categoryOption: Category) -> Color {
+        category == categoryOption ? categoryOption.color.opacity(0.2) : Color(.systemGray6)
+    }
+    
+    private func borderColor(for categoryOption: Category) -> Color {
+        category == categoryOption ? categoryOption.color : Color.clear
+    }
+    
+    // MARK: - Helper Methods for Complex UI Expressions
+    
+    private func priorityButton(for priorityLevel: Priority) -> some View {
+        Button(action: { priority = priorityLevel }) {
+            VStack(spacing: 4) {
+                Circle()
+                    .fill(priorityLevel.color)
+                    .frame(width: 24, height: 24)
+                    .overlay(
+                        Circle()
+                            .stroke(priorityStrokeColor(for: priorityLevel), lineWidth: 2)
+                    )
+                
+                Text(priorityLevel.displayName)
+                    .font(.caption)
+                    .foregroundColor(priorityTextColor(for: priorityLevel))
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func categoryButton(for categoryOption: Category) -> some View {
+        Button(action: { category = categoryOption }) {
+            HStack(spacing: 6) {
+                Text(categoryOption.icon)
+                    .font(.title3)
+                
+                Text(categoryOption.displayName)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(backgroundColor(for: categoryOption))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(borderColor(for: categoryOption), lineWidth: 2)
+                    )
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -1513,9 +1655,10 @@ struct UnifiedCalendarTodoBlock: View {
     
     private var priorityColor: Color {
         switch todo.priority {
-        case .high: return .red
-        case .medium: return .orange
-        case .low: return .purple
+        case .urgent: return .red
+        case .medium: return .yellow
+        case .low: return .green
+        case .none: return .gray
         }
     }
     

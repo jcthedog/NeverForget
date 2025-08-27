@@ -996,6 +996,259 @@ struct ExportDataView: View {
     }
 }
 
+// MARK: - Calendar Date Picker View
+struct CalendarDatePickerView: View {
+    @Binding var selectedDate: Date
+    @State private var currentMonth: Date
+    @State private var showingTimePicker = false
+    
+    private let calendar = Calendar.current
+    private let monthFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter
+    }()
+    
+    private let selectedDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter
+    }()
+    
+    init(selectedDate: Binding<Date>) {
+        self._selectedDate = selectedDate
+        self._currentMonth = State(initialValue: calendar.dateInterval(of: .month, for: selectedDate.wrappedValue)?.start ?? Date())
+    }
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // Month Navigation
+            HStack {
+                Button(action: previousMonth) {
+                    Image(systemName: "chevron.left")
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                }
+                
+                Spacer()
+                
+                Text(monthFormatter.string(from: currentMonth))
+                    .font(.headline)
+                    .fontWeight(.medium)
+                
+                Spacer()
+                
+                Button(action: nextMonth) {
+                    Image(systemName: "chevron.right")
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal)
+            
+            // Calendar Grid
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
+                // Day headers
+                ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
+                    Text(day)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                }
+                
+                // Calendar days
+                ForEach(daysInMonth, id: \.self) { date in
+                    if let date = date {
+                        Button(action: { selectDate(date) }) {
+                            Text("\(calendar.component(.day, from: date))")
+                                .font(.body)
+                                .fontWeight(calendar.isDate(date, inSameDayAs: selectedDate) ? .bold : .regular)
+                                .foregroundColor(calendar.isDate(date, inSameDayAs: selectedDate) ? .white : .primary)
+                                .frame(width: 32, height: 32)
+                                .background(
+                                    calendar.isDate(date, inSameDayAs: selectedDate) ? Color.blue : Color.clear
+                                )
+                                .cornerRadius(16)
+                        }
+                        .disabled(!calendar.isDate(date, equalTo: currentMonth, toGranularity: .month))
+                    } else {
+                        Text("")
+                            .frame(width: 32, height: 32)
+                    }
+                }
+            }
+            .padding(.horizontal)
+            
+            // Selected Date Display
+            HStack {
+                Text("Selected: \(selectedDate, formatter: selectedDateFormatter)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                Button("Set Time") {
+                    showingTimePicker = true
+                }
+                .font(.subheadline)
+                .foregroundColor(.blue)
+            }
+            .padding(.horizontal)
+        }
+        .sheet(isPresented: $showingTimePicker) {
+            TimePickerView(selectedTime: Binding(
+                get: { selectedDate },
+                set: { selectedDate = $0 }
+            ))
+        }
+    }
+    
+    private var daysInMonth: [Date?] {
+        guard let monthInterval = calendar.dateInterval(of: .month, for: currentMonth),
+              let monthFirstWeek = calendar.dateInterval(of: .weekOfYear, for: monthInterval.start),
+              let monthLastWeek = calendar.dateInterval(of: .weekOfYear, for: monthInterval.end - 1) else {
+            return []
+        }
+        
+        let dateInterval = DateInterval(start: monthFirstWeek.start, end: monthLastWeek.end)
+        var dates: [Date?] = []
+        var date = dateInterval.start
+        
+        while date < dateInterval.end {
+            if calendar.isDate(date, equalTo: currentMonth, toGranularity: .month) {
+                dates.append(date)
+            } else {
+                dates.append(nil)
+            }
+            date = calendar.date(byAdding: .day, value: 1, to: date) ?? date
+        }
+        
+        return dates
+    }
+    
+    private func previousMonth() {
+        if let newMonth = calendar.date(byAdding: .month, value: -1, to: currentMonth) {
+            currentMonth = newMonth
+        }
+    }
+    
+    private func nextMonth() {
+        if let newMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) {
+            currentMonth = newMonth
+        }
+    }
+    
+    private func selectDate(_ date: Date) {
+        let currentHour = calendar.component(.hour, from: selectedDate)
+        let currentMinute = calendar.component(.minute, from: selectedDate)
+        if let newDate = calendar.date(bySettingHour: currentHour, minute: currentMinute, second: 0, of: date) {
+            selectedDate = newDate
+        }
+    }
+}
+
+// MARK: - Time Picker View
+struct TimePickerView: View {
+    @Binding var selectedTime: Date
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                DatePicker("Time", selection: $selectedTime, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(WheelDatePickerStyle())
+                    .labelsHidden()
+                    .padding()
+                
+                Spacer()
+            }
+            .navigationTitle("Set Time")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Custom Category Creation View
+struct CreateCustomCategoryView: View {
+    let viewModel: DashboardViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var categoryName = ""
+    @State private var selectedIcon = "📝"
+    @State private var selectedColor: Color = .gray
+    
+    private let availableIcons = ["📝", "🎯", "⭐", "💡", "🔧", "📚", "🎨", "🏃", "🍽️", "🎵", "📱", "💻", "🎮", "📷", "🎬", "📖", "✏️", "🎪", "🎭", "🎨"]
+    private let availableColors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple, .pink, .brown, .gray, .mint, .indigo, .teal]
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section("Category Name") {
+                    TextField("Enter category name", text: $categoryName)
+                }
+                
+                Section("Icon") {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
+                        ForEach(availableIcons, id: \.self) { icon in
+                            Button(action: { selectedIcon = icon }) {
+                                Text(icon)
+                                    .font(.title2)
+                                    .frame(width: 44, height: 44)
+                                    .background(selectedIcon == icon ? Color.blue.opacity(0.2) : Color.clear)
+                                    .cornerRadius(8)
+                            }
+                        }
+                    }
+                }
+                
+                Section("Color") {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
+                        ForEach(availableColors, id: \.self) { color in
+                            Button(action: { selectedColor = color }) {
+                                Circle()
+                                    .fill(color)
+                                    .frame(width: 32, height: 32)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(selectedColor == color ? Color.blue : Color.clear, lineWidth: 3)
+                                    )
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Create Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Create") {
+                        createCategory()
+                    }
+                    .disabled(categoryName.isEmpty)
+                }
+            }
+        }
+    }
+    
+    private func createCategory() {
+        let newCategory = CustomCategory(name: categoryName, icon: selectedIcon, color: selectedColor)
+        viewModel.addCustomCategory(newCategory)
+        dismiss()
+    }
+}
+
 // MARK: - Add/Edit Todo Views
 struct AddTodoFormView: View {
     let viewModel: DashboardViewModel
@@ -1004,12 +1257,16 @@ struct AddTodoFormView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var description = ""
-    @State private var priority: Priority = .medium
+    @State private var priority: Priority = .none
     @State private var category: Category = .personal
-    @State private var dueDate: Date?
+    @State private var dueDate: Date = Date()
     @State private var hasDueDate = false
     @State private var showingRecurringOptions = false
     @State private var recurringPattern: RecurringPattern?
+    @State private var showingCreateCategory = false
+    @State private var alarmEnabled = false
+    @State private var persistentAlarmEnabled = false
+    @State private var reminderTime = Date()
     
     init(viewModel: DashboardViewModel, preselectedDate: Date? = nil) {
         self.viewModel = viewModel
@@ -1017,52 +1274,121 @@ struct AddTodoFormView: View {
         if let date = preselectedDate {
             self._dueDate = State(initialValue: date)
             self._hasDueDate = State(initialValue: true)
+            self._reminderTime = State(initialValue: date)
         }
+        
+        // Initialize alarm settings
+        self._alarmEnabled = State(initialValue: false)
+        self._persistentAlarmEnabled = State(initialValue: false)
     }
     
     var body: some View {
         NavigationView {
             Form {
+                // MARK: - Todo Details Section
                 Section("Todo Details") {
-                    TextField("Title", text: $title)
+                    TextField("Todo Name", text: $title)
+                        .font(.headline)
+                    
                     TextField("Description (optional)", text: $description, axis: .vertical)
                         .lineLimit(3...6)
                 }
                 
-                Section("Priority & Category") {
-                    Picker("Priority", selection: $priority) {
-                        ForEach(Priority.allCases, id: \.self) { priority in
-                            HStack {
-                                Text(priority.icon)
-                                Text(priority.displayName)
-                            }
-                            .tag(priority)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    
-                    Picker("Category", selection: $category) {
-                        ForEach(Category.allCases, id: \.self) { category in
-                            HStack {
-                                Text(category.icon)
-                                Text(category.displayName)
-                            }
-                            .tag(category)
-                        }
-                    }
-                }
-                
-                Section("Due Date") {
+                // MARK: - Date & Time Section
+                Section("Date & Time") {
                     Toggle("Set due date", isOn: $hasDueDate)
                     
                     if hasDueDate {
-                        DatePicker("Due Date", selection: Binding(
-                            get: { dueDate ?? Date() },
-                            set: { dueDate = $0 }
-                        ), displayedComponents: [.date, .hourAndMinute])
+                        CalendarDatePickerView(selectedDate: $dueDate)
+                            .frame(height: 320)
                     }
                 }
                 
+                // MARK: - Priority & Category Section
+                Section("Priority & Category") {
+                    // Priority Selector with Color Coding
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Priority")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        HStack(spacing: 8) {
+                            ForEach(Priority.allCases, id: \.self) { priorityLevel in
+                                Button(action: { 
+                                    priority = priorityLevel
+                                    updateAlarmSettingsForPriority(priorityLevel)
+                                }) {
+                                    VStack(spacing: 4) {
+                                        Circle()
+                                            .fill(priorityLevel.color)
+                                            .frame(width: 24, height: 24)
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(priorityStrokeColor(for: priorityLevel), lineWidth: 2)
+                                            )
+                                        
+                                        Text(priorityLevel.displayName)
+                                            .font(.caption)
+                                            .foregroundColor(priorityTextColor(for: priorityLevel))
+                                    }
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                if priorityLevel != .urgent {
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Category Picker
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Category")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Button("Create New") {
+                                showingCreateCategory = true
+                            }
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        }
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(allCategories, id: \.self) { categoryOption in
+                                    Button(action: { category = categoryOption }) {
+                                        HStack(spacing: 6) {
+                                            Text(categoryOption.icon)
+                                                .font(.title3)
+                                            
+                                            Text(categoryOption.displayName)
+                                                .font(.subheadline)
+                                                .foregroundColor(.primary)
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .fill(backgroundColor(for: categoryOption))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 16)
+                                                        .stroke(borderColor(for: categoryOption), lineWidth: 2)
+                                                )
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    }
+                }
+                
+                // MARK: - Recurring Section
                 Section("Recurring") {
                     Toggle("Make recurring", isOn: Binding(
                         get: { recurringPattern != nil },
@@ -1072,6 +1398,39 @@ struct AddTodoFormView: View {
                     if recurringPattern != nil {
                         Button("Configure recurring pattern") {
                             showingRecurringOptions = true
+                        }
+                    }
+                }
+                
+                // MARK: - Alarm Settings Section
+                Section("Alarm Settings") {
+                    Toggle("Enable alarm", isOn: $alarmEnabled)
+                    
+                    if alarmEnabled {
+                        Toggle("Persistent Alarm", isOn: $persistentAlarmEnabled)
+                            .foregroundColor(persistentAlarmEnabled ? .orange : .primary)
+                        
+                        if persistentAlarmEnabled {
+                            HStack {
+                                Text("Notification Interval")
+                                Spacer()
+                                Text("Every 10 minutes")
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            if priority == .urgent {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                    Text("Auto-enabled for Urgent priority")
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                        }
+                        
+                        if hasDueDate {
+                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
                         }
                     }
                 }
@@ -1095,17 +1454,59 @@ struct AddTodoFormView: View {
             .sheet(isPresented: $showingRecurringOptions) {
                 RecurringPatternView(recurringPattern: $recurringPattern)
             }
+            .sheet(isPresented: $showingCreateCategory) {
+                CreateCustomCategoryView(viewModel: viewModel)
+            }
+        }
+    }
+    
+    private var allCategories: [Category] {
+        Category.defaultCategories + viewModel.customCategories.map { Category.custom($0) }
+    }
+    
+    private func backgroundColor(for categoryOption: Category) -> Color {
+        category == categoryOption ? categoryOption.color.opacity(0.2) : Color(.systemGray6)
+    }
+    
+    private func borderColor(for categoryOption: Category) -> Color {
+        category == categoryOption ? categoryOption.color : Color.clear
+    }
+    
+    private func priorityStrokeColor(for priorityLevel: Priority) -> Color {
+        priority == priorityLevel ? Color.blue : Color.clear
+    }
+    
+    private func priorityTextColor(for priorityLevel: Priority) -> Color {
+        priority == priorityLevel ? Color.blue : Color.primary
+    }
+    
+    private func updateAlarmSettingsForPriority(_ newPriority: Priority) {
+        if newPriority == .urgent {
+            // Auto-enable alarm and persistent alarm for urgent priority
+            alarmEnabled = true
+            persistentAlarmEnabled = true
         }
     }
     
     private func saveTodo() {
+        let alarmSettings = AlarmSettings(
+            isEnabled: alarmEnabled,
+            reminderTime: alarmEnabled ? reminderTime : nil,
+            notificationType: .standard,
+            soundEnabled: true,
+            vibrationEnabled: true,
+            isPersistentAlarm: persistentAlarmEnabled,
+            persistentAlarmInterval: 600 // 10 minutes
+        )
+        
         let newTodo = Todo(
             title: title,
             description: description.isEmpty ? nil : description,
             priority: priority,
             dueDate: hasDueDate ? dueDate : nil,
             category: category,
-            recurringPattern: recurringPattern
+            recurringPattern: recurringPattern,
+            alarmSettings: alarmSettings
         )
         
         viewModel.addTodo(newTodo)
@@ -1125,6 +1526,10 @@ struct EditTodoView: View {
     @State private var dueDate: Date?
     @State private var hasDueDate: Bool
     @State private var showingRecurringOptions = false
+    @State private var showingCreateCategory = false
+    @State private var alarmEnabled: Bool
+    @State private var persistentAlarmEnabled: Bool
+    @State private var reminderTime: Date
     
     init(todo: Todo, viewModel: DashboardViewModel) {
         self.todo = todo
@@ -1135,6 +1540,9 @@ struct EditTodoView: View {
         self._category = State(initialValue: todo.category)
         self._dueDate = State(initialValue: todo.dueDate)
         self._hasDueDate = State(initialValue: todo.dueDate != nil)
+        self._alarmEnabled = State(initialValue: todo.alarmSettings.isEnabled)
+        self._persistentAlarmEnabled = State(initialValue: todo.alarmSettings.isPersistentAlarm)
+        self._reminderTime = State(initialValue: todo.alarmSettings.reminderTime ?? Date())
     }
     
     var body: some View {
@@ -1147,36 +1555,97 @@ struct EditTodoView: View {
                 }
                 
                 Section("Priority & Category") {
-                    Picker("Priority", selection: $priority) {
-                        ForEach(Priority.allCases, id: \.self) { priority in
-                            HStack {
-                                Text(priority.icon)
-                                Text(priority.displayName)
+                    // Priority Selector with Color Coding
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Priority")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        HStack(spacing: 8) {
+                            ForEach(Priority.allCases, id: \.self) { priorityLevel in
+                                Button(action: { 
+                                    priority = priorityLevel
+                                    updateAlarmSettingsForPriority(priorityLevel)
+                                }) {
+                                    VStack(spacing: 4) {
+                                        Circle()
+                                            .fill(priorityLevel.color)
+                                            .frame(width: 24, height: 24)
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(priorityStrokeColor(for: priorityLevel), lineWidth: 2)
+                                            )
+                                        
+                                        Text(priorityLevel.displayName)
+                                            .font(.caption)
+                                            .foregroundColor(priorityTextColor(for: priorityLevel))
+                                    }
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                if priorityLevel != .urgent {
+                                    Spacer()
+                                }
                             }
-                            .tag(priority)
                         }
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                     
-                    Picker("Category", selection: $category) {
-                        ForEach(Category.allCases, id: \.self) { category in
-                            HStack {
-                                Text(category.icon)
-                                Text(category.displayName)
+                    // Category Picker
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Category")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                            
+                            Button("Create New") {
+                                showingCreateCategory = true
                             }
-                            .tag(category)
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        }
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(allCategories, id: \.self) { categoryOption in
+                                    Button(action: { category = categoryOption }) {
+                                        HStack(spacing: 6) {
+                                            Text(categoryOption.icon)
+                                                .font(.title3)
+                                            
+                                            Text(categoryOption.displayName)
+                                                .font(.subheadline)
+                                                .foregroundColor(.primary)
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .fill(backgroundColor(for: categoryOption))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 16)
+                                                        .stroke(borderColor(for: categoryOption), lineWidth: 2)
+                                                )
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal, 4)
                         }
                     }
                 }
                 
-                Section("Due Date") {
+                Section("Date & Time") {
                     Toggle("Set due date", isOn: $hasDueDate)
                     
                     if hasDueDate {
-                        DatePicker("Due Date", selection: Binding(
+                        CalendarDatePickerView(selectedDate: Binding(
                             get: { dueDate ?? Date() },
                             set: { dueDate = $0 }
-                        ), displayedComponents: [.date, .hourAndMinute])
+                        ))
+                        .frame(height: 320)
                     }
                 }
                 
@@ -1190,6 +1659,38 @@ struct EditTodoView: View {
                         Text("Current pattern: \(pattern.description)")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    }
+                }
+                
+                Section("Alarm Settings") {
+                    Toggle("Enable alarm", isOn: $alarmEnabled)
+                    
+                    if alarmEnabled {
+                        Toggle("Persistent Alarm", isOn: $persistentAlarmEnabled)
+                            .foregroundColor(persistentAlarmEnabled ? .orange : .primary)
+                        
+                        if persistentAlarmEnabled {
+                            HStack {
+                                Text("Notification Interval")
+                                Spacer()
+                                Text("Every 10 minutes")
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            if priority == .urgent {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                    Text("Auto-enabled for Urgent priority")
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                        }
+                        
+                        if hasDueDate {
+                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                        }
                     }
                 }
             }
@@ -1209,10 +1710,51 @@ struct EditTodoView: View {
                     .disabled(title.isEmpty)
                 }
             }
+            .sheet(isPresented: $showingCreateCategory) {
+                CreateCustomCategoryView(viewModel: viewModel)
+            }
+        }
+    }
+    
+    private var allCategories: [Category] {
+        Category.defaultCategories + viewModel.customCategories.map { Category.custom($0) }
+    }
+    
+    private func backgroundColor(for categoryOption: Category) -> Color {
+        category == categoryOption ? categoryOption.color.opacity(0.2) : Color(.systemGray6)
+    }
+    
+    private func borderColor(for categoryOption: Category) -> Color {
+        category == categoryOption ? categoryOption.color : Color.clear
+    }
+    
+    private func priorityStrokeColor(for priorityLevel: Priority) -> Color {
+        priority == priorityLevel ? Color.blue : Color.clear
+    }
+    
+    private func priorityTextColor(for priorityLevel: Priority) -> Color {
+        priority == priorityLevel ? Color.blue : Color.primary
+    }
+    
+    private func updateAlarmSettingsForPriority(_ newPriority: Priority) {
+        if newPriority == .urgent {
+            // Auto-enable alarm and persistent alarm for urgent priority
+            alarmEnabled = true
+            persistentAlarmEnabled = true
         }
     }
     
     private func saveChanges() {
+        let alarmSettings = AlarmSettings(
+            isEnabled: alarmEnabled,
+            reminderTime: alarmEnabled ? reminderTime : nil,
+            notificationType: todo.alarmSettings.notificationType,
+            soundEnabled: todo.alarmSettings.soundEnabled,
+            vibrationEnabled: todo.alarmSettings.vibrationEnabled,
+            isPersistentAlarm: persistentAlarmEnabled,
+            persistentAlarmInterval: 600 // 10 minutes
+        )
+        
         let updatedTodo = Todo(
             id: todo.id,
             title: title,
@@ -1223,7 +1765,7 @@ struct EditTodoView: View {
             category: category,
             subtasks: todo.subtasks,
             recurringPattern: todo.recurringPattern,
-            alarmSettings: todo.alarmSettings,
+            alarmSettings: alarmSettings,
             createdAt: todo.createdAt,
             modifiedAt: Date()
         )

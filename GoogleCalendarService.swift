@@ -140,62 +140,35 @@ class GoogleCalendarService: ObservableObject {
                 }
                 
                 let fetchedCalendars = calendarList.items?.compactMap { item -> GoogleCalendar? in
-                    guard let calendarItem = item as? GTLRCalendar_CalendarListEntry else {
-                        print("❌ Failed to cast calendar item: \(type(of: item))")
-                        return nil
-                    }
+                    let calendarItem = item
                     
                     print("📋 Processing calendar: \(calendarItem.summary ?? "Unknown")")
                     
                     // Safely extract properties with proper type handling
                     let calendarId: String
                     if let id = calendarItem.identifier {
-                        if let stringId = id as? String {
-                            calendarId = stringId
-                        } else if let numberId = id as? NSNumber {
-                            calendarId = numberId.stringValue
-                        } else {
-                            calendarId = UUID().uuidString
-                        }
+                        calendarId = String(describing: id)
                     } else {
                         calendarId = UUID().uuidString
                     }
                     
                     let calendarSummary: String
                     if let summary = calendarItem.summary {
-                        if let stringSummary = summary as? String {
-                            calendarSummary = stringSummary
-                        } else if let numberSummary = summary as? NSNumber {
-                            calendarSummary = numberSummary.stringValue
-                        } else {
-                            calendarSummary = "Untitled Calendar"
-                        }
+                        calendarSummary = String(describing: summary)
                     } else {
                         calendarSummary = "Untitled Calendar"
                     }
                     
                     let calendarDescription: String?
                     if let description = calendarItem.descriptionProperty {
-                        if let stringDesc = description as? String {
-                            calendarDescription = stringDesc
-                        } else if let numberDesc = description as? NSNumber {
-                            calendarDescription = numberDesc.stringValue
-                        } else {
-                            calendarDescription = nil
-                        }
+                        calendarDescription = String(describing: description)
                     } else {
                         calendarDescription = nil
                     }
                     
                     let calendarAccessRole: String
                     if let accessRole = calendarItem.accessRole {
-                        if let stringRole = accessRole as? String {
-                            calendarAccessRole = stringRole
-                        } else if let numberRole = accessRole as? NSNumber {
-                            calendarAccessRole = numberRole.stringValue
-                        } else {
-                            calendarAccessRole = "reader"
-                        }
+                        calendarAccessRole = String(describing: accessRole)
                     } else {
                         calendarAccessRole = "reader"
                     }
@@ -325,7 +298,7 @@ class GoogleCalendarService: ObservableObject {
                 guard let events = result as? GTLRCalendar_Events else { return }
                 
                 let calendarEvents = events.items?.compactMap { item -> GoogleCalendarEvent? in
-                    let event = item as! GTLRCalendar_Event
+                    let event = item
                     
                     let startDate: Date
                     let endDate: Date

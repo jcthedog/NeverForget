@@ -26,9 +26,9 @@ struct GoogleCalendarEvent: Identifiable, Codable {
     var priority: Priority {
         // Determine priority based on event characteristics
         if attendees.count > 5 {
-            return .high // Meeting with many people
+            return .urgent // Meeting with many people
         } else if !isAllDay && endDate.timeIntervalSince(startDate) < 3600 {
-            return .high // Short, focused event
+            return .urgent // Short, focused event
         } else if location != nil && !location!.isEmpty {
             return .medium // Event with location
         } else {
@@ -52,11 +52,23 @@ struct GoogleCalendarEvent: Identifiable, Codable {
     
     // Convert to Todo
     func toTodo() -> Todo {
+        let alarmSettings = AlarmSettings(
+            isEnabled: false, // Default to disabled, user can enable in conversion view
+            reminderTime: nil,
+            notificationType: .standard,
+            soundEnabled: true,
+            vibrationEnabled: true,
+            isPersistentAlarm: false,
+            persistentAlarmInterval: 600
+        )
+        
         return Todo(
             title: title,
             description: description ?? "",
             priority: priority,
-            dueDate: dueDate
+            dueDate: dueDate,
+            category: .personal, // Default to personal category for imported events
+            alarmSettings: alarmSettings
         )
     }
 }

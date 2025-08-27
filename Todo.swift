@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 // MARK: - Notification Type
 enum NotificationType: String, CaseIterable, Codable {
@@ -27,19 +28,25 @@ struct AlarmSettings: Codable, Equatable {
     var notificationType: NotificationType
     var soundEnabled: Bool
     var vibrationEnabled: Bool
+    var isPersistentAlarm: Bool
+    var persistentAlarmInterval: TimeInterval // Interval in seconds between notifications
     
     init(
         isEnabled: Bool = false,
         reminderTime: Date? = nil,
         notificationType: NotificationType = .standard,
         soundEnabled: Bool = true,
-        vibrationEnabled: Bool = true
+        vibrationEnabled: Bool = true,
+        isPersistentAlarm: Bool = false,
+        persistentAlarmInterval: TimeInterval = 600 // Default: 10 minutes (600 seconds)
     ) {
         self.isEnabled = isEnabled
         self.reminderTime = reminderTime
         self.notificationType = notificationType
         self.soundEnabled = soundEnabled
         self.vibrationEnabled = vibrationEnabled
+        self.isPersistentAlarm = isPersistentAlarm
+        self.persistentAlarmInterval = persistentAlarmInterval
     }
 }
 
@@ -111,7 +118,7 @@ struct Todo: Identifiable, Codable, Equatable {
         title: String,
         description: String? = nil,
         isCompleted: Bool = false,
-        priority: Priority = .medium,
+        priority: Priority = .none,
         dueDate: Date? = nil,
         category: Category = .personal,
         subtasks: [Subtask] = [],
@@ -132,81 +139,232 @@ struct Todo: Identifiable, Codable, Equatable {
         self.alarmSettings = alarmSettings
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+        
+        // Auto-enable persistent alarm for urgent priority
+        if priority == .urgent && !alarmSettings.isPersistentAlarm {
+            self.alarmSettings.isPersistentAlarm = true
+        }
     }
 }
 
 enum Priority: String, CaseIterable, Codable {
+    case none = "none"
     case low = "low"
     case medium = "medium"
-    case high = "high"
+    case urgent = "urgent"
     
     var displayName: String {
         switch self {
+        case .none: return "None"
         case .low: return "Low"
         case .medium: return "Medium"
-        case .high: return "High"
+        case .urgent: return "Urgent"
         }
     }
     
     var icon: String {
         switch self {
+        case .none: return "⚪"
         case .low: return "🟢"
         case .medium: return "🟡"
-        case .high: return "🔴"
+        case .urgent: return "🔴"
         }
     }
     
     var color: Color {
         switch self {
+        case .none: return .white
         case .low: return .green
-        case .medium: return .orange
-        case .high: return .red
+        case .medium: return .yellow
+        case .urgent: return .red
+        }
+    }
+    
+    var shouldDefaultToPersistentAlarm: Bool {
+        return self == .urgent
+    }
+}
+
+// MARK: - Custom Category
+struct CustomCategory: Identifiable, Codable, Equatable, Hashable {
+    let id: UUID
+    var name: String
+    var icon: String
+    var color: Color
+    
+    init(id: UUID = UUID(), name: String, icon: String = "📝", color: Color = .gray) {
+        self.id = id
+        self.name = name
+        self.icon = icon
+        self.color = color
+    }
+    
+    // MARK: - Codable Implementation for Color
+    private enum CodingKeys: String, CodingKey {
+        case id, name, icon, colorHex
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        icon = try container.decode(String.self, forKey: .icon)
+        
+        let hexString = try container.decode(String.self, forKey: .colorHex)
+        color = Color(hex: hexString) ?? .gray
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(icon, forKey: .icon)
+        try container.encode(color.toHex(), forKey: .colorHex)
+    }
+}
+
+// MARK: - Category System
+enum Category: Codable, Equatable, Hashable {
+    case personal
+    case work
+    case family
+    case custom(CustomCategory)
+    
+    var displayName: String {
+        switch self {
+        case .personal: return "Personal"
+        case .work: return "Work"
+        case .family: return "Family"
+        case .custom(let custom): return custom.name
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .personal: return "👤"
+        case .work: return "💼"
+        case .family: return "👨‍👩‍👧‍👦"
+        case .custom(let custom): return custom.icon
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .personal: return .purple
+        case .work: return .blue
+        case .family: return .green
+        case .custom(let custom): return custom.color
+        }
+    }
+    
+    var isDefault: Bool {
+        switch self {
+        case .personal, .work, .family: return true
+        case .custom: return false
+        }
+    }
+    
+    // MARK: - Codable Implementation
+    private enum CodingKeys: String, CodingKey {
+        case type, customCategory
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        
+        switch type {
+        case "personal":
+            self = .personal
+        case "work":
+            self = .work
+        case "family":
+            self = .family
+        case "custom":
+            let customCategory = try container.decode(CustomCategory.self, forKey: .customCategory)
+            self = .custom(customCategory)
+        default:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown category type")
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .personal:
+            try container.encode("personal", forKey: .type)
+        case .work:
+            try container.encode("work", forKey: .type)
+        case .family:
+            try container.encode("family", forKey: .type)
+        case .custom(let customCategory):
+            try container.encode("custom", forKey: .type)
+            try container.encode(customCategory, forKey: .customCategory)
         }
     }
 }
 
-enum Category: String, CaseIterable, Codable {
-    case work = "work"
-    case personal = "personal"
-    case health = "health"
-    case finance = "finance"
-    case shopping = "shopping"
-    case travel = "travel"
-    case other = "other"
-    
-    var displayName: String {
-        switch self {
-        case .work: return "Work"
-        case .personal: return "Personal"
-        case .health: return "Health"
-        case .finance: return "Finance"
-        case .shopping: return "Shopping"
-        case .travel: return "Travel"
-        case .other: return "Other"
+// MARK: - Color Extensions for Hex Support
+extension Color {
+    init?(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            return nil
         }
+        
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
     
-    var icon: String {
-        switch self {
-        case .work: return "💼"
-        case .personal: return "👤"
-        case .health: return "🏥"
-        case .finance: return "💰"
-        case .shopping: return "🛒"
-        case .travel: return "✈️"
-        case .other: return "📝"
-        }
+    func toHex() -> String {
+        let uiColor = UIColor(self)
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        
+        let rgb = Int(red * 255) << 16 | Int(green * 255) << 8 | Int(blue * 255) << 0
+        
+        return String(format: "#%06x", rgb)
+    }
+}
+
+// MARK: - Category Extensions for UI
+extension Category {
+    static var defaultCategories: [Category] {
+        [.personal, .work, .family]
     }
     
-    var color: Color {
-        switch self {
-        case .work: return .blue
-        case .personal: return .purple
-        case .health: return .green
-        case .finance: return .orange
-        case .shopping: return .pink
-        case .travel: return .cyan
-        case .other: return .gray
+    static var allCategories: [Category] {
+        defaultCategories
+    }
+    
+    static func == (lhs: Category, rhs: Category) -> Bool {
+        switch (lhs, rhs) {
+        case (.personal, .personal), (.work, .work), (.family, .family):
+            return true
+        case (.custom(let lhsCustom), .custom(let rhsCustom)):
+            return lhsCustom.id == rhsCustom.id
+        default:
+            return false
         }
     }
 }

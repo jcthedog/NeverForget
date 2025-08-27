@@ -1,8 +1,9 @@
 import Foundation
 import Combine
+import UserNotifications
 
 @MainActor
-class DashboardViewModel: ObservableObject {
+class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     @Published var activeAlarms: [PersistentAlarm] = []
     // todayTodos is now a computed property to ensure consistency
     @Published var completedToday: Int = 0
@@ -10,15 +11,18 @@ class DashboardViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var todos: [Todo] = []
+    @Published var customCategories: [CustomCategory] = []
     @Published var isGoogleSignedIn = false
     @Published var lastSyncTime: String?
     @Published var sampleCalendarEvents: [GoogleCalendarEvent] = []
     
     private var cancellables = Set<AnyCancellable>()
     
-    init() {
+    override init() {
+        super.init()
         loadDashboardData()
         setupSampleData()
+        setupNotifications()
     }
     
     func loadDashboardData() {
@@ -38,8 +42,65 @@ class DashboardViewModel: ObservableObject {
     
     // MARK: - Todo Management
     func addTodo(_ todo: Todo) {
-        todos.append(todo)
+        // Ensure urgent priority todos have persistent alarms enabled
+        var updatedTodo = todo
+        if todo.priority == .urgent && !todo.alarmSettings.isPersistentAlarm {
+            updatedTodo.alarmSettings.isPersistentAlarm = true
+            updatedTodo.alarmSettings.isEnabled = true
+        }
+        
+        todos.append(updatedTodo)
         calculateTodayStats()
+        
+        // Schedule alarm if enabled
+        if updatedTodo.alarmSettings.isEnabled {
+            scheduleAlarm(for: updatedTodo)
+        }
+    }
+    
+    // MARK: - Alarm Scheduling
+    private func scheduleAlarm(for todo: Todo) {
+        guard let reminderTime = todo.alarmSettings.reminderTime else { return }
+        
+        if todo.alarmSettings.isPersistentAlarm {
+            // Schedule persistent alarm with 10-minute intervals
+            schedulePersistentAlarm(for: todo, startTime: reminderTime)
+        } else {
+            // Schedule single notification
+            scheduleSingleNotification(for: todo, at: reminderTime)
+        }
+    }
+    
+    private func schedulePersistentAlarm(for todo: Todo, startTime: Date) {
+        let persistentAlarm = PersistentAlarm(
+            title: todo.title,
+            message: todo.description ?? "Reminder for \(todo.title)",
+            time: startTime,
+            notificationType: .repeating,
+            repeatDays: [],
+            isEnabled: true,
+            isPersistent: true,
+            persistentInterval: todo.alarmSettings.persistentAlarmInterval
+        )
+        
+        addAlarm(persistentAlarm)
+        persistentAlarm.schedule() // Schedule the notifications
+    }
+    
+    private func scheduleSingleNotification(for todo: Todo, at time: Date) {
+        let alarm = PersistentAlarm(
+            title: todo.title,
+            message: todo.description ?? "Reminder for \(todo.title)",
+            time: time,
+            notificationType: .standard,
+            repeatDays: [],
+            isEnabled: true,
+            isPersistent: false,
+            persistentInterval: 600
+        )
+        
+        addAlarm(alarm)
+        alarm.schedule() // Schedule the notification
     }
     
     func updateTodo(_ todo: Todo) {
@@ -93,6 +154,21 @@ class DashboardViewModel: ObservableObject {
     func toggleAlarm(_ alarm: PersistentAlarm) {
         if let index = activeAlarms.firstIndex(where: { $0.id == alarm.id }) {
             activeAlarms[index].isEnabled.toggle()
+        }
+    }
+    
+    // MARK: - Custom Category Management
+    func addCustomCategory(_ category: CustomCategory) {
+        customCategories.append(category)
+    }
+    
+    func deleteCustomCategory(_ category: CustomCategory) {
+        customCategories.removeAll { $0.id == category.id }
+    }
+    
+    func updateCustomCategory(_ category: CustomCategory) {
+        if let index = customCategories.firstIndex(where: { $0.id == category.id }) {
+            customCategories[index] = category
         }
     }
     
@@ -176,7 +252,7 @@ class DashboardViewModel: ObservableObject {
             Todo(
                 title: "Call Client",
                 description: "Discuss Q4 project timeline",
-                priority: Priority.high,
+                priority: Priority.urgent,
                 dueDate: Date().addingTimeInterval(-15 * 60), // 15 minutes ago
                 category: Category.work
             ),
@@ -192,14 +268,14 @@ class DashboardViewModel: ObservableObject {
                 description: "Milk, bread, eggs",
                 priority: Priority.low,
                 dueDate: Date().addingTimeInterval(2 * 60 * 60), // 2 hours from now
-                category: Category.shopping
+                category: Category.personal
             ),
             Todo(
-                title: "Gym Workout",
-                description: "Cardio and strength training",
+                title: "Family Dinner Planning",
+                description: "Plan weekend family dinner",
                 priority: Priority.medium,
                 dueDate: Date().addingTimeInterval(4 * 60 * 60), // 4 hours from now
-                category: Category.health
+                category: Category.family
             )
         ]
         
@@ -322,5 +398,141 @@ class DashboardViewModel: ObservableObject {
         sampleCalendarEvents = sampleEvents
         
         calculateTodayStats()
+    }
+    
+    // MARK: - Notification Setup
+    private func setupNotifications() {
+        // Request notification permissions
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                print("✅ Notification permissions granted")
+                self.setupNotificationCategories()
+            } else {
+                print("❌ Notification permissions denied: \(error?.localizedDescription ?? "Unknown error")")
+            }
+        }
+    }
+    
+    private func setupNotificationCategories() {
+        // Create notification categories for different alarm types
+        let persistentAlarmCategory = UNNotificationCategory(
+            identifier: "PERSISTENT_ALARM",
+            actions: [
+                UNNotificationAction(
+                    identifier: "SNOOZE_10MIN",
+                    title: "Snooze 10 min",
+                    options: []
+                ),
+                UNNotificationAction(
+                    identifier: "SNOOZE_1HOUR",
+                    title: "Snooze 1 hour",
+                    options: []
+                ),
+                UNNotificationAction(
+                    identifier: "COMPLETE_TODO",
+                    title: "Mark Complete",
+                    options: [.foreground]
+                ),
+                UNNotificationAction(
+                    identifier: "DELETE_TODO",
+                    title: "Delete",
+                    options: [.destructive]
+                )
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        let singleAlarmCategory = UNNotificationCategory(
+            identifier: "SINGLE_ALARM",
+            actions: [
+                UNNotificationAction(
+                    identifier: "SNOOZE_10MIN",
+                    title: "Snooze 10 min",
+                    options: []
+                ),
+                UNNotificationAction(
+                    identifier: "COMPLETE_TODO",
+                    title: "Mark Complete",
+                    options: [.foreground]
+                )
+            ],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        UNUserNotificationCenter.current().setNotificationCategories([persistentAlarmCategory, singleAlarmCategory])
+        
+        // Set notification delegate
+        UNUserNotificationCenter.current().delegate = self
+    }
+    
+    // MARK: - Notification Action Handling
+    func handleNotificationAction(identifier: String, for alarmId: UUID) {
+        guard let alarm = activeAlarms.first(where: { $0.id == alarmId }) else { return }
+        
+        switch identifier {
+        case "SNOOZE_10MIN":
+            var updatedAlarm = alarm
+            updatedAlarm.snooze(duration: 600) // 10 minutes
+            updateAlarm(updatedAlarm)
+            
+        case "SNOOZE_1HOUR":
+            var updatedAlarm = alarm
+            updatedAlarm.snooze(duration: 3600) // 1 hour
+            updateAlarm(updatedAlarm)
+            
+        case "COMPLETE_TODO":
+            // Find and complete the associated todo
+            if let todo = todos.first(where: { $0.id == alarmId }) {
+                var updatedTodo = todo
+                updatedTodo.isCompleted = true
+                updateTodo(updatedTodo)
+            }
+            alarm.complete()
+            deleteAlarm(alarm)
+            
+        case "DELETE_TODO":
+            // Find and delete the associated todo
+            if let todo = todos.first(where: { $0.id == alarmId }) {
+                deleteTodo(todo)
+            }
+            alarm.delete()
+            deleteAlarm(alarm)
+            
+        default:
+            break
+        }
+    }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+extension DashboardViewModel {
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let identifier = response.actionIdentifier
+        
+        // Extract alarm ID from notification identifier
+        let notificationId = response.notification.request.identifier
+        if let alarmIdString = notificationId.components(separatedBy: "_").first,
+           let alarmId = UUID(uuidString: alarmIdString) {
+            Task { @MainActor in
+                self.handleNotificationAction(identifier: identifier, for: alarmId)
+            }
+        }
+        
+        completionHandler()
+    }
+    
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        // Show notification even when app is in foreground
+        completionHandler([.banner, .sound, .badge])
     }
 }
