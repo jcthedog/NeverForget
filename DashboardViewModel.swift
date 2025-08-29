@@ -15,8 +15,25 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     @Published var isGoogleSignedIn = false
     @Published var lastSyncTime: String?
     @Published var sampleCalendarEvents: [GoogleCalendarEvent] = []
+    @Published var use24HourTime = false
     
     private var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Time Format Management
+    func toggleTimeFormat() {
+        use24HourTime.toggle()
+        print("Time format toggled to: \(use24HourTime ? "24-hour" : "12-hour")")
+    }
+    
+    func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        if use24HourTime {
+            formatter.dateFormat = "HH:mm"
+        } else {
+            formatter.dateFormat = "h:mm a"
+        }
+        return formatter.string(from: date)
+    }
     
     override init() {
         super.init()

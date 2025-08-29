@@ -1,5 +1,39 @@
 import SwiftUI
 
+// MARK: - Notification Interval Enum
+enum NotificationInterval: String, CaseIterable, Identifiable {
+    case every5Minutes = "5min"
+    case every15Minutes = "15min"
+    case every30Minutes = "30min"
+    case everyHour = "1hour"
+    case every12Hours = "12hours"
+    case every24Hours = "24hours"
+    
+    var id: String { rawValue }
+    
+    var displayName: String {
+        switch self {
+        case .every5Minutes: return "Every 5 Minutes"
+        case .every15Minutes: return "Every 15 Minutes"
+        case .every30Minutes: return "Every ½ Hour"
+        case .everyHour: return "Every Hour"
+        case .every12Hours: return "Every 12 Hours"
+        case .every24Hours: return "Every 24 Hours"
+        }
+    }
+    
+    var timeInterval: TimeInterval {
+        switch self {
+        case .every5Minutes: return 300 // 5 minutes
+        case .every15Minutes: return 900 // 15 minutes
+        case .every30Minutes: return 1800 // 30 minutes
+        case .everyHour: return 3600 // 1 hour
+        case .every12Hours: return 43200 // 12 hours
+        case .every24Hours: return 86400 // 24 hours
+        }
+    }
+}
+
 struct ContentView: View {
     @StateObject private var sharedViewModel = DashboardViewModel()
     
@@ -688,6 +722,26 @@ struct SettingsView: View {
                     }
                     
                     HStack {
+                        Image(systemName: "clock.fill")
+                            .foregroundColor(.teal)
+                        Text("Time Format")
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { 
+                                print("Getting time format: \(viewModel.use24HourTime)")
+                                return viewModel.use24HourTime 
+                            },
+                            set: { newValue in 
+                                print("Setting time format to: \(newValue)")
+                                viewModel.toggleTimeFormat()
+                            }
+                        ))
+                        Text(viewModel.use24HourTime ? "24h" : "12h")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                    
+                    HStack {
                         Image(systemName: "hand.raised.fill")
                             .foregroundColor(.blue)
                         Text("Accessibility")
@@ -1059,21 +1113,25 @@ struct CalendarDatePickerView: View {
                 // Calendar days
                 ForEach(daysInMonth, id: \.self) { date in
                     if let date = date {
-                        Button(action: { selectDate(date) }) {
+                        Button(action: { 
+                            selectDate(date)
+                        }) {
                             Text("\(calendar.component(.day, from: date))")
                                 .font(.body)
                                 .fontWeight(calendar.isDate(date, inSameDayAs: selectedDate) ? .bold : .regular)
                                 .foregroundColor(calendar.isDate(date, inSameDayAs: selectedDate) ? .white : .primary)
-                                .frame(width: 32, height: 32)
+                                .frame(width: 40, height: 40)
                                 .background(
                                     calendar.isDate(date, inSameDayAs: selectedDate) ? Color.blue : Color.clear
                                 )
-                                .cornerRadius(16)
+                                .cornerRadius(20)
                         }
+                        .buttonStyle(PlainButtonStyle())
                         .disabled(!calendar.isDate(date, equalTo: currentMonth, toGranularity: .month))
+                        .contentShape(Rectangle())
                     } else {
                         Text("")
-                            .frame(width: 32, height: 32)
+                            .frame(width: 40, height: 40)
                     }
                 }
             }
@@ -1096,10 +1154,30 @@ struct CalendarDatePickerView: View {
             .padding(.horizontal)
         }
         .sheet(isPresented: $showingTimePicker) {
-            TimePickerView(selectedTime: Binding(
-                get: { selectedDate },
-                set: { selectedDate = $0 }
-            ))
+            NavigationView {
+                VStack(spacing: 20) {
+                    Text("Set Time")
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    DatePicker("Time", selection: $selectedDate, displayedComponents: .hourAndMinute)
+                        .datePickerStyle(WheelDatePickerStyle())
+                        .labelsHidden()
+                        .padding(.horizontal)
+                    
+                    Spacer()
+                }
+                .navigationTitle("Set Time")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") {
+                            showingTimePicker = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.height(300)])
         }
     }
     
@@ -1147,33 +1225,7 @@ struct CalendarDatePickerView: View {
     }
 }
 
-// MARK: - Time Picker View
-struct TimePickerView: View {
-    @Binding var selectedTime: Date
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            VStack {
-                DatePicker("Time", selection: $selectedTime, displayedComponents: .hourAndMinute)
-                    .datePickerStyle(WheelDatePickerStyle())
-                    .labelsHidden()
-                    .padding()
-                
-                Spacer()
-            }
-            .navigationTitle("Set Time")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
+
 
 // MARK: - Custom Category Creation View
 struct CreateCustomCategoryView: View {
@@ -1249,6 +1301,15 @@ struct CreateCustomCategoryView: View {
     }
 }
 
+// Extension to add ordinal suffix to numbers
+extension Int {
+    var ordinalString: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .ordinal
+        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+    }
+}
+
 // MARK: - Add/Edit Todo Views
 struct AddTodoFormView: View {
     let viewModel: DashboardViewModel
@@ -1267,6 +1328,8 @@ struct AddTodoFormView: View {
     @State private var alarmEnabled = false
     @State private var persistentAlarmEnabled = false
     @State private var reminderTime = Date()
+    @State private var showingNotificationIntervalPicker = false
+    @State private var notificationInterval: NotificationInterval = .every15Minutes
     
     init(viewModel: DashboardViewModel, preselectedDate: Date? = nil) {
         self.viewModel = viewModel
@@ -1299,8 +1362,7 @@ struct AddTodoFormView: View {
                     Toggle("Set due date", isOn: $hasDueDate)
                     
                     if hasDueDate {
-                        CalendarDatePickerView(selectedDate: $dueDate)
-                            .frame(height: 320)
+                        DatePicker("Due Date", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
                     }
                 }
                 
@@ -1392,13 +1454,28 @@ struct AddTodoFormView: View {
                 Section("Recurring") {
                     Toggle("Make recurring", isOn: Binding(
                         get: { recurringPattern != nil },
-                        set: { if !$0 { recurringPattern = nil } }
+                        set: { isOn in
+                            if isOn {
+                                // Initialize with a default pattern if turning on
+                                if recurringPattern == nil {
+                                    recurringPattern = .daily(interval: 1)
+                                }
+                            } else {
+                                // Clear pattern if turning off
+                                recurringPattern = nil
+                            }
+                        }
                     ))
                     
                     if recurringPattern != nil {
                         Button("Configure recurring pattern") {
                             showingRecurringOptions = true
                         }
+                        .foregroundColor(.blue)
+                        
+                        Text("Current: \(recurringPattern!.displayName)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 
@@ -1414,8 +1491,12 @@ struct AddTodoFormView: View {
                             HStack {
                                 Text("Notification Interval")
                                 Spacer()
-                                Text("Every 10 minutes")
-                                    .foregroundColor(.secondary)
+                                Button(action: {
+                                    showingNotificationIntervalPicker = true
+                                }) {
+                                    Text(notificationInterval.displayName)
+                                        .foregroundColor(.blue)
+                                }
                             }
                             
                             if priority == .urgent {
@@ -1430,7 +1511,13 @@ struct AddTodoFormView: View {
                         }
                         
                         if hasDueDate {
-                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                            if viewModel.use24HourTime {
+                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .environment(\.locale, Locale(identifier: "en_GB"))
+                            } else {
+                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .environment(\.locale, Locale(identifier: "en_US"))
+                            }
                         }
                     }
                 }
@@ -1451,11 +1538,14 @@ struct AddTodoFormView: View {
                     .disabled(title.isEmpty)
                 }
             }
-            .sheet(isPresented: $showingRecurringOptions) {
-                RecurringPatternView(recurringPattern: $recurringPattern)
+            .popover(isPresented: $showingRecurringOptions, arrowEdge: .bottom) {
+                RecurringPatternView(recurringPattern: $recurringPattern, selectedDate: dueDate, viewModel: viewModel)
             }
             .sheet(isPresented: $showingCreateCategory) {
                 CreateCustomCategoryView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingNotificationIntervalPicker) {
+                NotificationIntervalPickerView(selectedInterval: $notificationInterval)
             }
         }
     }
@@ -1496,7 +1586,7 @@ struct AddTodoFormView: View {
             soundEnabled: true,
             vibrationEnabled: true,
             isPersistentAlarm: persistentAlarmEnabled,
-            persistentAlarmInterval: 600 // 10 minutes
+            persistentAlarmInterval: notificationInterval.timeInterval
         )
         
         let newTodo = Todo(
@@ -1530,6 +1620,8 @@ struct EditTodoView: View {
     @State private var alarmEnabled: Bool
     @State private var persistentAlarmEnabled: Bool
     @State private var reminderTime: Date
+    @State private var showingNotificationIntervalPicker = false
+    @State private var notificationInterval: NotificationInterval = .every15Minutes
     
     init(todo: Todo, viewModel: DashboardViewModel) {
         self.todo = todo
@@ -1543,6 +1635,16 @@ struct EditTodoView: View {
         self._alarmEnabled = State(initialValue: todo.alarmSettings.isEnabled)
         self._persistentAlarmEnabled = State(initialValue: todo.alarmSettings.isPersistentAlarm)
         self._reminderTime = State(initialValue: todo.alarmSettings.reminderTime ?? Date())
+        
+        // Initialize notification interval from existing alarm settings
+        let interval = todo.alarmSettings.persistentAlarmInterval
+        if interval == 300 { self._notificationInterval = State(initialValue: .every5Minutes) }
+        else if interval == 900 { self._notificationInterval = State(initialValue: .every15Minutes) }
+        else if interval == 1800 { self._notificationInterval = State(initialValue: .every30Minutes) }
+        else if interval == 3600 { self._notificationInterval = State(initialValue: .everyHour) }
+        else if interval == 43200 { self._notificationInterval = State(initialValue: .every12Hours) }
+        else if interval == 86400 { self._notificationInterval = State(initialValue: .every24Hours) }
+        else { self._notificationInterval = State(initialValue: .every15Minutes) }
     }
     
     var body: some View {
@@ -1637,23 +1739,25 @@ struct EditTodoView: View {
                     }
                 }
                 
-                Section("Date & Time") {
+                                Section("Date & Time") {
                     Toggle("Set due date", isOn: $hasDueDate)
                     
                     if hasDueDate {
-                        CalendarDatePickerView(selectedDate: Binding(
+                        DatePicker("Due Date", selection: Binding(
                             get: { dueDate ?? Date() },
                             set: { dueDate = $0 }
-                        ))
-                        .frame(height: 320)
+                        ), displayedComponents: [.date, .hourAndMinute])
                     }
                 }
                 
                 Section("Recurring") {
                     Toggle("Make recurring", isOn: Binding(
                         get: { todo.recurringPattern != nil },
-                        set: { _ in }
+                        set: { isOn in
+                            // This is read-only in edit mode, but we can show the pattern
+                        }
                     ))
+                    .disabled(true) // Disable in edit mode since we're not editing patterns yet
                     
                     if let pattern = todo.recurringPattern {
                         Text("Current pattern: \(pattern.description)")
@@ -1673,8 +1777,12 @@ struct EditTodoView: View {
                             HStack {
                                 Text("Notification Interval")
                                 Spacer()
-                                Text("Every 10 minutes")
-                                    .foregroundColor(.secondary)
+                                Button(action: {
+                                    showingNotificationIntervalPicker = true
+                                }) {
+                                    Text(notificationInterval.displayName)
+                                        .foregroundColor(.blue)
+                                }
                             }
                             
                             if priority == .urgent {
@@ -1689,7 +1797,13 @@ struct EditTodoView: View {
                         }
                         
                         if hasDueDate {
-                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                            if viewModel.use24HourTime {
+                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .environment(\.locale, Locale(identifier: "en_GB"))
+                            } else {
+                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .environment(\.locale, Locale(identifier: "en_US"))
+                            }
                         }
                     }
                 }
@@ -1752,7 +1866,7 @@ struct EditTodoView: View {
             soundEnabled: todo.alarmSettings.soundEnabled,
             vibrationEnabled: todo.alarmSettings.vibrationEnabled,
             isPersistentAlarm: persistentAlarmEnabled,
-            persistentAlarmInterval: 600 // 10 minutes
+            persistentAlarmInterval: notificationInterval.timeInterval
         )
         
         let updatedTodo = Todo(
@@ -1777,101 +1891,198 @@ struct EditTodoView: View {
 
 struct RecurringPatternView: View {
     @Binding var recurringPattern: RecurringPattern?
+    let selectedDate: Date
+    let viewModel: DashboardViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var patternType: PatternType = .daily
-    @State private var interval = 1
+    @State private var selectedOption: RecurringOption = .everyDay
+    @State private var customInterval = 1
+    @State private var customUnit: CustomUnit = .weeks
     @State private var selectedDays: Set<Int> = []
     
-    enum PatternType: String, CaseIterable {
-        case daily = "daily"
-        case weekly = "weekly"
-        case monthly = "monthly"
+    private let calendar = Calendar.current
+    
+    private let dayOfWeekFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        return formatter
+    }()
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter
+    }()
+    
+    enum RecurringOption: String, CaseIterable, Identifiable {
+        case everyDay = "everyDay"
+        case everyWeek = "everyWeek"
+        case everyMonth = "everyMonth"
         case yearly = "yearly"
+        case custom = "custom"
+        
+        var id: String { rawValue }
+    }
+    
+    // Method to get display name with selected date context
+    private func displayName(for option: RecurringOption) -> String {
+        switch option {
+        case .everyDay: return "Every Day(s) of the Week"
+        case .everyWeek: return "Every Week (On \(dayOfWeekFormatter.string(from: selectedDate)))"
+        case .everyMonth: return "Every Month (On the \(calendar.component(.day, from: selectedDate).ordinalString))"
+        case .yearly: return "Every Year (On \(dateFormatter.string(from: selectedDate)))"
+        case .custom: return "Custom"
+        }
+    }
+    
+    enum CustomUnit: String, CaseIterable, Identifiable {
+        case weeks = "weeks"
+        case months = "months"
+        case years = "years"
+        
+        var id: String { rawValue }
         
         var displayName: String {
             switch self {
-            case .daily: return "Daily"
-            case .weekly: return "Weekly"
-            case .monthly: return "Monthly"
-            case .yearly: return "Yearly"
-            }
-        }
-        
-        var unitName: String {
-            switch self {
-            case .daily: return "days"
-            case .weekly: return "weeks"
-            case .monthly: return "months"
-            case .yearly: return "years"
+            case .weeks: return "Weeks"
+            case .months: return "Months"
+            case .years: return "Years"
             }
         }
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section("Pattern Type") {
-                    Picker("Repeat", selection: $patternType) {
-                        ForEach(PatternType.allCases, id: \.self) { type in
-                            Text(type.displayName).tag(type)
+        VStack(spacing: 20) {
+            // Header
+            Text("Recurring Pattern")
+                .font(.headline)
+                .padding(.top)
+            
+            // Pattern Selection
+            VStack(spacing: 16) {
+                ForEach(RecurringOption.allCases) { option in
+                    Button(action: { selectedOption = option }) {
+                        HStack {
+                            Text(displayName(for: option))
+                                .foregroundColor(selectedOption == option ? .white : .primary)
+                                .multilineTextAlignment(.leading)
+                            
+                            Spacer()
+                            
+                            if selectedOption == option {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.white)
+                            }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(selectedOption == option ? Color.blue : Color(.systemGray6))
+                        )
                     }
-                    .pickerStyle(SegmentedPickerStyle())
+                    .buttonStyle(PlainButtonStyle())
                 }
-                
-                Section("Interval") {
-                    Stepper("Every \(interval) \(patternType.unitName)", value: $interval, in: 1...30)
+            }
+            
+            // Custom Interval Section
+            if selectedOption == .custom {
+                VStack(spacing: 12) {
+                    HStack {
+                        Text("Every")
+                        Stepper("\(customInterval)", value: $customInterval, in: 1...30)
+                            .labelsHidden()
+                        Picker("Unit", selection: $customUnit) {
+                            ForEach(CustomUnit.allCases) { unit in
+                                Text(unit.displayName).tag(unit)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                    .padding(.horizontal, 16)
                 }
-                
-                if patternType == .weekly {
-                    Section("Days of Week") {
+            }
+            
+            // Day Selection Section (Only for Every Day)
+            if selectedOption == .everyDay {
+                VStack(spacing: 12) {
+                    Text("Select Days")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                         ForEach(0..<7, id: \.self) { day in
-                            let dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][day]
-                            Toggle(dayName, isOn: Binding(
-                                get: { selectedDays.contains(day) },
-                                set: { isSelected in
-                                    if isSelected {
-                                        selectedDays.insert(day)
-                                    } else {
-                                        selectedDays.remove(day)
-                                    }
+                            let dayName = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day]
+                            Button(action: {
+                                if selectedDays.contains(day) {
+                                    selectedDays.remove(day)
+                                } else {
+                                    selectedDays.insert(day)
                                 }
-                            ))
+                            }) {
+                                Text(dayName)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(selectedDays.contains(day) ? .white : .primary)
+                                    .frame(width: 50, height: 30)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 15)
+                                            .fill(selectedDays.contains(day) ? Color.blue : Color(.systemGray6))
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
+                    .padding(.horizontal, 16)
                 }
             }
-            .navigationTitle("Recurring Pattern")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+            
+            Spacer()
+            
+            // Action Buttons
+            HStack(spacing: 16) {
+                Button("Cancel") {
+                    dismiss()
                 }
+                .foregroundColor(.secondary)
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        savePattern()
-                    }
-                    .disabled(patternType == .weekly && selectedDays.isEmpty)
+                Button("Save") {
+                    savePattern()
                 }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(selectedOption == .everyDay && selectedDays.isEmpty ? Color.gray : Color.blue)
+                )
+                .disabled(selectedOption == .everyDay && selectedDays.isEmpty)
             }
+            .padding(.bottom)
         }
+        .frame(width: 350, height: 500)
     }
     
     private func savePattern() {
         let pattern: RecurringPattern
         
-        switch patternType {
-        case .daily:
-            pattern = .daily(interval: interval)
-        case .weekly:
-            pattern = .weekly(interval: interval, days: selectedDays)
-        case .monthly:
-            pattern = .monthly(interval: interval)
+        switch selectedOption {
+        case .everyDay:
+            pattern = .daily(interval: 1)
+        case .everyWeek:
+            pattern = .weekly(interval: 1, days: selectedDays)
+        case .everyMonth:
+            pattern = .monthly(interval: 1)
         case .yearly:
-            pattern = .yearly(interval: interval)
+            pattern = .yearly(interval: 1)
+        case .custom:
+            switch customUnit {
+            case .weeks:
+                pattern = .weekly(interval: customInterval, days: selectedDays.isEmpty ? [1] : selectedDays)
+            case .months:
+                pattern = .monthly(interval: customInterval)
+            case .years:
+                pattern = .yearly(interval: customInterval)
+            }
         }
         
         recurringPattern = pattern
@@ -2171,6 +2382,47 @@ struct EditAlarmView: View {
         
         viewModel.updateAlarm(updatedAlarm)
         dismiss()
+    }
+}
+
+// MARK: - Notification Interval Picker View
+struct NotificationIntervalPickerView: View {
+    @Binding var selectedInterval: NotificationInterval
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                Text("Select Notification Interval")
+                    .font(.headline)
+                    .padding()
+                
+                Picker("Notification Interval", selection: $selectedInterval) {
+                    ForEach(NotificationInterval.allCases, id: \.self) { interval in
+                        Text(interval.displayName).tag(interval)
+                    }
+                }
+                .pickerStyle(WheelPickerStyle())
+                .frame(height: 200)
+                
+                Spacer()
+            }
+            .navigationTitle("Notification Interval")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -10,7 +10,7 @@
 
 ### **Advanced Data Input Screen**
 - **Modern Form Design**: Sections-based layout (Todo Details, Date & Time, Priority & Category, Recurring)
-- **Custom Calendar Picker**: Monthly calendar view with navigation
+- **Simple Date Picker**: Clean DatePicker interface for date and time selection
 - **Enhanced Time Selection**: Dedicated time picker wheel interface
 - **Visual Priority Selection**: Color-coded priority buttons with visual feedback
 - **Category Creation**: User can create custom categories with icons and colors
@@ -26,6 +26,19 @@
 - **Flexible Scheduling**: Support for recurring and one-time alarms
 - **User Notifications**: Rich notification system with custom sounds
 - **Alarm Management**: Create, edit, and delete persistent alarms
+
+### **Enhanced Recurring Patterns**
+- **Contextual Options**: Shows actual selected date information
+- **Every Week (On Friday)**: Uses actual day of week from selected date
+- **Every Month (On the 9th)**: Shows actual date number with ordinal suffix
+- **Every Year (On Sept. 9)**: Shows month abbreviation and date
+- **Compact UI**: Popup interface instead of scrolling sheet
+
+### **Time Format Support**
+- **12/24 Hour Toggle**: User-selectable time format preference
+- **Global Application**: All time pickers respect user choice
+- **Settings Integration**: Easy toggle in Settings → App → Time Format
+- **Format Options**: 12-hour (2:30 PM) or 24-hour (14:30)
 
 ## 🔧 **Technical Architecture**
 
@@ -225,5 +238,5 @@ struct CustomCategory: Identifiable, Codable {
 ---
 
 *Last Updated: December 26, 2024*
-*Version: 2.2 - Persistent Alarm System Complete*
-*Status: Active Development - Build Successful, Persistent Alarms Implemented*
+*Version: 2.3 - Enhanced UX & Time Format Support*
+*Status: Active Development - Build Successful, Enhanced User Experience Complete*

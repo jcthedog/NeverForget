@@ -1343,6 +1343,8 @@ struct ConvertEventToTodoView: View {
     @State private var alarmEnabled: Bool = false
     @State private var persistentAlarmEnabled: Bool = false
     @State private var reminderTime: Date
+    @State private var showingNotificationIntervalPicker = false
+    @State private var notificationInterval: NotificationInterval = .every15Minutes
     
     init(event: GoogleCalendarEvent, viewModel: DashboardViewModel) {
         self.event = event
@@ -1423,8 +1425,12 @@ struct ConvertEventToTodoView: View {
                             HStack {
                                 Text("Notification Interval")
                                 Spacer()
-                                Text("Every 10 minutes")
-                                    .foregroundColor(.secondary)
+                                Button(action: {
+                                    showingNotificationIntervalPicker = true
+                                }) {
+                                    Text(notificationInterval.displayName)
+                                        .foregroundColor(.blue)
+                                }
                             }
                             
                             if priority == .urgent {
@@ -1439,7 +1445,13 @@ struct ConvertEventToTodoView: View {
                         }
                         
                         if hasDueDate {
-                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                            if viewModel.use24HourTime {
+                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .environment(\.locale, Locale(identifier: "en_GB"))
+                            } else {
+                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .environment(\.locale, Locale(identifier: "en_US"))
+                            }
                         }
                     }
                 }
@@ -1455,6 +1467,9 @@ struct ConvertEventToTodoView: View {
                     Button("Save") { saveTodo() }
                 }
             }
+            .sheet(isPresented: $showingNotificationIntervalPicker) {
+                NotificationIntervalPickerView(selectedInterval: $notificationInterval)
+            }
         }
     }
     
@@ -1466,7 +1481,7 @@ struct ConvertEventToTodoView: View {
             soundEnabled: true,
             vibrationEnabled: true,
             isPersistentAlarm: persistentAlarmEnabled,
-            persistentAlarmInterval: 600 // 10 minutes
+            persistentAlarmInterval: notificationInterval.timeInterval
         )
         
         let newTodo = Todo(

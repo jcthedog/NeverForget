@@ -142,6 +142,10 @@ Never Forget/
 - **Priority-Based Alarm Defaults** - Urgent priority automatically enables persistent alarms
 - **Notification Management** - Full UserNotifications framework integration
 - **Alarm Action Handling** - Snooze, Complete, and Delete actions
+- **Simplified Calendar Interface** - Replaced complex calendar picker with simple DatePicker
+- **Enhanced Recurring Patterns** - Contextual pattern options with actual date information
+- **Compact Recurring Pattern UI** - Replaced sheet with popup for better UX
+- **12/24 Hour Time Format Support** - User-selectable time format preference
 
 ### **🔄 In Progress**
 - Performance optimization and testing
@@ -153,6 +157,9 @@ Never Forget/
 - **Build Success**: App now compiles and builds successfully on all targets
 - **Persistent Alarm System**: Complete implementation with UserNotifications framework integration
 - **Actor Isolation**: Fixed actor isolation issues in DashboardViewModel for notification handling
+- **Calendar Interface Simplification**: Replaced complex calendar picker with simple DatePicker for better UX
+- **Recurring Pattern Enhancement**: Added contextual pattern options showing actual selected date information
+- **Time Format Support**: Implemented 12/24 hour time format toggle in settings
 
 ### **📋 Planned Features**
 - Recurring todo support
@@ -212,5 +219,5 @@ Never Forget/
 ---
 
 *Last Updated: December 26, 2024*
-*Version: 2.2 - Persistent Alarm System Complete*
-*Status: Active Development - Build Successful, Persistent Alarms Implemented*
+*Version: 2.3 - Enhanced UX & Time Format Support*
+*Status: Active Development - Build Successful, Enhanced User Experience Complete*
