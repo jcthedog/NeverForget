@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import UserNotifications
+import SwiftUI
 
 @MainActor
 class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
@@ -16,6 +17,8 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     @Published var lastSyncTime: String?
     @Published var sampleCalendarEvents: [GoogleCalendarEvent] = []
     @Published var use24HourTime = false
+    
+
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -34,6 +37,8 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
         }
         return formatter.string(from: date)
     }
+    
+
     
     override init() {
         super.init()

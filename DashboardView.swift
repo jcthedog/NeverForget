@@ -1,5 +1,23 @@
 import SwiftUI
 
+// MARK: - Search View
+struct SearchView: View {
+    @ObservedObject var viewModel: DashboardViewModel
+    @State private var searchText = ""
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                Text("Search View - Coming Soon")
+                    .font(.title)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .navigationTitle("Search")
+        }
+    }
+}
+
 struct DashboardView: View {
     @ObservedObject var viewModel: DashboardViewModel
     @StateObject private var googleCalendarService = GoogleCalendarService()
@@ -85,7 +103,17 @@ struct ActiveAlarmsSection: View {
             }
             
             if alarms.isEmpty {
-                EmptyAlarmsView()
+                VStack(spacing: 12) {
+                    Image(systemName: "alarm.slash")
+                        .foregroundColor(.secondary)
+                        .font(.title2)
+                    
+                    Text("No active alarms")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
             } else {
                 ForEach(alarms) { alarm in
                     ActiveAlarmCard(alarm: alarm, viewModel: viewModel)
@@ -93,12 +121,13 @@ struct ActiveAlarmsSection: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
+// MARK: - Active Alarm Card
 struct ActiveAlarmCard: View {
     let alarm: PersistentAlarm
     let viewModel: DashboardViewModel
@@ -169,20 +198,12 @@ struct ActiveAlarmCard: View {
         .actionSheet(isPresented: $showingSnoozeOptions) {
             ActionSheet(
                 title: Text("Snooze Alarm"),
-                message: Text("When should we remind you again?"),
+                message: Text("Choose how long to snooze this alarm"),
                 buttons: [
-                    .default(Text("5 minutes")) {
-                        viewModel.snoozeAlarm(alarm, duration: 5 * 60)
-                    },
-                    .default(Text("15 minutes")) {
-                        viewModel.snoozeAlarm(alarm, duration: 15 * 60)
-                    },
-                    .default(Text("1 hour")) {
-                        viewModel.snoozeAlarm(alarm, duration: 60 * 60)
-                    },
-                    .default(Text("3 hours")) {
-                        viewModel.snoozeAlarm(alarm, duration: 3 * 60 * 60)
-                    },
+                    .default(Text("5 minutes")) { viewModel.snoozeAlarm(alarm, for: 5) },
+                    .default(Text("15 minutes")) { viewModel.snoozeAlarm(alarm, for: 15) },
+                    .default(Text("30 minutes")) { viewModel.snoozeAlarm(alarm, for: 30) },
+                    .default(Text("1 hour")) { viewModel.snoozeAlarm(alarm, for: 60) },
                     .cancel()
                 ]
             )
@@ -201,20 +222,18 @@ struct ActiveAlarmCard: View {
     
     private func formatOverdueTime(_ minutes: Int) -> String {
         if minutes < 60 {
-            return "\(minutes) min late"
+            return "\(minutes) min overdue"
         } else {
             let hours = minutes / 60
             let remainingMinutes = minutes % 60
             if remainingMinutes == 0 {
-                return "\(hours) hour\(hours == 1 ? "" : "s") late"
+                return "\(hours) hour\(hours == 1 ? "" : "s") overdue"
             } else {
-                return "\(hours)h \(remainingMinutes)m late"
+                return "\(hours)h \(remainingMinutes)m overdue"
             }
         }
     }
 }
-
-
 
 // MARK: - Quick Actions Section
 struct QuickActionsSection: View {
@@ -229,7 +248,10 @@ struct QuickActionsSection: View {
                 .font(.headline)
                 .foregroundColor(.blue)
             
-            HStack(spacing: 16) {
+            LazyVGrid(columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible())
+            ], spacing: 12) {
                 QuickActionButton(
                     title: "Add Todo",
                     icon: "plus.circle.fill",
@@ -264,12 +286,13 @@ struct QuickActionsSection: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
+// MARK: - Quick Action Button
 struct QuickActionButton: View {
     let title: String
     let icon: String
@@ -294,7 +317,7 @@ struct QuickActionButton: View {
             .background(Color(.secondarySystemBackground))
             .cornerRadius(12)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -320,70 +343,61 @@ struct TodaysFocusSection: View {
                     .foregroundColor(.purple)
             }
             
-            if total == 0 {
-                EmptyTodosView()
-            } else {
+            if total > 0 {
                 ProgressView(value: Double(completed), total: Double(total))
                     .progressViewStyle(LinearProgressViewStyle(tint: .purple))
                     .scaleEffect(x: 1, y: 2, anchor: .center)
-                
-                Text("\(Int((Double(completed) / Double(total)) * 100))% complete")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                HStack {
-                    Button("View All") {
-                        // Navigate to todos list
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    
-                    Button("Add More") {
-                        // Show add todo
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    
-                    Spacer()
+            }
+            
+            if todos.isEmpty {
+                EmptyTodosView()
+            } else {
+                ForEach(todos.prefix(3)) { todo in
+                    DashboardTodoRowView(todo: todo, viewModel: viewModel)
                 }
                 
-                // Show next 3 upcoming todos
-                if !todos.isEmpty {
-                    VStack(spacing: 8) {
-                        ForEach(Array(todos.prefix(3))) { todo in
-                            UpcomingTodoRow(todo: todo, viewModel: viewModel)
-                        }
+                if todos.count > 3 {
+                    Button("View All \(todos.count) Todos") {
+                        // Navigate to todo list
                     }
+                    .font(.caption)
+                    .foregroundColor(.blue)
                 }
             }
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
+// MARK: - Empty Todos View
 struct EmptyTodosView: View {
     var body: some View {
-        HStack {
+        VStack(spacing: 12) {
             Image(systemName: "plus.circle")
                 .foregroundColor(.purple)
                 .font(.title2)
             
-            Text("No tasks for today. Add your first todo!")
+            Text("No todos for today")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
-            Spacer()
+            Text("Tap the + button to add your first todo")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
         }
-        .padding()
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
         .background(Color(.tertiarySystemBackground))
         .cornerRadius(12)
     }
 }
 
-struct UpcomingTodoRow: View {
+// MARK: - Dashboard Todo Row View
+struct DashboardTodoRowView: View {
     let todo: Todo
     let viewModel: DashboardViewModel
     
@@ -396,52 +410,48 @@ struct UpcomingTodoRow: View {
                     .foregroundColor(todo.isCompleted ? .green : .secondary)
                     .font(.title3)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PlainButtonStyle())
             
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(todo.title)
                     .font(.subheadline)
+                    .fontWeight(.medium)
                     .foregroundColor(todo.isCompleted ? .secondary : .primary)
                     .strikethrough(todo.isCompleted)
                 
-                HStack {
-                    Text(todo.category.icon)
+                HStack(spacing: 8) {
+                    if todo.priority != .none {
+                        Text(todo.priority.displayName)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                    
                     Text(todo.category.displayName)
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Text(todo.priority.icon)
-                        .font(.caption)
                 }
             }
             
             Spacer()
             
-            if let dueDate = todo.dueDate {
-                Text(formatTime(dueDate))
+            if todo.alarmSettings.isEnabled {
+                Image(systemName: "alarm")
+                    .foregroundColor(.blue)
                     .font(.caption)
-                    .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 4)
     }
-    
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
 }
-
-
-
-
 
 // MARK: - Google Calendar Status Section
 struct GoogleCalendarStatusSection: View {
     @ObservedObject var service: GoogleCalendarService
+    @State private var errorMessage: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -449,66 +459,49 @@ struct GoogleCalendarStatusSection: View {
                 .font(.headline)
                 .foregroundColor(.purple)
             
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Image(systemName: service.isAuthenticated ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundColor(service.isAuthenticated ? .green : .red)
-                    
+            HStack {
+                Image(systemName: service.isAuthenticated ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundColor(service.isAuthenticated ? .green : .red)
+                    .font(.title2)
+                
+                VStack(alignment: .leading, spacing: 4) {
                     Text(service.isAuthenticated ? "Connected to Google Calendar" : "Not connected to Google Calendar")
                         .font(.subheadline)
                         .foregroundColor(service.isAuthenticated ? .green : .red)
                     
-                    Spacer()
                 }
                 
-                if service.isLoading {
-                    HStack {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                        Text("Connecting...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                Spacer()
+                
+                if !service.isAuthenticated {
+                    Button("Connect") {
+                        service.signIn()
                     }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
                 }
-                
-                if let errorMessage = service.errorMessage {
-                    Text("Error: \(errorMessage)")
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(8)
-                }
-                
-                if service.isAuthenticated {
-                    Text("Calendars available: \(service.calendars.count)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+            }
+            
+            if let errorMessage = errorMessage {
+                Text("Error: \(errorMessage)")
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(8)
             }
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.white)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 
-struct SearchView: View {
-    @ObservedObject var viewModel: DashboardViewModel
-    
-    var body: some View {
-        NavigationView {
-            Text("Search View")
-                .navigationTitle("Search")
-        }
+// MARK: - Preview
+struct DashboardView_Previews: PreviewProvider {
+    static var previews: some View {
+        DashboardView(viewModel: DashboardViewModel())
     }
-}
-
-
-
-#Preview {
-    let viewModel = DashboardViewModel()
-    return DashboardView(viewModel: viewModel)
 }

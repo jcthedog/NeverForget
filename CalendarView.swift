@@ -151,7 +151,7 @@ struct CalendarView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color.blue)
+                        .background(.blue)
                         .cornerRadius(8)
                     }
                     
@@ -166,7 +166,7 @@ struct CalendarView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color.purple)
+                        .background(.purple)
                         .cornerRadius(8)
                     }
                 }

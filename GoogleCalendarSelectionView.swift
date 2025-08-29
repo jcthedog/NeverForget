@@ -128,7 +128,7 @@ struct GoogleCalendarSelectionView: View {
                 .foregroundColor(.white)
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Color.blue)
+                .background(.blue)
                 .cornerRadius(12)
             }
             .padding(.horizontal, 40)

@@ -1,5 +1,7 @@
 import SwiftUI
 
+
+
 // MARK: - Notification Interval Enum
 enum NotificationInterval: String, CaseIterable, Identifiable {
     case every5Minutes = "5min"
@@ -259,7 +261,7 @@ struct TodoRowView: View {
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 2)
-                        .background(Color.orange.opacity(0.1))
+                        .background(Color.orange.opacity(0.15))
                         .cornerRadius(8)
                     }
                 }
