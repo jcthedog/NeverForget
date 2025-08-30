@@ -35,6 +35,10 @@
 	<true/>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>This app needs access to documents to import ICS calendar files.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses location services to provide automatic location suggestions when creating events.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Location access helps provide accurate address suggestions for your events.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

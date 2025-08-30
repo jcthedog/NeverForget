@@ -2468,11 +2468,62 @@ struct CreateCalendarEventView: View {
     @State private var selectedCalendar: String = "primary"
     @State private var recurringPattern: RecurringPattern?
     
+    // Location suggestions
+    @State private var showingLocationSuggestions = false
+    @State private var locationSuggestions: [String] = []
+    @State private var isSearchingLocation = false
+    
     init(viewModel: DashboardViewModel, preselectedDate: Date) {
         self.viewModel = viewModel
         self.preselectedDate = preselectedDate
         self._startDate = State(initialValue: preselectedDate)
         self._endDate = State(initialValue: preselectedDate.addingTimeInterval(3600)) // 1 hour later
+    }
+    
+    // MARK: - Location Search
+    private func searchLocations(query: String) {
+        isSearchingLocation = true
+        
+        // Simulate location search with common place types
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.isSearchingLocation = false
+            
+            let commonPlaces = [
+                "Coffee Shop",
+                "Restaurant",
+                "Office Building",
+                "Shopping Mall",
+                "Park",
+                "Gym",
+                "Library",
+                "Hospital",
+                "School",
+                "Airport"
+            ]
+            
+            // Filter places that contain the query
+            let filtered = commonPlaces.filter { place in
+                place.lowercased().contains(query.lowercased())
+            }
+            
+            // Add some generic suggestions
+            var suggestions = filtered
+            if query.lowercased().contains("coffee") || query.lowercased().contains("cafe") {
+                suggestions.append("Starbucks")
+                suggestions.append("Local Coffee Shop")
+            }
+            if query.lowercased().contains("restaurant") || query.lowercased().contains("food") {
+                suggestions.append("McDonald's")
+                suggestions.append("Local Restaurant")
+            }
+            if query.lowercased().contains("office") || query.lowercased().contains("work") {
+                suggestions.append("Downtown Office")
+                suggestions.append("Business Center")
+            }
+            
+            // Limit to 5 suggestions
+            self.locationSuggestions = Array(suggestions.prefix(5))
+        }
     }
     
     var body: some View {
@@ -2500,8 +2551,85 @@ struct CreateCalendarEventView: View {
                             TextField("Description", text: $eventDescription, axis: .vertical)
                                 .textFieldStyle(PastelTextFieldStyle())
                             
-                            TextField("Location", text: $location)
-                                .textFieldStyle(PastelTextFieldStyle())
+                            // Enhanced Location Field with Suggestions
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Image(systemName: "location.fill")
+                                        .foregroundColor(PastelTheme.softMint)
+                                        .font(.system(size: 16))
+                                    
+                                    TextField("Location (optional)", text: $location)
+                                        .textFieldStyle(PastelTextFieldStyle())
+                                        .onChange(of: location) { _, newValue in
+                                            if newValue.count >= 3 {
+                                                searchLocations(query: newValue)
+                                                showingLocationSuggestions = true
+                                            } else {
+                                                showingLocationSuggestions = false
+                                                locationSuggestions = []
+                                            }
+                                        }
+                                        .onTapGesture {
+                                            if !location.isEmpty && location.count >= 3 {
+                                                showingLocationSuggestions = true
+                                            }
+                                        }
+                                }
+                                
+                                // Location Suggestions Dropdown
+                                if showingLocationSuggestions && !locationSuggestions.isEmpty {
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        ForEach(locationSuggestions, id: \.self) { suggestion in
+                                            Button(action: {
+                                                location = suggestion
+                                                showingLocationSuggestions = false
+                                                locationSuggestions = []
+                                            }) {
+                                                HStack(spacing: 12) {
+                                                    Image(systemName: "mappin.circle.fill")
+                                                        .foregroundColor(PastelTheme.primary)
+                                                        .font(.system(size: 16))
+                                                    
+                                                    Text(suggestion)
+                                                        .font(.system(size: 14, weight: .medium))
+                                                        .foregroundColor(PastelTheme.primaryText)
+                                                        .lineLimit(2)
+                                                    
+                                                    Spacer()
+                                                }
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 12)
+                                                .background(Color.white.opacity(0.9))
+                                                .cornerRadius(8)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            
+                                            if suggestion != locationSuggestions.last {
+                                                Divider()
+                                                    .padding(.leading, 44)
+                                            }
+                                        }
+                                    }
+                                    .background(PastelTheme.cardGradient)
+                                    .cornerRadius(12)
+                                    .shadow(color: PastelTheme.shadow.opacity(0.3), radius: 4, x: 0, y: 2)
+                                    .padding(.top, 4)
+                                }
+                                
+                                // Search Status Indicators
+                                if isSearchingLocation {
+                                    HStack(spacing: 8) {
+                                        ProgressView()
+                                            .scaleEffect(0.8)
+                                            .progressViewStyle(CircularProgressViewStyle(tint: PastelTheme.primary))
+                                        
+                                        Text("Searching locations...")
+                                            .font(.caption)
+                                            .foregroundColor(PastelTheme.secondaryText)
+                                    }
+                                    .padding(.leading, 44)
+                                }
+                            }
                             
                             Toggle("All Day Event", isOn: $isAllDay)
                                 .toggleStyle(PastelToggleStyle())
