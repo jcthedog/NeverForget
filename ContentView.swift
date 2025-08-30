@@ -124,31 +124,41 @@ struct TodoListView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Filter Pills
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(TodoFilter.allCases, id: \.self) { filter in
-                            FilterPill(
-                                filter: filter,
-                                isSelected: selectedFilter == filter,
-                                action: { selectedFilter = filter }
-                            )
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.vertical, 8)
+            ZStack {
+                // Beautiful light beige background matching DashboardView
+                LinearGradient(
+                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                    .ignoresSafeArea()
                 
-                // Todo List
-                List {
-                    ForEach(filteredTodos) { todo in
-                        TodoRowView(todo: todo, viewModel: viewModel)
+                VStack(spacing: 0) {
+                    // Filter Pills
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(TodoFilter.allCases, id: \.self) { filter in
+                                FilterPill(
+                                    filter: filter,
+                                    isSelected: selectedFilter == filter,
+                                    action: { selectedFilter = filter }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
                     }
-                    .onDelete(perform: deleteTodos)
+                    .padding(.vertical, 8)
+                    
+                    // Todo List
+                    List {
+                        ForEach(filteredTodos) { todo in
+                            TodoRowView(todo: todo, viewModel: viewModel)
+                        }
+                        .onDelete(perform: deleteTodos)
+                    }
+                    .listStyle(PlainListStyle())
+                    .searchable(text: $searchText, prompt: "Search todos...")
                 }
-                .listStyle(PlainListStyle())
-                .searchable(text: $searchText, prompt: "Search todos...")
             }
             .navigationTitle("Todos")
             .navigationBarTitleDisplayMode(.large)
@@ -321,7 +331,16 @@ struct AlarmCenterView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
+            ZStack {
+                // Beautiful light beige background matching other screens
+                LinearGradient(
+                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
                 // Quick Stats
                 HStack(spacing: 20) {
                     StatCard(
@@ -367,7 +386,8 @@ struct AlarmCenterView: View {
                 }
                 .listStyle(PlainListStyle())
             }
-            .navigationTitle("Alarms")
+        }
+        .navigationTitle("Alarms")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

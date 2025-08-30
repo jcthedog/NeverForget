@@ -69,5 +69,9 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app needs access to documents to import ICS calendar files.</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

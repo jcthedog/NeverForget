@@ -41,8 +41,12 @@ struct CalendarView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Beautiful pastel background
-                PastelTheme.primaryGradient
+                // Beautiful light beige background matching other screens
+                LinearGradient(
+                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -72,6 +76,28 @@ struct CalendarView: View {
                         }
                         .padding(.horizontal)
                         .padding(.vertical, 8)
+                        
+                        // Go to Today Button
+                        HStack {
+                            Spacer()
+                            Button(action: goToToday) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "sun.max.fill")
+                                        .font(.caption)
+                                    Text("Go to Today")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.orange)
+                                .cornerRadius(12)
+                                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            }
+                            Spacer()
+                        }
+                        .padding(.bottom, 8)
                         
                         // View Mode Selector (Google Calendar Style)
                         HStack(spacing: 0) {
@@ -178,9 +204,9 @@ struct CalendarView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(PastelTheme.softMint)
+                        .background(Color.green)
                         .cornerRadius(8)
-                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                     
                     Button(action: { showingEventImport = true }) {
@@ -194,9 +220,9 @@ struct CalendarView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(PastelTheme.softBlue)
+                        .background(Color.blue)
                         .cornerRadius(8)
-                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                     
                     Button(action: { showingAddTodo = true }) {
@@ -210,15 +236,15 @@ struct CalendarView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(PastelTheme.softLavender)
+                        .background(Color.purple)
                         .cornerRadius(8)
-                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                     }
                 }
                 .padding()
-                .background(PastelTheme.sectionBackground)
+                .background(Color.white)
                 .cornerRadius(12)
-                .shadow(color: PastelTheme.shadowLight, radius: 4, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
             }
             
             // Close the outer VStack
@@ -268,6 +294,10 @@ struct CalendarView: View {
         if let newDate = calendar.date(byAdding: .month, value: 1, to: currentMonth) {
             currentMonth = newDate
         }
+    }
+    
+    private func goToToday() {
+        currentMonth = calendar.startOfDay(for: Date())
     }
     
     private func loadEventsForDate(_ date: Date) {
@@ -360,74 +390,69 @@ struct GoogleCalendarMonthView: View {
             )
             
             // Calendar grid - Google Calendar style with grid lines and Pastel Theme
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: daysInWeek), spacing: 0) {
-                ForEach(Array(daysInMonth.enumerated()), id: \.offset) { index, date in
-                    if let date = date {
-                        GoogleCalendarDayCell(
-                            date: date,
-                            isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
-                            isToday: calendar.isDateInToday(date),
-                            events: eventsForDate(date),
-                            todos: todosForDate(date),
-                            onTap: { selectedDate = date },
-                            onEventTap: onEventTap,
-                            onCreateEvent: onCreateEvent,
-                            onCreateTodo: onCreateTodo
-                        )
-                        .overlay(
-                            // Right border for each cell
-                            Rectangle()
-                                .fill(PastelTheme.gridLine.opacity(0.3))
-                                .frame(width: 0.5)
-                                .offset(x: 35)
-                            , alignment: .trailing
-                        )
-                        .overlay(
-                            // Bottom border for each cell
-                            Rectangle()
-                                .fill(PastelTheme.gridLine.opacity(0.3))
-                                .frame(height: 0.5)
-                                .offset(y: 39.5)
-                            , alignment: .bottom
-                        )
-                    } else {
-                        // Empty cell for padding with grid lines
-                        Color.clear
-                            .frame(height: 80)
-                            .overlay(
-                                // Right border for empty cells
-                                Rectangle()
-                                    .fill(PastelTheme.gridLine.opacity(0.3))
-                                    .frame(width: 0.5)
-                                    .offset(x: 35)
-                                , alignment: .trailing
+            ZStack {
+                // Grid lines background layer (drawn first, behind all cells)
+                VStack(spacing: 0) {
+                    // Horizontal grid lines
+                    ForEach(0..<7, id: \.self) { row in
+                        Rectangle()
+                            .fill(PastelTheme.gridLine.opacity(0.8))
+                            .frame(height: 0.5)
+                            .frame(maxWidth: .infinity)
+                        if row < 6 { Spacer() }
+                    }
+                }
+                .frame(height: 480) // 6 rows * 80 height
+                .offset(y: 40) // Start after header
+                
+                // Vertical grid lines
+                HStack(spacing: 0) {
+                    ForEach(0..<8, id: \.self) { col in
+                        Rectangle()
+                            .fill(PastelTheme.gridLine.opacity(0.8))
+                            .frame(width: 0.5)
+                            .frame(maxHeight: .infinity)
+                        if col < 7 { Spacer() }
+                    }
+                }
+                .frame(height: 480)
+                .offset(y: 40)
+                
+                // Date cells (drawn on top of grid lines)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: daysInWeek), spacing: 0) {
+                    ForEach(Array(daysInMonth.enumerated()), id: \.offset) { index, date in
+                        if let date = date {
+                            GoogleCalendarDayCell(
+                                date: date,
+                                isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
+                                isToday: calendar.isDateInToday(date),
+                                events: eventsForDate(date),
+                                todos: todosForDate(date),
+                                onTap: { selectedDate = date },
+                                onEventTap: onEventTap,
+                                onCreateEvent: onCreateEvent,
+                                onCreateTodo: onCreateTodo
                             )
-                            .overlay(
-                                // Bottom border for empty cells
-                                Rectangle()
-                                    .fill(PastelTheme.gridLine.opacity(0.3))
-                                    .frame(height: 0.5)
-                                    .offset(y: 39.5)
-                                , alignment: .bottom
-                            )
+                        } else {
+                            // Empty cell for padding
+                            Color.clear
+                                .frame(height: 80)
+                        }
                     }
                 }
             }
             .background(Color.white)
             .overlay(
-                // Left border for the entire grid
-                Rectangle()
-                    .fill(PastelTheme.gridLine.opacity(0.3))
-                    .frame(width: 0.5)
-                    .offset(x: -0.25)
-                , alignment: .leading
+                // Outer border for the entire calendar
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(PastelTheme.gridLine.opacity(0.4), lineWidth: 0.5)
             )
         }
         .background(Color.white)
         .overlay(
             // Outer border for the entire calendar
             RoundedRectangle(cornerRadius: 16)
-                .stroke(PastelTheme.gridLine.opacity(0.2), lineWidth: 0.5)
+                .stroke(PastelTheme.gridLine.opacity(0.4), lineWidth: 0.5)
         )
     }
     
@@ -539,7 +564,7 @@ struct GoogleCalendarDayCell: View {
             }
             .frame(height: 80)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? PastelTheme.softLavender.opacity(0.3) : PastelTheme.inputBackground)
+            .background(isSelected ? PastelTheme.softLavender.opacity(0.3) : Color.white)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .stroke(isSelected ? PastelTheme.primary : Color.clear, lineWidth: 2)
@@ -833,8 +858,9 @@ struct DateEventsPopup: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(PastelTheme.softMint)
+                    .background(Color.green)
                     .cornerRadius(8)
+                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                 }
                 
                 Button(action: onCreateTodo) {
@@ -848,8 +874,9 @@ struct DateEventsPopup: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(PastelTheme.softLavender)
+                    .background(Color.blue)
                     .cornerRadius(8)
+                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                 }
             }
         }
