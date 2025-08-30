@@ -2467,6 +2467,7 @@ struct CreateCalendarEventView: View {
     @State private var isAllDay = false
     @State private var selectedCalendar: String = "primary"
     @State private var recurringPattern: RecurringPattern?
+    @State private var showingRecurringPatternView = false
     
     // Location suggestions
     @State private var showingLocationSuggestions = false
@@ -2482,10 +2483,16 @@ struct CreateCalendarEventView: View {
     
     // MARK: - Location Search
     private func searchLocations(query: String) {
+        guard query.count >= 3 else {
+            locationSuggestions = []
+            showingLocationSuggestions = false
+            return
+        }
+        
         isSearchingLocation = true
         
         // Simulate location search with common place types
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.isSearchingLocation = false
             
             let commonPlaces = [
@@ -2498,7 +2505,12 @@ struct CreateCalendarEventView: View {
                 "Library",
                 "Hospital",
                 "School",
-                "Airport"
+                "Airport",
+                "Gas Station",
+                "Bank",
+                "Post Office",
+                "Pharmacy",
+                "Supermarket"
             ]
             
             // Filter places that contain the query
@@ -2506,23 +2518,37 @@ struct CreateCalendarEventView: View {
                 place.lowercased().contains(query.lowercased())
             }
             
-            // Add some generic suggestions
+            // Add some generic suggestions based on query
             var suggestions = filtered
             if query.lowercased().contains("coffee") || query.lowercased().contains("cafe") {
                 suggestions.append("Starbucks")
                 suggestions.append("Local Coffee Shop")
+                suggestions.append("Coffee Bean")
             }
             if query.lowercased().contains("restaurant") || query.lowercased().contains("food") {
                 suggestions.append("McDonald's")
                 suggestions.append("Local Restaurant")
+                suggestions.append("Pizza Place")
             }
             if query.lowercased().contains("office") || query.lowercased().contains("work") {
                 suggestions.append("Downtown Office")
                 suggestions.append("Business Center")
+                suggestions.append("Corporate Building")
+            }
+            if query.lowercased().contains("shop") || query.lowercased().contains("store") {
+                suggestions.append("Local Store")
+                suggestions.append("Shopping Center")
+                suggestions.append("Retail Store")
             }
             
-            // Limit to 5 suggestions
-            self.locationSuggestions = Array(suggestions.prefix(5))
+            // Always show some suggestions if we have a query
+            if suggestions.isEmpty {
+                suggestions = ["\(query) Location", "Near \(query)", "\(query) Area"]
+            }
+            
+            // Limit to 6 suggestions
+            self.locationSuggestions = Array(suggestions.prefix(6))
+            self.showingLocationSuggestions = true
         }
     }
     
@@ -2535,6 +2561,12 @@ struct CreateCalendarEventView: View {
                 
                 ScrollView {
                     VStack(spacing: 20) {
+                        // Background tap to dismiss location suggestions
+                        Color.clear
+                            .frame(height: 1)
+                            .onTapGesture {
+                                showingLocationSuggestions = false
+                            }
                         // Event Details Card
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
@@ -2563,7 +2595,6 @@ struct CreateCalendarEventView: View {
                                         .onChange(of: location) { _, newValue in
                                             if newValue.count >= 3 {
                                                 searchLocations(query: newValue)
-                                                showingLocationSuggestions = true
                                             } else {
                                                 showingLocationSuggestions = false
                                                 locationSuggestions = []
@@ -2573,6 +2604,10 @@ struct CreateCalendarEventView: View {
                                             if !location.isEmpty && location.count >= 3 {
                                                 showingLocationSuggestions = true
                                             }
+                                        }
+                                        .onSubmit {
+                                            // Hide suggestions when user submits
+                                            showingLocationSuggestions = false
                                         }
                                 }
                                 
@@ -2614,6 +2649,9 @@ struct CreateCalendarEventView: View {
                                     .cornerRadius(12)
                                     .shadow(color: PastelTheme.shadow.opacity(0.3), radius: 4, x: 0, y: 2)
                                     .padding(.top, 4)
+                                    .onTapGesture {
+                                        // Prevent tap from dismissing suggestions when tapping on the dropdown itself
+                                    }
                                 }
                                 
                                 // Search Status Indicators
@@ -2699,7 +2737,7 @@ struct CreateCalendarEventView: View {
                                     .foregroundColor(PastelTheme.primaryText)
                             }
                             
-                            // Simple recurring options for now
+                            // Enhanced recurring pattern system (same as Todo screen)
                             VStack(spacing: 12) {
                                 Button("No Repeat") {
                                     recurringPattern = nil
@@ -2720,7 +2758,21 @@ struct CreateCalendarEventView: View {
                                     recurringPattern = .monthly(interval: 1)
                                 }
                                 .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .monthly(interval: 1)))
+                                
+                                Button("Custom Pattern") {
+                                    // Show the enhanced recurring pattern view
+                                    showingRecurringPatternView = true
+                                }
+                                .buttonStyle(PastelButtonStyle(isSelected: false))
                             }
+                        }
+                        .sheet(isPresented: $showingRecurringPatternView) {
+                            RecurringPatternView(
+                                recurringPattern: $recurringPattern,
+                                selectedDate: startDate,
+                                viewModel: viewModel
+                            )
+                            .presentationDetents([.medium, .large])
                         }
                         .padding(20)
                         .background(PastelTheme.cardGradient)
