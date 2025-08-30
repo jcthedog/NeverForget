@@ -2796,8 +2796,9 @@ struct CreateCalendarEventView: View {
                         createEvent()
                     }
                     .disabled(eventTitle.isEmpty)
-                    .foregroundColor(PastelTheme.softMint)
+                    .foregroundColor(eventTitle.isEmpty ? PastelTheme.secondaryText : PastelTheme.softMint)
                     .fontWeight(.semibold)
+                    .opacity(eventTitle.isEmpty ? 0.6 : 1.0)
                 }
             }
         }
