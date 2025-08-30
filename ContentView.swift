@@ -1,3 +1,4 @@
+
 import SwiftUI
 
 
@@ -2430,4 +2431,243 @@ struct NotificationIntervalPickerView: View {
 
 #Preview {
     ContentView()
+}
+
+// MARK: - Create Calendar Event View
+struct CreateCalendarEventView: View {
+    @ObservedObject var viewModel: DashboardViewModel
+    let preselectedDate: Date
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var eventTitle = ""
+    @State private var eventDescription = ""
+    @State private var startDate: Date
+    @State private var endDate: Date
+    @State private var location = ""
+    @State private var isAllDay = false
+    @State private var selectedCalendar: String = "primary"
+    @State private var recurringPattern: RecurringPattern?
+    
+    init(viewModel: DashboardViewModel, preselectedDate: Date) {
+        self.viewModel = viewModel
+        self.preselectedDate = preselectedDate
+        self._startDate = State(initialValue: preselectedDate)
+        self._endDate = State(initialValue: preselectedDate.addingTimeInterval(3600)) // 1 hour later
+    }
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                // Beautiful pastel background
+                PastelTheme.primaryGradient
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Event Details Card
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Image(systemName: "calendar.badge.plus")
+                                    .foregroundColor(PastelTheme.primary)
+                                Text("Event Details")
+                                    .font(.headline)
+                                    .foregroundColor(PastelTheme.primaryText)
+                            }
+                            
+                            TextField("Event Title", text: $eventTitle)
+                                .textFieldStyle(PastelTextFieldStyle())
+                            
+                            TextField("Description", text: $eventDescription, axis: .vertical)
+                                .textFieldStyle(PastelTextFieldStyle())
+                            
+                            TextField("Location", text: $location)
+                                .textFieldStyle(PastelTextFieldStyle())
+                            
+                            Toggle("All Day Event", isOn: $isAllDay)
+                                .toggleStyle(PastelToggleStyle())
+                        }
+                        .padding(20)
+                        .background(PastelTheme.cardGradient)
+                        .cornerRadius(16)
+                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
+                        
+                        // Date & Time Card
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Image(systemName: "clock")
+                                    .foregroundColor(PastelTheme.softMint)
+                                Text("Date & Time")
+                                    .font(.headline)
+                                    .foregroundColor(PastelTheme.primaryText)
+                            }
+                            
+                            if isAllDay {
+                                DatePicker("Date", selection: $startDate, displayedComponents: .date)
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .accentColor(PastelTheme.primary)
+                            } else {
+                                DatePicker("Start Time", selection: $startDate)
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .accentColor(PastelTheme.primary)
+                                DatePicker("End Time", selection: $endDate)
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .accentColor(PastelTheme.primary)
+                            }
+                        }
+                        .padding(20)
+                        .background(PastelTheme.cardGradient)
+                        .cornerRadius(16)
+                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
+                        
+                        // Calendar Selection Card
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Image(systemName: "calendar")
+                                    .foregroundColor(PastelTheme.softBlue)
+                                Text("Calendar")
+                                    .font(.headline)
+                                    .foregroundColor(PastelTheme.primaryText)
+                            }
+                            
+                            Picker("Calendar", selection: $selectedCalendar) {
+                                Text("Primary Calendar").tag("primary")
+                                // Add more calendar options here when available
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                            .accentColor(PastelTheme.primary)
+                        }
+                        .padding(20)
+                        .background(PastelTheme.cardGradient)
+                        .cornerRadius(16)
+                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
+                        
+                        // Recurring Pattern Card
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Image(systemName: "repeat")
+                                    .foregroundColor(PastelTheme.softPeach)
+                                Text("Recurring")
+                                    .font(.headline)
+                                    .foregroundColor(PastelTheme.primaryText)
+                            }
+                            
+                            // Simple recurring options for now
+                            VStack(spacing: 12) {
+                                Button("No Repeat") {
+                                    recurringPattern = nil
+                                }
+                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == nil))
+                                
+                                Button("Every Day") {
+                                    recurringPattern = .daily(interval: 1)
+                                }
+                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .daily(interval: 1)))
+                                
+                                Button("Every Week") {
+                                    recurringPattern = .weekly(interval: 1, days: [])
+                                }
+                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .weekly(interval: 1, days: [])))
+                                
+                                Button("Every Month") {
+                                    recurringPattern = .monthly(interval: 1)
+                                }
+                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .monthly(interval: 1)))
+                            }
+                        }
+                        .padding(20)
+                        .background(PastelTheme.cardGradient)
+                        .cornerRadius(16)
+                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
+                    }
+                    .padding(20)
+                }
+            }
+            .navigationTitle("New Event")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .foregroundColor(PastelTheme.primary)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Create") {
+                        createEvent()
+                    }
+                    .disabled(eventTitle.isEmpty)
+                    .foregroundColor(PastelTheme.softMint)
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+    
+    private func createEvent() {
+        // For now, just create a todo from this event
+        // Later we'll implement actual Google Calendar event creation
+        let todo = Todo(
+            title: eventTitle,
+            description: eventDescription.isEmpty ? nil : eventDescription,
+            priority: .medium,
+            dueDate: startDate,
+            category: .work // Default to work, could be enhanced
+        )
+        
+        viewModel.addTodo(todo)
+        dismiss()
+    }
+}
+
+// MARK: - Pastel UI Components
+struct PastelTextFieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .padding(12)
+            .background(PastelTheme.inputBackground)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
+            )
+    }
+}
+
+struct PastelToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.label
+            Spacer()
+            RoundedRectangle(cornerRadius: 16)
+                .fill(configuration.isOn ? PastelTheme.softMint : PastelTheme.inputBorder)
+                .frame(width: 50, height: 30)
+                .overlay(
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 26, height: 26)
+                        .offset(x: configuration.isOn ? 10 : -10)
+                        .animation(.easeInOut(duration: 0.2), value: configuration.isOn)
+                )
+                .onTapGesture {
+                    configuration.isOn.toggle()
+                }
+        }
+    }
+}
+
+struct PastelButtonStyle: ButtonStyle {
+    let isSelected: Bool
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(isSelected ? PastelTheme.primary : PastelTheme.inputBackground)
+            .foregroundColor(isSelected ? .white : PastelTheme.primaryText)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? PastelTheme.primary : PastelTheme.inputBorder, lineWidth: 0.5)
+            )
+    }
 }

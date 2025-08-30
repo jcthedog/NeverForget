@@ -28,31 +28,41 @@ struct DashboardView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Active Alarms Section
-                    ActiveAlarmsSection(alarms: viewModel.activeAlarms, viewModel: viewModel)
-                    
-                    // Quick Actions Section
-                    QuickActionsSection(
-                        showingAddTodo: $showingAddTodo,
-                        showingCalendar: $showingCalendar,
-                        showingSearch: $showingSearch,
-                        showingGoogleCalendar: $showingGoogleCalendar
-                    )
-                    
-                    // Google Calendar Status Section
-                    GoogleCalendarStatusSection(service: googleCalendarService)
-                    
-                    // Today's Focus Section
-                    TodaysFocusSection(
-                        completed: viewModel.completedToday,
-                        total: viewModel.totalToday,
-                        todos: viewModel.todayTodos,
-                        viewModel: viewModel
-                    )
+            ZStack {
+                // Beautiful background
+                LinearGradient(
+                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Active Alarms Section
+                        ActiveAlarmsSection(alarms: viewModel.activeAlarms, viewModel: viewModel)
+                        
+                        // Quick Actions Section
+                        QuickActionsSection(
+                            showingAddTodo: $showingAddTodo,
+                            showingCalendar: $showingCalendar,
+                            showingSearch: $showingSearch,
+                            showingGoogleCalendar: $showingGoogleCalendar
+                        )
+                        
+                        // Google Calendar Status Section
+                        GoogleCalendarStatusSection(service: googleCalendarService)
+                        
+                        // Today's Focus Section
+                        TodaysFocusSection(
+                            completed: viewModel.completedToday,
+                            total: viewModel.totalToday,
+                            todos: viewModel.todayTodos,
+                            viewModel: viewModel
+                        )
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
             .navigationTitle("Dashboard")
             .navigationBarTitleDisplayMode(.large)
@@ -144,6 +154,7 @@ struct ActiveAlarmCard: View {
                 
                 Text(alarm.currentEscalationLevel.icon)
                     .font(.title2)
+                    .foregroundColor(.blue)
             }
             
             HStack {
@@ -321,6 +332,50 @@ struct QuickActionButton: View {
     }
 }
 
+// MARK: - Google Calendar Status Section
+struct GoogleCalendarStatusSection: View {
+    let service: GoogleCalendarService
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Google Calendar", systemImage: "calendar.badge.plus")
+                .font(.headline)
+                .foregroundColor(.green)
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(service.isAuthenticated ? "Connected" : "Not Connected")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(service.isAuthenticated ? .green : .secondary)
+                    
+                    if service.isAuthenticated {
+                        Text("Calendar: \(service.selectedCalendars.isEmpty ? "None" : "\(service.selectedCalendars.count) selected")")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                Button(service.isAuthenticated ? "Disconnect" : "Connect") {
+                    if service.isAuthenticated {
+                        service.signOut()
+                    } else {
+                        service.signIn()
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+    }
+}
+
 // MARK: - Today's Focus Section
 struct TodaysFocusSection: View {
     let completed: Int
@@ -354,14 +409,6 @@ struct TodaysFocusSection: View {
             } else {
                 ForEach(todos.prefix(3)) { todo in
                     DashboardTodoRowView(todo: todo, viewModel: viewModel)
-                }
-                
-                if todos.count > 3 {
-                    Button("View All \(todos.count) Todos") {
-                        // Navigate to todo list
-                    }
-                    .font(.caption)
-                    .foregroundColor(.blue)
                 }
             }
         }
@@ -407,30 +454,19 @@ struct DashboardTodoRowView: View {
                 viewModel.toggleTodoCompletion(todo)
             }) {
                 Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(todo.isCompleted ? .green : .secondary)
+                    .foregroundColor(todo.isCompleted ? .green : .blue)
                     .font(.title3)
             }
             .buttonStyle(PlainButtonStyle())
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(todo.title)
                     .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(todo.isCompleted ? .secondary : .primary)
+                    .foregroundColor(.primary)
                     .strikethrough(todo.isCompleted)
                 
-                HStack(spacing: 8) {
-                    if todo.priority != .none {
-                        Text(todo.priority.displayName)
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.1))
-                            .cornerRadius(4)
-                    }
-                    
-                    Text(todo.category.displayName)
+                if let dueDate = todo.dueDate {
+                    Text(dueDate, style: .time)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -438,64 +474,27 @@ struct DashboardTodoRowView: View {
             
             Spacer()
             
-            if todo.alarmSettings.isEnabled {
-                Image(systemName: "alarm")
-                    .foregroundColor(.blue)
+            if todo.priority != .none {
+                Text(todo.priority.displayName)
                     .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(priorityColor.opacity(0.2))
+                    .foregroundColor(priorityColor)
+                    .cornerRadius(4)
             }
         }
         .padding(.vertical, 4)
     }
-}
-
-// MARK: - Google Calendar Status Section
-struct GoogleCalendarStatusSection: View {
-    @ObservedObject var service: GoogleCalendarService
-    @State private var errorMessage: String?
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("Google Calendar Status", systemImage: "calendar.badge.plus")
-                .font(.headline)
-                .foregroundColor(.purple)
-            
-            HStack {
-                Image(systemName: service.isAuthenticated ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundColor(service.isAuthenticated ? .green : .red)
-                    .font(.title2)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(service.isAuthenticated ? "Connected to Google Calendar" : "Not connected to Google Calendar")
-                        .font(.subheadline)
-                        .foregroundColor(service.isAuthenticated ? .green : .red)
-                    
-                }
-                
-                Spacer()
-                
-                if !service.isAuthenticated {
-                    Button("Connect") {
-                        service.signIn()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                }
-            }
-            
-            if let errorMessage = errorMessage {
-                Text("Error: \(errorMessage)")
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.red.opacity(0.1))
-                    .cornerRadius(8)
-            }
+    private var priorityColor: Color {
+        switch todo.priority {
+        case .none: return .gray
+        case .low: return .green
+        case .medium: return .yellow
+        case .urgent: return .red
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
     }
 }
 

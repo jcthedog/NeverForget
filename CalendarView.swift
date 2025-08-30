@@ -6,6 +6,7 @@ struct CalendarView: View {
     @State private var showingAddTodo = false
     @State private var showingEventImport = false
     @State private var showingEventDetail = false
+    @State private var showingCreateEvent = false
     @State private var selectedEvent: GoogleCalendarEvent?
     @State private var calendarEvents: [GoogleCalendarEvent] = []
     @State private var isLoadingEvents = false
@@ -39,54 +40,62 @@ struct CalendarView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Google Calendar Style Header
+            ZStack {
+                // Beautiful pastel background
+                PastelTheme.primaryGradient
+                    .ignoresSafeArea()
+                
                 VStack(spacing: 0) {
-                    // Month/Year Title with Navigation
-                    HStack {
-                        Button(action: previousMonth) {
-                            Image(systemName: "chevron.left")
+                    // Google Calendar Style Header
+                    VStack(spacing: 0) {
+                        // Month/Year Title with Navigation
+                        HStack {
+                            Button(action: previousMonth) {
+                                Image(systemName: "chevron.left")
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
+                            }
+                            
+                            Spacer()
+                            
+                            Text(dateFormatter.string(from: currentMonth))
                                 .font(.title2)
-                                .foregroundColor(.blue)
-                        }
-                        
-                        Spacer()
-                        
-                        Text(dateFormatter.string(from: currentMonth))
-                            .font(.title2)
-                            .fontWeight(.medium)
-                        
-                        Spacer()
-                        
-                        Button(action: nextMonth) {
-                            Image(systemName: "chevron.right")
-                                .font(.title2)
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    
-                    // View Mode Selector (Google Calendar Style)
-                    HStack(spacing: 0) {
-                        ForEach(CalendarViewMode.allCases, id: \.self) { mode in
-                            Button(action: { calendarViewMode = mode }) {
-                                Text(mode.rawValue)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(calendarViewMode == mode ? .white : .blue)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(calendarViewMode == mode ? Color.blue : Color.clear)
-                                    .cornerRadius(16)
+                                .fontWeight(.medium)
+                            
+                            Spacer()
+                            
+                            Button(action: nextMonth) {
+                                Image(systemName: "chevron.right")
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
                             }
                         }
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        
+                        // View Mode Selector (Google Calendar Style)
+                        HStack(spacing: 0) {
+                            ForEach(CalendarViewMode.allCases, id: \.self) { mode in
+                                Button(action: { calendarViewMode = mode }) {
+                                    Text(mode.rawValue)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(calendarViewMode == mode ? .white : .blue)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(calendarViewMode == mode ? Color.blue : Color.clear)
+                                        .cornerRadius(16)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 8)
                     }
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                     .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
-                .background(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.1), radius: 1, y: 1)
+                    .padding(.top)
                 
                 // Calendar Content based on selected mode
                 switch calendarViewMode {
@@ -99,6 +108,10 @@ struct CalendarView: View {
                             showingEventDetail = true
                         }
                     )
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .padding(.horizontal)
                 case .threeDay:
                     ScrollView {
                         GoogleCalendarMultiDayView(
@@ -112,6 +125,10 @@ struct CalendarView: View {
                             }
                         )
                     }
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .padding(.horizontal)
                 case .sevenDay:
                     ScrollView {
                         GoogleCalendarMultiDayView(
@@ -125,8 +142,12 @@ struct CalendarView: View {
                             }
                         )
                     }
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .padding(.horizontal)
                 case .monthly:
-                    GoogleCalendarMonthView(
+                                        GoogleCalendarMonthView(
                         viewModel: viewModel,
                         currentMonth: $currentMonth,
                         selectedDate: $selectedDate,
@@ -134,25 +155,48 @@ struct CalendarView: View {
                         onEventTap: { event in
                             selectedEvent = event
                             showingEventDetail = true
-                        }
+                        },
+                        onCreateEvent: { showingCreateEvent = true },
+                        onCreateTodo: { showingAddTodo = true }
                     )
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                    .padding(.horizontal)
                 }
                 
-                // Google Calendar Style Quick Actions
-                HStack(spacing: 16) {
+                // Google Calendar Style Quick Actions with Enhanced Visibility
+                HStack(spacing: 12) {
+                    Button(action: { showingCreateEvent = true }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                            Text("Create Event")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(PastelTheme.softMint)
+                        .cornerRadius(8)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    }
+                    
                     Button(action: { showingEventImport = true }) {
                         HStack(spacing: 8) {
                             Image(systemName: "calendar.badge.plus")
                                 .font(.title3)
                             Text("Import Events")
                                 .font(.subheadline)
-                                .fontWeight(.medium)
+                                .fontWeight(.semibold)
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(.blue)
+                        .background(PastelTheme.softBlue)
                         .cornerRadius(8)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                     }
                     
                     Button(action: { showingAddTodo = true }) {
@@ -161,19 +205,25 @@ struct CalendarView: View {
                                 .font(.title3)
                             Text("Add Todo")
                                 .font(.subheadline)
-                                .fontWeight(.medium)
+                                .fontWeight(.semibold)
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(.purple)
+                        .background(PastelTheme.softLavender)
                         .cornerRadius(8)
+                        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                     }
                 }
                 .padding()
-                .background(Color(.systemBackground))
+                .background(PastelTheme.sectionBackground)
+                .cornerRadius(12)
+                .shadow(color: PastelTheme.shadowLight, radius: 4, x: 0, y: 2)
             }
-            .navigationTitle("Calendar")
+            
+            // Close the outer VStack
+        }
+        .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.large)
             .onAppear {
                 loadEventsForDate(selectedDate)
@@ -186,6 +236,9 @@ struct CalendarView: View {
             }
             .sheet(isPresented: $showingAddTodo) {
                 AddTodoFormView(viewModel: viewModel, preselectedDate: selectedDate)
+            }
+            .sheet(isPresented: $showingCreateEvent) {
+                CreateCalendarEventView(viewModel: viewModel, preselectedDate: selectedDate)
             }
             .sheet(isPresented: $showingEventImport) {
                 EventImportView(
@@ -269,26 +322,44 @@ struct GoogleCalendarMonthView: View {
     @Binding var selectedDate: Date
     let calendarEvents: [GoogleCalendarEvent]
     let onEventTap: (GoogleCalendarEvent) -> Void
+    let onCreateEvent: () -> Void
+    let onCreateTodo: () -> Void
     
     private let calendar = Calendar.current
     private let daysInWeek = 7
     
     var body: some View {
         VStack(spacing: 0) {
-            // Day headers (Sun, Mon, Tue, etc.) - Google Calendar style
+            // Day headers (Sun, Mon, Tue, etc.) - Google Calendar style with Pastel Theme
             HStack(spacing: 0) {
                 ForEach(calendar.shortWeekdaySymbols, id: \.self) { day in
                     Text(day)
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(PastelTheme.secondaryText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Color(.systemGray6))
+                        .background(PastelTheme.calendarHeader)
+                        .overlay(
+                            // Bottom border for header
+                            Rectangle()
+                                .fill(PastelTheme.gridLine.opacity(0.3))
+                                .frame(height: 0.5)
+                                .offset(y: 23.5)
+                            , alignment: .bottom
+                        )
                 }
             }
+            .overlay(
+                // Right border for header
+                Rectangle()
+                    .fill(PastelTheme.gridLine.opacity(0.3))
+                    .frame(width: 0.5)
+                    .offset(x: -0.25)
+                , alignment: .trailing
+            )
             
-            // Calendar grid - Google Calendar style with proper date boxes
+            // Calendar grid - Google Calendar style with grid lines and Pastel Theme
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: daysInWeek), spacing: 0) {
                 ForEach(Array(daysInMonth.enumerated()), id: \.offset) { index, date in
                     if let date = date {
@@ -299,17 +370,65 @@ struct GoogleCalendarMonthView: View {
                             events: eventsForDate(date),
                             todos: todosForDate(date),
                             onTap: { selectedDate = date },
-                            onEventTap: onEventTap
+                            onEventTap: onEventTap,
+                            onCreateEvent: onCreateEvent,
+                            onCreateTodo: onCreateTodo
+                        )
+                        .overlay(
+                            // Right border for each cell
+                            Rectangle()
+                                .fill(PastelTheme.gridLine.opacity(0.3))
+                                .frame(width: 0.5)
+                                .offset(x: 35)
+                            , alignment: .trailing
+                        )
+                        .overlay(
+                            // Bottom border for each cell
+                            Rectangle()
+                                .fill(PastelTheme.gridLine.opacity(0.3))
+                                .frame(height: 0.5)
+                                .offset(y: 39.5)
+                            , alignment: .bottom
                         )
                     } else {
-                        // Empty cell for padding
+                        // Empty cell for padding with grid lines
                         Color.clear
                             .frame(height: 80)
+                            .overlay(
+                                // Right border for empty cells
+                                Rectangle()
+                                    .fill(PastelTheme.gridLine.opacity(0.3))
+                                    .frame(width: 0.5)
+                                    .offset(x: 35)
+                                , alignment: .trailing
+                            )
+                            .overlay(
+                                // Bottom border for empty cells
+                                Rectangle()
+                                    .fill(PastelTheme.gridLine.opacity(0.3))
+                                    .frame(height: 0.5)
+                                    .offset(y: 39.5)
+                                , alignment: .bottom
+                            )
                     }
                 }
             }
-            .background(Color(.systemBackground))
+            .background(Color.white)
+            .overlay(
+                // Left border for the entire grid
+                Rectangle()
+                    .fill(PastelTheme.gridLine.opacity(0.3))
+                    .frame(width: 0.5)
+                    .offset(x: -0.25)
+                , alignment: .leading
+            )
         }
+        .background(Color.white)
+        .overlay(
+            // Outer border for the entire calendar
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(PastelTheme.gridLine.opacity(0.2), lineWidth: 0.5)
+        )
     }
     
     private var daysInMonth: [Date?] {
@@ -366,6 +485,8 @@ struct GoogleCalendarDayCell: View {
     let todos: [Todo]
     let onTap: () -> Void
     let onEventTap: (GoogleCalendarEvent) -> Void
+    let onCreateEvent: () -> Void
+    let onCreateTodo: () -> Void
     
     @State private var showingDatePopup = false
     
@@ -373,17 +494,17 @@ struct GoogleCalendarDayCell: View {
     
     var body: some View {
         Button(action: {
-            showingDatePopup = true
             onTap()
+            showingDatePopup = true
         }) {
             VStack(alignment: .leading, spacing: 2) {
-                // Date number - Google Calendar style
+                // Date number - Google Calendar style with Pastel Theme
                 HStack {
                     Text("\(calendar.component(.day, from: date))")
                         .font(.system(size: 14, weight: isToday ? .bold : .medium))
-                        .foregroundColor(isToday ? .white : .primary)
+                        .foregroundColor(isToday ? .white : PastelTheme.primaryText)
                         .frame(width: 24, height: 24)
-                        .background(isToday ? Color.blue : Color.clear)
+                        .background(isToday ? PastelTheme.primary : Color.clear)
                         .clipShape(Circle())
                     
                     Spacer()
@@ -418,10 +539,10 @@ struct GoogleCalendarDayCell: View {
             }
             .frame(height: 80)
             .frame(maxWidth: .infinity)
-            .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+            .background(isSelected ? PastelTheme.softLavender.opacity(0.3) : PastelTheme.inputBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? PastelTheme.primary : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -431,7 +552,9 @@ struct GoogleCalendarDayCell: View {
                 events: events,
                 todos: todos,
                 onEventTap: onEventTap,
-                onDismiss: { showingDatePopup = false }
+                onDismiss: { showingDatePopup = false },
+                onCreateEvent: onCreateEvent,
+                onCreateTodo: onCreateTodo
             )
         }
     }
@@ -579,6 +702,8 @@ struct DateEventsPopup: View {
     let todos: [Todo]
     let onEventTap: (GoogleCalendarEvent) -> Void
     let onDismiss: () -> Void
+    let onCreateEvent: () -> Void
+    let onCreateTodo: () -> Void
     
     private let calendar = Calendar.current
     private let dateFormatter: DateFormatter = {
@@ -693,6 +818,39 @@ struct DateEventsPopup: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)
+            }
+            
+            // Action buttons for creating events and todos
+            VStack(spacing: 12) {
+                Button(action: onCreateEvent) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                        Text("Create Event")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(PastelTheme.softMint)
+                    .cornerRadius(8)
+                }
+                
+                Button(action: onCreateTodo) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus")
+                            .font(.title3)
+                        Text("Add Todo")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(PastelTheme.softLavender)
+                    .cornerRadius(8)
+                }
             }
         }
         .padding(20)
