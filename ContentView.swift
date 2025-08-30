@@ -2737,34 +2737,38 @@ struct CreateCalendarEventView: View {
                                     .foregroundColor(PastelTheme.primaryText)
                             }
                             
-                            // Enhanced recurring pattern system (same as Todo screen)
-                            VStack(spacing: 12) {
-                                Button("No Repeat") {
-                                    recurringPattern = nil
+                            // Single recurring option that opens the enhanced popup
+                            Button(action: {
+                                showingRecurringPatternView = true
+                            }) {
+                                HStack {
+                                    Image(systemName: recurringPattern != nil ? "repeat.circle.fill" : "repeat.circle")
+                                        .foregroundColor(recurringPattern != nil ? PastelTheme.softPeach : PastelTheme.softPeach)
+                                        .font(.system(size: 18))
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(recurringPattern != nil ? "Recurring Pattern Set" : "Set Recurring Pattern")
+                                            .foregroundColor(PastelTheme.primaryText)
+                                            .fontWeight(.medium)
+                                        if let pattern = recurringPattern {
+                                            Text(pattern.description)
+                                                .foregroundColor(PastelTheme.secondaryText)
+                                                .font(.caption)
+                                        }
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(PastelTheme.secondaryText)
+                                        .font(.system(size: 14))
                                 }
-                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == nil))
-                                
-                                Button("Every Day") {
-                                    recurringPattern = .daily(interval: 1)
-                                }
-                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .daily(interval: 1)))
-                                
-                                Button("Every Week") {
-                                    recurringPattern = .weekly(interval: 1, days: [])
-                                }
-                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .weekly(interval: 1, days: [])))
-                                
-                                Button("Every Month") {
-                                    recurringPattern = .monthly(interval: 1)
-                                }
-                                .buttonStyle(PastelButtonStyle(isSelected: recurringPattern == .monthly(interval: 1)))
-                                
-                                Button("Custom Pattern") {
-                                    // Show the enhanced recurring pattern view
-                                    showingRecurringPatternView = true
-                                }
-                                .buttonStyle(PastelButtonStyle(isSelected: false))
+                                .padding(16)
+                                .background(recurringPattern != nil ? PastelTheme.softPeach.opacity(0.1) : PastelTheme.inputBackground)
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(recurringPattern != nil ? PastelTheme.softPeach : PastelTheme.inputBorder, lineWidth: 0.5)
+                                )
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .sheet(isPresented: $showingRecurringPatternView) {
                             RecurringPatternView(
