@@ -13,6 +13,7 @@ struct CalendarView: View {
     @State private var eventStartDate = Date()
     @State private var eventEndDate = Date().addingTimeInterval(3600)
     @State private var todoTitle = ""
+    @State private var todoDescription = ""
     @State private var todoDueDate = Date()
     @State private var selectedEvent: GoogleCalendarEvent?
     @State private var calendarEvents: [GoogleCalendarEvent] = []
