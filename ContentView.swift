@@ -2520,10 +2520,23 @@ struct CreateCalendarEventView: View {
                     .foregroundColor(eventTitle.isEmpty ? PastelTheme.secondaryText : PastelTheme.primary)
                 }
             }
-            .sheet(isPresented: $showingRecurringPatternView) {
-                RecurringPatternView(recurringPattern: $selectedRecurringPattern, selectedDate: startDate, viewModel: viewModel)
-                    .presentationDetents([.medium, .large])
-            }
+            .overlay(
+                ZStack {
+                    if showingRecurringPatternView {
+                        // Background overlay for dismissal
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showingRecurringPatternView = false
+                                }
+                            }
+                        
+                        // Custom popup
+                        RecurringPatternPopup
+                    }
+                }
+            )
             .onTapGesture {
                 showingLocationSuggestions = false
             }
@@ -2536,6 +2549,63 @@ struct CreateCalendarEventView: View {
                 print("🧹 CreateCalendarEventView disappeared, cleaned up search state")
             }
         }
+    }
+    
+    // MARK: - Custom Popup Views
+    private var RecurringPatternPopup: some View {
+        VStack(spacing: 0) {
+            // Header with close button
+            HStack {
+                Text("Recurring Pattern")
+                    .font(.headline)
+                    .foregroundColor(PastelTheme.primaryText)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showingRecurringPatternView = false
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(PastelTheme.secondaryText)
+                        .font(.title2)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
+            
+            // Divider
+            Rectangle()
+                .fill(PastelTheme.inputBorder)
+                .frame(height: 0.5)
+            
+            // Recurring pattern content
+            RecurringPatternView(
+                recurringPattern: $selectedRecurringPattern,
+                selectedDate: startDate,
+                viewModel: viewModel
+            )
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
+        .frame(maxWidth: 350, maxHeight: 500)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(PastelTheme.cardBackground)
+                .shadow(color: PastelTheme.shadow.opacity(0.15), radius: 10, x: 0, y: 5)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
+        )
+        .offset(y: -80) // Position above the button with better spacing
+        .transition(.asymmetric(
+            insertion: .scale(scale: 0.9).combined(with: .opacity),
+            removal: .scale(scale: 0.9).combined(with: .opacity)
+        ))
+        .animation(.easeInOut(duration: 0.2), value: showingRecurringPatternView)
     }
     
     // MARK: - Helper Views
