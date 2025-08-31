@@ -7,6 +7,13 @@ struct CalendarView: View {
     @State private var showingEventImport = false
     @State private var showingEventDetail = false
     @State private var showingCreateEvent = false
+    
+    // Inline form state variables
+    @State private var eventTitle = ""
+    @State private var eventStartDate = Date()
+    @State private var eventEndDate = Date().addingTimeInterval(3600)
+    @State private var todoTitle = ""
+    @State private var todoDueDate = Date()
     @State private var selectedEvent: GoogleCalendarEvent?
     @State private var calendarEvents: [GoogleCalendarEvent] = []
     @State private var isLoadingEvents = false
@@ -173,78 +180,323 @@ struct CalendarView: View {
                     .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                     .padding(.horizontal)
                 case .monthly:
-                                        GoogleCalendarMonthView(
-                        viewModel: viewModel,
-                        currentMonth: $currentMonth,
-                        selectedDate: $selectedDate,
-                        calendarEvents: calendarEvents,
-                        onEventTap: { event in
-                            selectedEvent = event
-                            showingEventDetail = true
-                        },
-                        onCreateEvent: { showingCreateEvent = true },
-                        onCreateTodo: { showingAddTodo = true }
-                    )
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
-                    .padding(.horizontal)
+                    VStack(spacing: 0) {
+                        GoogleCalendarMonthView(
+                            viewModel: viewModel,
+                            currentMonth: $currentMonth,
+                            selectedDate: $selectedDate,
+                            calendarEvents: calendarEvents,
+                            onEventTap: { event in
+                                selectedEvent = event
+                                showingEventDetail = true
+                            },
+                            onCreateEvent: { showingCreateEvent = true },
+                            onCreateTodo: { showingAddTodo = true }
+                        )
+                        .background(Color.white)
+                        .cornerRadius(16)
+                        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                        
+                        // Integrated Action Sections (replacing floating buttons)
+                        VStack(spacing: 0) {
+                            // Create Event Section
+                            VStack(spacing: 0) {
+                                Button(action: { 
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        showingCreateEvent = true
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.title3)
+                                            .foregroundColor(.green)
+                                        Text("Create New Event")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                // Inline Event Creation Form
+                                if showingCreateEvent {
+                                    VStack(spacing: 16) {
+                                        Divider()
+                                        
+                                        // Simple inline form for quick event creation
+                                        VStack(spacing: 12) {
+                                            TextField("Event Title", text: $eventTitle)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            
+                                            HStack {
+                                                DatePicker("Start", selection: $eventStartDate, displayedComponents: [.date, .hourAndMinute])
+                                                DatePicker("End", selection: $eventEndDate, displayedComponents: [.date, .hourAndMinute])
+                                            }
+                                            
+                                            HStack {
+                                                Button("Cancel") {
+                                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                                        showingCreateEvent = false
+                                                        // Reset form
+                                                        eventTitle = ""
+                                                        eventStartDate = Date()
+                                                        eventEndDate = Date().addingTimeInterval(3600)
+                                                    }
+                                                }
+                                                .buttonStyle(.bordered)
+                                                
+                                                Button("Create") {
+                                                    // Create the event
+                                                    if !eventTitle.isEmpty {
+                                                        // TODO: Implement actual event creation with viewModel
+                                                        print("Creating event: \(eventTitle) from \(eventStartDate) to \(eventEndDate)")
+                                                    }
+                                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                                        showingCreateEvent = false
+                                                        // Reset form
+                                                        eventTitle = ""
+                                                        eventStartDate = Date()
+                                                        eventEndDate = Date().addingTimeInterval(3600)
+                                                    }
+                                                }
+                                                .disabled(eventTitle.isEmpty)
+                                                .buttonStyle(.borderedProminent)
+                                            }
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .padding(.bottom, 16)
+                                    }
+                                    .background(Color(.secondarySystemBackground))
+                                    .cornerRadius(8)
+                                    .transition(.move(edge: .top).combined(with: .opacity))
+                                }
+                            }
+                            
+                            // Import Events Section
+                            VStack(spacing: 0) {
+                                Button(action: { 
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        showingEventImport = true
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "calendar.badge.plus")
+                                            .font(.title3)
+                                            .foregroundColor(.blue)
+                                        Text("Import Events")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                // Inline Import Options
+                                if showingEventImport {
+                                    VStack(spacing: 16) {
+                                        Divider()
+                                        
+                                        VStack(spacing: 12) {
+                                            Text("Select calendars to import from:")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            
+                                            // Simple calendar selection
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                HStack {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundColor(.green)
+                                                    Text("Primary Calendar")
+                                                }
+                                                HStack {
+                                                    Image(systemName: "circle")
+                                                        .foregroundColor(.secondary)
+                                                    Text("Work Calendar")
+                                                }
+                                                HStack {
+                                                    Image(systemName: "circle")
+                                                        .foregroundColor(.secondary)
+                                                    Text("Personal Calendar")
+                                                }
+                                            }
+                                            .font(.caption)
+                                            
+                                            HStack {
+                                                Button("Cancel") {
+                                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                                        showingEventImport = false
+                                                    }
+                                                }
+                                                .buttonStyle(.bordered)
+                                                
+                                                Button("Import") {
+                                                    // TODO: Implement import
+                                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                                        showingEventImport = false
+                                                    }
+                                                }
+                                                .buttonStyle(.borderedProminent)
+                                            }
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .padding(.bottom, 16)
+                                    }
+                                    .background(Color(.secondarySystemBackground))
+                                    .cornerRadius(8)
+                                    .transition(.move(edge: .top).combined(with: .opacity))
+                                }
+                            }
+                            
+                            // Add Todo Section
+                            VStack(spacing: 0) {
+                                Button(action: { 
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        showingAddTodo = true
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "plus")
+                                            .font(.title3)
+                                            .foregroundColor(.purple)
+                                        Text("Add Todo")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                // Inline Todo Creation Form
+                                if showingAddTodo {
+                                    VStack(spacing: 16) {
+                                        Divider()
+                                        
+                                        VStack(spacing: 12) {
+                                            TextField("Todo Title", text: $todoTitle)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            
+                                            DatePicker("Due Date", selection: $todoDueDate, displayedComponents: [.date, .date])
+                                            
+                                            HStack {
+                                                Button("Cancel") {
+                                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                                        showingAddTodo = false
+                                                        // Reset form
+                                                        todoTitle = ""
+                                                        todoDueDate = selectedDate
+                                                    }
+                                                }
+                                                .buttonStyle(.bordered)
+                                                
+                                                Button("Add") {
+                                                    // Create the todo
+                                                    if !todoTitle.isEmpty {
+                                                        // TODO: Implement actual todo creation with viewModel
+                                                        print("Creating todo: \(todoTitle) due \(todoDueDate)")
+                                                    }
+                                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                                        showingAddTodo = false
+                                                        // Reset form
+                                                        todoDueDate = selectedDate
+                                                        todoTitle = ""
+                                                    }
+                                                }
+                                                .disabled(todoTitle.isEmpty)
+                                                .buttonStyle(.borderedProminent)
+                                            }
+                                        }
+                                        .padding(.horizontal, 16)
+                                        .padding(.bottom, 16)
+                                    }
+                                    .background(Color(.secondarySystemBackground))
+                                    .cornerRadius(8)
+                                    .transition(.move(edge: .top).combined(with: .opacity))
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                    }
                 }
                 
-                // Google Calendar Style Quick Actions with Enhanced Visibility
-                HStack(spacing: 12) {
-                    Button(action: { showingCreateEvent = true }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title3)
-                            Text("Create Event")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.green)
-                        .cornerRadius(8)
-                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                    }
+
+                // HStack(spacing: 12) {
+                //     Button(action: { showingCreateEvent = true }) {
+                //         HStack(spacing: 8) {
+                //             Image(systemName: "plus.circle.fill")
+                //                 .font(.title3)
+                //             Text("Create Event")
+                //                 .font(.subheadline)
+                //                 .fontWeight(.semibold)
+                //         }
+                //         .foregroundColor(.white)
+                //         .frame(maxWidth: .infinity)
+                //         .padding(.vertical, 12)
+                //         .background(Color.green)
+                //         .cornerRadius(8)
+                //         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                //     }
                     
-                    Button(action: { showingEventImport = true }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.title3)
-                            Text("Import Events")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.blue)
-                        .cornerRadius(8)
-                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                    }
+                //     Button(action: { showingEventImport = true }) {
+                //         HStack(spacing: 8) {
+                //             Image(systemName: "calendar.badge.plus")
+                //                 .font(.title3)
+                //             Text("Import Events")
+                //                 .font(.subheadline)
+                //                 .fontWeight(.semibold)
+                //         }
+                //         .foregroundColor(.white)
+                //         .frame(maxWidth: .infinity)
+                //         .padding(.vertical, 12)
+                //         .background(Color.blue)
+                //         .cornerRadius(8)
+                //         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                //     }
                     
-                    Button(action: { showingAddTodo = true }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "plus")
-                                .font(.title3)
-                            Text("Add Todo")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.purple)
-                        .cornerRadius(8)
-                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-                    }
-                }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                //     Button(action: { showingAddTodo = true }) {
+                //         HStack(spacing: 8) {
+                //             Image(systemName: "plus")
+                //                 .font(.title3)
+                //             Text("Add Todo")
+                //                 .font(.subheadline)
+                //                 .fontWeight(.semibold)
+                //         }
+                //         .foregroundColor(.white)
+                //         .frame(maxWidth: .infinity)
+                //         .padding(.vertical, 12)
+                //         .background(Color.purple)
+                //         .cornerRadius(8)
+                //         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                //     }
+                // }
+                // .padding()
+                // .background(Color.white)
+                // .cornerRadius(12)
+                // .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
             }
             
             // Close the outer VStack
@@ -259,20 +511,10 @@ struct CalendarView: View {
             }
             .onChange(of: selectedDate) { _, _ in
                 loadEventsForDate(selectedDate)
+                // Update todo due date to match selected date
+                todoDueDate = selectedDate
             }
-            .sheet(isPresented: $showingAddTodo) {
-                AddTodoFormView(viewModel: viewModel, preselectedDate: selectedDate)
-            }
-            .sheet(isPresented: $showingCreateEvent) {
-                CreateCalendarEventView(viewModel: viewModel, preselectedDate: selectedDate)
-            }
-            .sheet(isPresented: $showingEventImport) {
-                EventImportView(
-                    events: [],
-                    calendarService: GoogleCalendarService(),
-                    viewModel: viewModel
-                )
-            }
+            // Sheets removed - using inline expanding sections instead
             .sheet(isPresented: $showingEventDetail) {
                 if let event = selectedEvent {
                     GoogleCalendarEventDetailView(
