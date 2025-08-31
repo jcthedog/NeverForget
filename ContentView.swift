@@ -2473,6 +2473,7 @@ struct CreateCalendarEventView: View {
     @State private var showingLocationSuggestions = false
     @State private var locationSuggestions: [String] = []
     @State private var isSearchingLocation = false
+    @State private var searchTask: Task<Void, Never>?
     
     init(viewModel: DashboardViewModel, preselectedDate: Date) {
         self.viewModel = viewModel
@@ -2489,11 +2490,18 @@ struct CreateCalendarEventView: View {
             return
         }
         
+        // Cancel any previous search
+        searchTask?.cancel()
+        
         isSearchingLocation = true
         
-        // Simulate location search with common place types
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.isSearchingLocation = false
+        // Create a new search task with debouncing
+        searchTask = Task {
+            // Wait a bit to debounce rapid typing
+            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
+            
+            // Check if task was cancelled
+            if Task.isCancelled { return }
             
             let commonPlaces = [
                 "Coffee Shop",
@@ -2547,8 +2555,13 @@ struct CreateCalendarEventView: View {
             }
             
             // Limit to 6 suggestions
-            self.locationSuggestions = Array(suggestions.prefix(6))
-            self.showingLocationSuggestions = true
+            await MainActor.run {
+                if !Task.isCancelled {
+                    self.locationSuggestions = Array(suggestions.prefix(6))
+                    self.showingLocationSuggestions = true
+                    self.isSearchingLocation = false
+                }
+            }
         }
     }
     
@@ -2593,11 +2606,16 @@ struct CreateCalendarEventView: View {
                                     TextField("Location (optional)", text: $location)
                                         .textFieldStyle(PastelTextFieldStyle())
                                         .onChange(of: location) { _, newValue in
+                                            // Only search if we have enough characters and the query actually changed
                                             if newValue.count >= 3 {
+                                                // Debounce the search to prevent excessive calls
                                                 searchLocations(query: newValue)
                                             } else {
+                                                // Clear suggestions for short queries
                                                 showingLocationSuggestions = false
                                                 locationSuggestions = []
+                                                // Cancel any ongoing search
+                                                searchTask?.cancel()
                                             }
                                         }
                                         .onTapGesture {
