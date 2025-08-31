@@ -2770,14 +2770,53 @@ struct CreateCalendarEventView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
-                        .sheet(isPresented: $showingRecurringPatternView) {
-                            RecurringPatternView(
-                                recurringPattern: $recurringPattern,
-                                selectedDate: startDate,
-                                viewModel: viewModel
-                            )
-                            .presentationDetents([.medium, .large])
-                        }
+                        // Custom popup overlay for recurring patterns
+                        .overlay(
+                            Group {
+                                if showingRecurringPatternView {
+                                    VStack {
+                                        Spacer()
+                                        HStack {
+                                            Spacer()
+                                            VStack(alignment: .leading, spacing: 0) {
+                                                RecurringPatternView(
+                                                    recurringPattern: $recurringPattern,
+                                                    selectedDate: startDate,
+                                                    viewModel: viewModel
+                                                )
+                                                .frame(maxWidth: 350, maxHeight: 400)
+                                                .background(PastelTheme.cardGradient)
+                                                .cornerRadius(16)
+                                                .shadow(color: PastelTheme.shadow, radius: 12, x: 0, y: 8)
+                                                .overlay(
+                                                    // Close button
+                                                    VStack {
+                                                        HStack {
+                                                            Spacer()
+                                                            Button(action: {
+                                                                showingRecurringPatternView = false
+                                                            }) {
+                                                                Image(systemName: "xmark.circle.fill")
+                                                                    .foregroundColor(PastelTheme.secondaryText)
+                                                                    .font(.system(size: 24))
+                                                                    .background(Color.white, in: Circle())
+                                                            }
+                                                            .padding(.top, 8)
+                                                            .padding(.trailing, 8)
+                                                        }
+                                                        Spacer()
+                                                    }
+                                                )
+                                            }
+                                            .padding(.trailing, 20)
+                                        }
+                                        .padding(.bottom, 20)
+                                    }
+                                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                                    .animation(.easeInOut(duration: 0.2), value: showingRecurringPatternView)
+                                }
+                            }
+                        )
                         .padding(20)
                         .background(PastelTheme.cardGradient)
                         .cornerRadius(16)

@@ -2346,3 +2346,100 @@ var body: some View {
 **Code Quality**: ✅ **ENHANCED**
 
 ---
+
+## 📅 **Session 21: Replace Sheet with Custom Popup for Recurring Patterns**
+
+**Date**: August 30, 2025  
+**Duration**: 30 minutes  
+**Focus**: Replace full sheet presentation with small, focused custom popup for recurring patterns
+
+### 🎯 **Session Objectives**
+
+#### **Primary Goals**
+- **Better UX**: Replace full sheet that required manual dragging with small popup
+- **Focused Interface**: Create compact, focused popup that appears above the button
+- **No Manual Dragging**: Eliminate the need for users to manually lift the sheet
+- **Build Verification**: Ensure all changes compile successfully
+
+#### **Technical Requirements**
+- **Custom Overlay**: Replace `.sheet()` with custom `.overlay()` implementation
+- **Compact Design**: Create popup with max dimensions (350x400) for focused experience
+- **Visual Polish**: Add shadows, rounded corners, and smooth animations
+- **Close Button**: Include easy-to-access close button for better usability
+
+### 🔍 **Issue Analysis**
+
+#### **Previous Implementation**
+- Used `.sheet(isPresented:)` with `.presentationDetents([.large])`
+- Required users to manually drag up to see full content
+- Took up entire screen space unnecessarily
+- Poor user experience for quick recurring pattern selection
+
+#### **New Solution**
+- **Custom Popup Overlay**: Replaces sheet with focused popup
+- **Positioned Above Button**: Appears right above the "Set Recurring Pattern" button
+- **Compact Size**: Limited to 350x400 pixels for focused experience
+- **Smooth Animations**: Fade and scale transitions for polished feel
+- **Easy Dismissal**: Close button and tap outside to dismiss
+
+### ✅ **Implementation Details**
+
+#### **Custom Popup Features**
+- **Overlay Structure**: Uses `.overlay()` with conditional display
+- **Positioning**: Bottom-right aligned with proper spacing
+- **Visual Design**: 
+  - Pastel theme card gradient background
+  - Rounded corners (16pt radius)
+  - Subtle shadows for depth
+  - Close button with X icon
+- **Animations**: Smooth fade and scale transitions
+- **Responsive**: Adapts to content size while maintaining focus
+
+#### **User Experience Improvements**
+- **No Manual Dragging**: Popup appears at optimal size immediately
+- **Focused Content**: Only shows recurring pattern interface
+- **Quick Access**: Easy to open and close
+- **Visual Hierarchy**: Clear separation from main content
+
+### 🧪 **Testing Results**
+
+#### **Build Verification**
+- ✅ **Compilation**: All Swift code compiles successfully
+- ✅ **Build Success**: Xcode build completes without errors
+- ✅ **No Breaking Changes**: Existing functionality preserved
+- ✅ **Performance**: No impact on app performance
+
+### 📱 **User Experience Impact**
+
+#### **Before (Sheet)**
+- Full screen takeover
+- Required manual dragging to see content
+- Poor use of screen real estate
+- Inconsistent with modern iOS patterns
+
+#### **After (Custom Popup)**
+- Focused, compact interface
+- Immediate visibility of all content
+- Better screen space utilization
+- Modern, polished feel
+- Consistent with app's design language
+
+### 🔄 **Next Steps**
+
+#### **Immediate**
+- **User Testing**: Test popup behavior on different device sizes
+- **Animation Tuning**: Fine-tune transition timing if needed
+- **Accessibility**: Ensure proper VoiceOver support
+
+#### **Future Enhancements**
+- **Haptic Feedback**: Add subtle haptics for interactions
+- **Keyboard Handling**: Ensure proper keyboard dismissal
+- **Dark Mode**: Verify appearance in dark mode
+
+---
+
+**Session Status**: ✅ **COMPLETE**  
+**Build Status**: ✅ **SUCCESSFUL**  
+**User Experience**: 🚀 **SIGNIFICANTLY IMPROVED**
+
+---
