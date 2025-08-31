@@ -2710,17 +2710,34 @@ struct CreateCalendarEventView: View {
         .padding(.horizontal)
     }
     
+    private var commonPlaces: [String] {
+        [
+            "Coffee Shop", "Restaurant", "Office", "Home", "Gym", "Park",
+            "Shopping Mall", "Airport", "Hotel", "Hospital", "School", "University",
+            "Library", "Museum", "Theater", "Cinema", "Stadium", "Beach",
+            "Mountain", "Lake", "Forest", "Gas Station", "Bank", "Post Office",
+            "Pharmacy", "Supermarket", "Car Wash", "Salon", "Spa"
+        ]
+    }
+    
     private var locationInputView: some View {
         ZStack(alignment: .trailing) {
             TextField("Add location (optional)", text: $location)
                 .textFieldStyle(PastelTextFieldStyle())
                                                 .onChange(of: location) { oldValue, newLocation in
+                                    // Cancel any ongoing search
+                                    searchTask?.cancel()
+                                    
                                     if newLocation.count >= 3 && newLocation.count <= 50 {
-                                        searchLocationSuggestions(query: newLocation)
+                                        // Simple, immediate search without complex task management
+                                        let filtered = commonPlaces.filter { place in
+                                            place.lowercased().contains(newLocation.lowercased())
+                                        }
+                                        locationSuggestions = filtered.isEmpty ? ["No suggestions found"] : filtered
                                         showingLocationSuggestions = true
                                     } else {
-                                        searchTask?.cancel()
                                         showingLocationSuggestions = false
+                                        locationSuggestions = []
                                     }
                                 }
             
