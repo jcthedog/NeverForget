@@ -399,6 +399,10 @@ struct CalendarView: View {
                                             TextField("Todo Title", text: $todoTitle)
                                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                             
+                                            TextField("Description (optional)", text: $todoDescription, axis: .vertical)
+                                                .lineLimit(3...6)
+                                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                            
                                             DatePicker("Due Date", selection: $todoDueDate, displayedComponents: [.date, .date])
                                             
                                             HStack {
