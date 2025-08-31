@@ -271,6 +271,49 @@ Never Forget/
 
 **Both the recurring pattern freeze issue and the floating buttons freeze issue have been resolved. The app now uses integrated expanding sections instead of floating components, eliminating potential UI conflicts and freezing issues.**
 
+### **🚨 NEW CRITICAL ISSUE - APP FREEZES ON "CREATE NEW EVENT" BUTTON**
+
+**Date**: August 31, 2025  
+**Issue**: App completely freezes when clicking "Create New Event" button on Calendar page  
+**Status**: **CRITICAL - BLOCKING APP STORE SUBMISSION**  
+**Impact**: Core event creation functionality completely blocked  
+
+**Problem Description:**
+- **User Action**: Click "Create New Event" button on Calendar page
+- **Expected Behavior**: Comprehensive event creation form should appear
+- **Actual Behavior**: App completely freezes, no response, requires force quit
+- **Frequency**: 100% reproducible - happens every time button is clicked
+
+**Root Cause Analysis:**
+- **Recent Changes**: Replaced simplified inline form with comprehensive CreateCalendarEventView sheet
+- **Potential Issues**: 
+  - Sheet presentation conflicts with existing view hierarchy
+  - CreateCalendarEventView may have complex state management issues
+  - Possible memory leaks or infinite loops in event creation form
+  - Sheet presentation timing conflicts with calendar view state
+
+**Technical Investigation Needed:**
+1. **Sheet Presentation**: Verify sheet presentation is properly configured
+2. **CreateCalendarEventView**: Check for complex state management or rendering issues
+3. **Memory Management**: Look for potential memory leaks or infinite loops
+4. **View Hierarchy**: Analyze conflicts between calendar view and sheet presentation
+5. **State Management**: Check for circular dependencies or state conflicts
+
+**Immediate Action Required:**
+- **Debug Sheet Presentation**: Test sheet presentation in isolation
+- **Simplify Event Creation**: Temporarily revert to basic form to isolate issue
+- **Performance Profiling**: Use Xcode instruments to identify freezing cause
+- **Memory Analysis**: Check for memory leaks or excessive memory usage
+- **State Management Review**: Analyze CreateCalendarEventView state management
+
+**Impact on Project:**
+- **App Store Submission**: **BLOCKED** - Cannot submit app with freezing issue
+- **User Experience**: **SEVERELY IMPACTED** - Core functionality unusable
+- **Development Progress**: **HALTED** - Must resolve before continuing
+- **Testing**: **IMPOSSIBLE** - Cannot test event creation functionality
+
+**Priority**: **CRITICAL - IMMEDIATE ATTENTION REQUIRED**
+
 ### **✅ Completed Features - PRODUCTION READY**
 - **Enhanced Todo Creation System** - 4-level priority system with intelligent defaults
 - **Custom Category Management** - Comprehensive category system with color coding
@@ -422,5 +465,5 @@ This project serves as a **comprehensive example** of modern iOS development bes
 ---
 
 *Last Updated: August 31, 2025*
-*Version: 4.3 - NEW CRITICAL FREEZE ISSUE IDENTIFIED - EVENT CREATION BLOCKED*
-*Status: NEW CRITICAL ISSUE - EVENT CREATION COMPLETELY BLOCKED - NOT READY FOR APP STORE*
+*Version: 4.4 - CRITICAL FREEZE ISSUE RE-EMERGED - EVENT CREATION BLOCKED AGAIN*
+*Status: CRITICAL ISSUE - APP FREEZES ON "CREATE NEW EVENT" BUTTON - NOT READY FOR APP STORE*

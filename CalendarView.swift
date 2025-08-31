@@ -9,10 +9,8 @@ struct CalendarView: View {
     @State private var showingCreateEvent = false
     
     // Inline form state variables
-    @State private var eventTitle = ""
-    @State private var eventStartDate = Date()
-    @State private var eventEndDate = Date().addingTimeInterval(3600)
     @State private var todoTitle = ""
+    @State private var todoDescription = ""
     @State private var todoDueDate = Date()
     @State private var selectedEvent: GoogleCalendarEvent?
     @State private var calendarEvents: [GoogleCalendarEvent] = []
@@ -56,9 +54,10 @@ struct CalendarView: View {
                 )
                     .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
-                    // Google Calendar Style Header
+                ScrollView {
                     VStack(spacing: 0) {
+                        // Google Calendar Style Header
+                        VStack(spacing: 0) {
                         // Month/Year Title with Navigation
                         HStack {
                             Button(action: previousMonth) {
@@ -226,58 +225,7 @@ struct CalendarView: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
-                                // Inline Event Creation Form
-                                if showingCreateEvent {
-                                    VStack(spacing: 16) {
-                                        Divider()
-                                        
-                                        // Simple inline form for quick event creation
-                                        VStack(spacing: 12) {
-                                            TextField("Event Title", text: $eventTitle)
-                                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                            
-                                            HStack {
-                                                DatePicker("Start", selection: $eventStartDate, displayedComponents: [.date, .hourAndMinute])
-                                                DatePicker("End", selection: $eventEndDate, displayedComponents: [.date, .hourAndMinute])
-                                            }
-                                            
-                                            HStack {
-                                                Button("Cancel") {
-                                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                                        showingCreateEvent = false
-                                                        // Reset form
-                                                        eventTitle = ""
-                                                        eventStartDate = Date()
-                                                        eventEndDate = Date().addingTimeInterval(3600)
-                                                    }
-                                                }
-                                                .buttonStyle(.bordered)
-                                                
-                                                Button("Create") {
-                                                    // Create the event
-                                                    if !eventTitle.isEmpty {
-                                                        // TODO: Implement actual event creation with viewModel
-                                                        print("Creating event: \(eventTitle) from \(eventStartDate) to \(eventEndDate)")
-                                                    }
-                                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                                        showingCreateEvent = false
-                                                        // Reset form
-                                                        eventTitle = ""
-                                                        eventStartDate = Date()
-                                                        eventEndDate = Date().addingTimeInterval(3600)
-                                                    }
-                                                }
-                                                .disabled(eventTitle.isEmpty)
-                                                .buttonStyle(.borderedProminent)
-                                            }
-                                        }
-                                        .padding(.horizontal, 16)
-                                        .padding(.bottom, 16)
-                                    }
-                                    .background(Color(.secondarySystemBackground))
-                                    .cornerRadius(8)
-                                    .transition(.move(edge: .top).combined(with: .opacity))
-                                }
+                                // Event creation will be handled by sheet presentation
                             }
                             
                             // Import Events Section
@@ -444,9 +392,10 @@ struct CalendarView: View {
                         }
                         .padding(.horizontal)
                         .padding(.top, 8)
+                        .padding(.bottom, 20) // Add bottom padding for better spacing
                     }
                 }
-                
+                }
 
                 // HStack(spacing: 12) {
                 //     Button(action: { showingCreateEvent = true }) {
@@ -526,6 +475,12 @@ struct CalendarView: View {
                         viewModel: viewModel
                     )
                 }
+            }
+            .sheet(isPresented: $showingCreateEvent) {
+                CreateCalendarEventView(
+                    viewModel: viewModel,
+                    preselectedDate: selectedDate
+                )
             }
         }
     }
