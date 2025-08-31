@@ -16,7 +16,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2654"
             endingLineNumber = "2654"
-            landmarkName = "dateTimeSection"
+            landmarkName = "locationInputView"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
@@ -32,7 +32,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2598"
             endingLineNumber = "2598"
-            landmarkName = "body"
+            landmarkName = "startDateTimeView"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
@@ -48,7 +48,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2602"
             endingLineNumber = "2602"
-            landmarkName = "body"
+            landmarkName = "startDateTimeView"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
