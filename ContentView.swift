@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 
@@ -2463,17 +2462,12 @@ struct CreateCalendarEventView: View {
     @State private var eventDescription = ""
     @State private var startDate: Date
     @State private var endDate: Date
-    @State private var location = ""
     @State private var isAllDay = false
-    @State private var selectedCalendar: String = "primary"
-    @State private var recurringPattern: RecurringPattern?
+    @State private var location = ""
     @State private var showingRecurringPatternView = false
-    
-    // Location suggestions
+    @State private var selectedRecurringPattern: RecurringPattern?
     @State private var showingLocationSuggestions = false
     @State private var locationSuggestions: [String] = []
-    @State private var isSearchingLocation = false
-    @State private var searchTask: Task<Void, Never>?
     
     init(viewModel: DashboardViewModel, preselectedDate: Date) {
         self.viewModel = viewModel
@@ -2482,368 +2476,29 @@ struct CreateCalendarEventView: View {
         self._endDate = State(initialValue: preselectedDate.addingTimeInterval(3600)) // 1 hour later
     }
     
-    // MARK: - Location Search
-    private func searchLocations(query: String) {
-        guard query.count >= 3 else {
-            locationSuggestions = []
-            showingLocationSuggestions = false
-            return
-        }
-        
-        // Cancel any previous search
-        searchTask?.cancel()
-        
-        isSearchingLocation = true
-        
-        // Create a new search task with debouncing
-        searchTask = Task {
-            // Wait a bit to debounce rapid typing
-            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
-            
-            // Check if task was cancelled
-            if Task.isCancelled { return }
-            
-            let commonPlaces = [
-                "Coffee Shop",
-                "Restaurant",
-                "Office Building",
-                "Shopping Mall",
-                "Park",
-                "Gym",
-                "Library",
-                "Hospital",
-                "School",
-                "Airport",
-                "Gas Station",
-                "Bank",
-                "Post Office",
-                "Pharmacy",
-                "Supermarket"
-            ]
-            
-            // Filter places that contain the query
-            let filtered = commonPlaces.filter { place in
-                place.lowercased().contains(query.lowercased())
-            }
-            
-            // Add some generic suggestions based on query
-            var suggestions = filtered
-            if query.lowercased().contains("coffee") || query.lowercased().contains("cafe") {
-                suggestions.append("Starbucks")
-                suggestions.append("Local Coffee Shop")
-                suggestions.append("Coffee Bean")
-            }
-            if query.lowercased().contains("restaurant") || query.lowercased().contains("food") {
-                suggestions.append("McDonald's")
-                suggestions.append("Local Restaurant")
-                suggestions.append("Pizza Place")
-            }
-            if query.lowercased().contains("office") || query.lowercased().contains("work") {
-                suggestions.append("Downtown Office")
-                suggestions.append("Business Center")
-                suggestions.append("Corporate Building")
-            }
-            if query.lowercased().contains("shop") || query.lowercased().contains("store") {
-                suggestions.append("Local Store")
-                suggestions.append("Shopping Center")
-                suggestions.append("Retail Store")
-            }
-            
-            // Always show some suggestions if we have a query
-            if suggestions.isEmpty {
-                suggestions = ["\(query) Location", "Near \(query)", "\(query) Area"]
-            }
-            
-            // Limit to 6 suggestions
-            await MainActor.run {
-                if !Task.isCancelled {
-                    self.locationSuggestions = Array(suggestions.prefix(6))
-                    self.showingLocationSuggestions = true
-                    self.isSearchingLocation = false
-                }
-            }
-        }
-    }
-    
     var body: some View {
         NavigationView {
-            ZStack {
-                // Beautiful pastel background
-                PastelTheme.primaryGradient
-                    .ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Background tap to dismiss location suggestions
-                        Color.clear
-                            .frame(height: 1)
-                            .onTapGesture {
-                                showingLocationSuggestions = false
-                            }
-                        // Event Details Card
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Image(systemName: "calendar.badge.plus")
-                                    .foregroundColor(PastelTheme.primary)
-                                Text("Event Details")
-                                    .font(.headline)
-                                    .foregroundColor(PastelTheme.primaryText)
-                            }
-                            
-                            TextField("Event Title", text: $eventTitle)
-                                .textFieldStyle(PastelTextFieldStyle())
-                            
-                            TextField("Description", text: $eventDescription, axis: .vertical)
-                                .textFieldStyle(PastelTextFieldStyle())
-                            
-                            // Enhanced Location Field with Suggestions
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Image(systemName: "location.fill")
-                                        .foregroundColor(PastelTheme.softMint)
-                                        .font(.system(size: 16))
-                                    
-                                    TextField("Location (optional)", text: $location)
-                                        .textFieldStyle(PastelTextFieldStyle())
-                                        .onChange(of: location) { _, newValue in
-                                            // Only search if we have enough characters and the query actually changed
-                                            if newValue.count >= 3 {
-                                                // Debounce the search to prevent excessive calls
-                                                searchLocations(query: newValue)
-                                            } else {
-                                                // Clear suggestions for short queries
-                                                showingLocationSuggestions = false
-                                                locationSuggestions = []
-                                                // Cancel any ongoing search
-                                                searchTask?.cancel()
-                                            }
-                                        }
-                                        .onTapGesture {
-                                            if !location.isEmpty && location.count >= 3 {
-                                                showingLocationSuggestions = true
-                                            }
-                                        }
-                                        .onSubmit {
-                                            // Hide suggestions when user submits
-                                            showingLocationSuggestions = false
-                                        }
-                                }
-                                
-                                // Location Suggestions Dropdown
-                                if showingLocationSuggestions && !locationSuggestions.isEmpty {
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        ForEach(locationSuggestions, id: \.self) { suggestion in
-                                            Button(action: {
-                                                location = suggestion
-                                                showingLocationSuggestions = false
-                                                locationSuggestions = []
-                                            }) {
-                                                HStack(spacing: 12) {
-                                                    Image(systemName: "mappin.circle.fill")
-                                                        .foregroundColor(PastelTheme.primary)
-                                                        .font(.system(size: 16))
-                                                    
-                                                    Text(suggestion)
-                                                        .font(.system(size: 14, weight: .medium))
-                                                        .foregroundColor(PastelTheme.primaryText)
-                                                        .lineLimit(2)
-                                                    
-                                                    Spacer()
-                                                }
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 12)
-                                                .background(Color.white.opacity(0.9))
-                                                .cornerRadius(8)
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                            
-                                            if suggestion != locationSuggestions.last {
-                                                Divider()
-                                                    .padding(.leading, 44)
-                                            }
-                                        }
-                                    }
-                                    .background(PastelTheme.cardGradient)
-                                    .cornerRadius(12)
-                                    .shadow(color: PastelTheme.shadow.opacity(0.3), radius: 4, x: 0, y: 2)
-                                    .padding(.top, 4)
-                                    .onTapGesture {
-                                        // Prevent tap from dismissing suggestions when tapping on the dropdown itself
-                                    }
-                                }
-                                
-                                // Search Status Indicators
-                                if isSearchingLocation {
-                                    HStack(spacing: 8) {
-                                        ProgressView()
-                                            .scaleEffect(0.8)
-                                            .progressViewStyle(CircularProgressViewStyle(tint: PastelTheme.primary))
-                                        
-                                        Text("Searching locations...")
-                                            .font(.caption)
-                                            .foregroundColor(PastelTheme.secondaryText)
-                                    }
-                                    .padding(.leading, 44)
-                                }
-                            }
-                            
-                            Toggle("All Day Event", isOn: $isAllDay)
-                                .toggleStyle(PastelToggleStyle())
-                        }
-                        .padding(20)
-                        .background(PastelTheme.cardGradient)
-                        .cornerRadius(16)
-                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
-                        
-                        // Date & Time Card
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Image(systemName: "clock")
-                                    .foregroundColor(PastelTheme.softMint)
-                                Text("Date & Time")
-                                    .font(.headline)
-                                    .foregroundColor(PastelTheme.primaryText)
-                            }
-                            
-                            if isAllDay {
-                                DatePicker("Date", selection: $startDate, displayedComponents: .date)
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .accentColor(PastelTheme.primary)
-                            } else {
-                                DatePicker("Start Time", selection: $startDate)
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .accentColor(PastelTheme.primary)
-                                DatePicker("End Time", selection: $endDate)
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .accentColor(PastelTheme.primary)
-                            }
-                        }
-                        .padding(20)
-                        .background(PastelTheme.cardGradient)
-                        .cornerRadius(16)
-                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
-                        
-                        // Calendar Selection Card
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Image(systemName: "calendar")
-                                    .foregroundColor(PastelTheme.softBlue)
-                                Text("Calendar")
-                                    .font(.headline)
-                                    .foregroundColor(PastelTheme.primaryText)
-                            }
-                            
-                            Picker("Calendar", selection: $selectedCalendar) {
-                                Text("Primary Calendar").tag("primary")
-                                // Add more calendar options here when available
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                            .accentColor(PastelTheme.primary)
-                        }
-                        .padding(20)
-                        .background(PastelTheme.cardGradient)
-                        .cornerRadius(16)
-                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
-                        
-                        // Recurring Pattern Card
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Image(systemName: "repeat")
-                                    .foregroundColor(PastelTheme.softPeach)
-                                Text("Recurring")
-                                    .font(.headline)
-                                    .foregroundColor(PastelTheme.primaryText)
-                            }
-                            
-                            // Single recurring option that opens the enhanced popup
-                            Button(action: {
-                                showingRecurringPatternView = true
-                            }) {
-                                HStack {
-                                    Image(systemName: recurringPattern != nil ? "repeat.circle.fill" : "repeat.circle")
-                                        .foregroundColor(recurringPattern != nil ? PastelTheme.softPeach : PastelTheme.softPeach)
-                                        .font(.system(size: 18))
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(recurringPattern != nil ? "Recurring Pattern Set" : "Set Recurring Pattern")
-                                            .foregroundColor(PastelTheme.primaryText)
-                                            .fontWeight(.medium)
-                                        if let pattern = recurringPattern {
-                                            Text(pattern.description)
-                                                .foregroundColor(PastelTheme.secondaryText)
-                                                .font(.caption)
-                                        }
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(PastelTheme.secondaryText)
-                                        .font(.system(size: 14))
-                                }
-                                .padding(16)
-                                .background(recurringPattern != nil ? PastelTheme.softPeach.opacity(0.1) : PastelTheme.inputBackground)
-                                .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(recurringPattern != nil ? PastelTheme.softPeach : PastelTheme.inputBorder, lineWidth: 0.5)
-                                )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                        // Custom popup overlay for recurring patterns
-                        .overlay(
-                            Group {
-                                if showingRecurringPatternView {
-                                    VStack {
-                                        Spacer()
-                                        HStack {
-                                            Spacer()
-                                            VStack(alignment: .leading, spacing: 0) {
-                                                RecurringPatternView(
-                                                    recurringPattern: $recurringPattern,
-                                                    selectedDate: startDate,
-                                                    viewModel: viewModel
-                                                )
-                                                .frame(maxWidth: 350, maxHeight: 400)
-                                                .background(PastelTheme.cardGradient)
-                                                .cornerRadius(16)
-                                                .shadow(color: PastelTheme.shadow, radius: 12, x: 0, y: 8)
-                                                .overlay(
-                                                    // Close button
-                                                    VStack {
-                                                        HStack {
-                                                            Spacer()
-                                                            Button(action: {
-                                                                showingRecurringPatternView = false
-                                                            }) {
-                                                                Image(systemName: "xmark.circle.fill")
-                                                                    .foregroundColor(PastelTheme.secondaryText)
-                                                                    .font(.system(size: 24))
-                                                                    .background(Color.white, in: Circle())
-                                                            }
-                                                            .padding(.top, 8)
-                                                            .padding(.trailing, 8)
-                                                        }
-                                                        Spacer()
-                                                    }
-                                                )
-                                            }
-                                            .padding(.trailing, 20)
-                                        }
-                                        .padding(.bottom, 20)
-                                    }
-                                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
-                                    .animation(.easeInOut(duration: 0.2), value: showingRecurringPatternView)
-                                }
-                            }
-                        )
-                        .padding(20)
-                        .background(PastelTheme.cardGradient)
-                        .cornerRadius(16)
-                        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
-                    }
-                    .padding(20)
+            ScrollView {
+                VStack(spacing: 24) {
+                    eventTitleSection
+                    eventDescriptionSection
+                    dateTimeSection
+                    locationSection
+                    recurringPatternSection
+                    
+                    Spacer(minLength: 100)
                 }
+                .padding(.vertical)
             }
-            .navigationTitle("New Event")
+            .background(
+                LinearGradient(
+                    colors: [PastelTheme.background, PastelTheme.secondaryBackground],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            )
+            .navigationTitle("Create New Event")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -2852,28 +2507,283 @@ struct CreateCalendarEventView: View {
                     }
                     .foregroundColor(PastelTheme.primary)
                 }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Create") {
                         createEvent()
                     }
                     .disabled(eventTitle.isEmpty)
-                    .foregroundColor(eventTitle.isEmpty ? PastelTheme.secondaryText : PastelTheme.softMint)
-                    .fontWeight(.semibold)
-                    .opacity(eventTitle.isEmpty ? 0.6 : 1.0)
+                    .foregroundColor(eventTitle.isEmpty ? PastelTheme.secondaryText : PastelTheme.primary)
                 }
+            }
+            .sheet(isPresented: $showingRecurringPatternView) {
+                RecurringPatternView(recurringPattern: $selectedRecurringPattern, selectedDate: startDate, viewModel: viewModel)
+                    .presentationDetents([.medium, .large])
+            }
+            .onTapGesture {
+                showingLocationSuggestions = false
             }
         }
     }
     
+    // MARK: - Helper Views
+    private var eventTitleSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Event Title", systemImage: "textformat")
+                .font(.headline)
+                .foregroundColor(PastelTheme.primaryText)
+            
+            TextField("Enter event title", text: $eventTitle)
+                .textFieldStyle(PastelTextFieldStyle())
+        }
+        .padding(.horizontal)
+    }
+    
+    private var eventDescriptionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Description", systemImage: "text.alignleft")
+                .font(.headline)
+                .foregroundColor(PastelTheme.primaryText)
+            
+            TextField("Add event description (optional)", text: $eventDescription, axis: .vertical)
+                .textFieldStyle(PastelTextFieldStyle())
+                .lineLimit(3...6)
+        }
+        .padding(.horizontal)
+    }
+    
+    private var dateTimeSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label("Date & Time", systemImage: "calendar")
+                .font(.headline)
+                .foregroundColor(PastelTheme.primaryText)
+            
+            VStack(spacing: 12) {
+                Toggle("All Day", isOn: $isAllDay)
+                    .toggleStyle(PastelToggleStyle())
+                
+                if !isAllDay {
+                    startDateTimeView
+                    endDateTimeView
+                } else {
+                    allDayDateView
+                }
+            }
+            .padding()
+            .background(PastelTheme.inputBackground)
+            .cornerRadius(12)
+        }
+        .padding(.horizontal)
+    }
+    
+    private var startDateTimeView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Start")
+                .font(.subheadline)
+                .foregroundColor(PastelTheme.secondaryText)
+            
+            DatePicker("Start Date", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .onChange(of: startDate) { oldValue, newStartDate in
+                    if endDate <= newStartDate {
+                        endDate = newStartDate.addingTimeInterval(3600)
+                    }
+                }
+        }
+    }
+    
+    private var endDateTimeView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("End")
+                .font(.subheadline)
+                .foregroundColor(PastelTheme.secondaryText)
+            
+            DatePicker("End Date", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .onChange(of: endDate) { oldValue, newEndDate in
+                    if newEndDate <= startDate {
+                        startDate = newEndDate.addingTimeInterval(-3600)
+                    }
+                }
+        }
+    }
+    
+    private var allDayDateView: some View {
+        DatePicker("Date", selection: $startDate, displayedComponents: [.date])
+            .datePickerStyle(.compact)
+            .labelsHidden()
+    }
+    
+    private var locationSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Location", systemImage: "location")
+                .font(.headline)
+                .foregroundColor(PastelTheme.primaryText)
+            
+            locationInputView
+            locationSuggestionsView
+        }
+        .padding(.horizontal)
+    }
+    
+    private var locationInputView: some View {
+        ZStack(alignment: .trailing) {
+            TextField("Add location (optional)", text: $location)
+                .textFieldStyle(PastelTextFieldStyle())
+                                                .onChange(of: location) { oldValue, newLocation in
+                                    if newLocation.count >= 3 {
+                                        searchLocationSuggestions(query: newLocation)
+                                        showingLocationSuggestions = true
+                                    } else {
+                                        showingLocationSuggestions = false
+                                    }
+                                }
+            
+            if !location.isEmpty {
+                Button(action: {
+                    location = ""
+                    showingLocationSuggestions = false
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(PastelTheme.secondaryText)
+                }
+                .padding(.trailing, 12)
+            }
+        }
+    }
+    
+    private var locationSuggestionsView: some View {
+        Group {
+            if showingLocationSuggestions && !locationSuggestions.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(locationSuggestions, id: \.self) { suggestion in
+                        locationSuggestionRow(suggestion)
+                        
+                        if suggestion != locationSuggestions.last {
+                            Divider()
+                                .padding(.leading, 48)
+                        }
+                    }
+                }
+                .background(Color.white)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
+                )
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            }
+        }
+    }
+    
+    private func locationSuggestionRow(_ suggestion: String) -> some View {
+        Button(action: {
+            location = suggestion
+            showingLocationSuggestions = false
+        }) {
+            HStack {
+                Image(systemName: "mappin.circle")
+                    .foregroundColor(PastelTheme.softMint)
+                Text(suggestion)
+                    .foregroundColor(PastelTheme.primaryText)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.white)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var recurringPatternSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Recurring Pattern", systemImage: "repeat")
+                .font(.headline)
+                .foregroundColor(PastelTheme.primaryText)
+            
+            recurringPatternButton
+            
+            if let pattern = selectedRecurringPattern {
+                Text(pattern.description)
+                    .font(.subheadline)
+                    .foregroundColor(PastelTheme.secondaryText)
+                    .padding(.horizontal)
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private var recurringPatternButton: some View {
+        Button(action: {
+            showingRecurringPatternView = true
+        }) {
+            HStack {
+                Image(systemName: selectedRecurringPattern != nil ? "repeat.circle.fill" : "repeat.circle")
+                    .foregroundColor(PastelTheme.softMint)
+                
+                Text(selectedRecurringPattern != nil ? "Recurring Pattern Set" : "Set Recurring Pattern")
+                    .foregroundColor(PastelTheme.primaryText)
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(PastelTheme.secondaryText)
+                    .font(.caption)
+            }
+            .padding()
+            .background(selectedRecurringPattern != nil ? PastelTheme.softMint.opacity(0.1) : PastelTheme.inputBackground)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(selectedRecurringPattern != nil ? PastelTheme.softMint : PastelTheme.inputBorder, lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func searchLocationSuggestions(query: String) {
+        let commonPlaces = [
+            "Coffee Shop", "Restaurant", "Office", "Home", "Gym", "Park",
+            "Shopping Mall", "Airport", "Hotel", "Hospital", "School", "University",
+            "Library", "Museum", "Theater", "Cinema", "Stadium", "Beach",
+            "Mountain", "Lake", "Forest", "Gas Station", "Bank", "Post Office",
+            "Pharmacy", "Supermarket", "Gas Station", "Car Wash", "Salon", "Spa"
+        ]
+        
+        let filtered = commonPlaces.filter { place in
+            place.lowercased().contains(query.lowercased())
+        }
+        
+        locationSuggestions = filtered.isEmpty ? ["No suggestions found"] : filtered
+    }
+    
     private func createEvent() {
-        // For now, just create a todo from this event
-        // Later we'll implement actual Google Calendar event creation
+        // Create a comprehensive event (for future Google Calendar integration)
+        _ = GoogleCalendarEvent(
+            id: UUID().uuidString,
+            summary: eventTitle,
+            description: eventDescription.isEmpty ? nil : eventDescription,
+            startDate: startDate,
+            endDate: endDate,
+            isAllDay: isAllDay,
+            location: location.isEmpty ? nil : location,
+            attendees: [],
+            calendarId: "primary",
+            calendarName: "Primary Calendar",
+            recurringEventId: nil,
+            originalStartTime: nil
+        )
+        
+        // Create a todo from this event
         let todo = Todo(
             title: eventTitle,
             description: eventDescription.isEmpty ? nil : eventDescription,
+            isCompleted: false,
             priority: .medium,
             dueDate: startDate,
-            category: .work // Default to work, could be enhanced
+            category: .personal
         )
         
         viewModel.addTodo(todo)
