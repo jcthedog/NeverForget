@@ -2468,6 +2468,10 @@ struct CreateCalendarEventView: View {
     @State private var selectedRecurringPattern: RecurringPattern?
     @State private var showingLocationSuggestions = false
     @State private var locationSuggestions: [String] = []
+    @State private var searchTask: Task<Void, Never>?
+    @State private var isSearching = false
+    @State private var searchCount = 0
+    @State private var lastSearchTime: Date?
     
     init(viewModel: DashboardViewModel, preselectedDate: Date) {
         self.viewModel = viewModel
@@ -2522,6 +2526,14 @@ struct CreateCalendarEventView: View {
             }
             .onTapGesture {
                 showingLocationSuggestions = false
+            }
+            .onDisappear {
+                // Clean up search task when view disappears
+                searchTask?.cancel()
+                showingLocationSuggestions = false
+                locationSuggestions = []
+                isSearching = false
+                print("🧹 CreateCalendarEventView disappeared, cleaned up search state")
             }
         }
     }
@@ -2633,10 +2645,11 @@ struct CreateCalendarEventView: View {
             TextField("Add location (optional)", text: $location)
                 .textFieldStyle(PastelTextFieldStyle())
                                                 .onChange(of: location) { oldValue, newLocation in
-                                    if newLocation.count >= 3 {
+                                    if newLocation.count >= 3 && newLocation.count <= 50 {
                                         searchLocationSuggestions(query: newLocation)
                                         showingLocationSuggestions = true
                                     } else {
+                                        searchTask?.cancel()
                                         showingLocationSuggestions = false
                                     }
                                 }
@@ -2656,24 +2669,47 @@ struct CreateCalendarEventView: View {
     
     private var locationSuggestionsView: some View {
         Group {
-            if showingLocationSuggestions && !locationSuggestions.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(locationSuggestions, id: \.self) { suggestion in
-                        locationSuggestionRow(suggestion)
-                        
-                        if suggestion != locationSuggestions.last {
-                            Divider()
-                                .padding(.leading, 48)
+            if showingLocationSuggestions {
+                if isSearching {
+                    // Loading state
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                            .foregroundColor(PastelTheme.softMint)
+                        Text("Searching...")
+                            .font(.subheadline)
+                            .foregroundColor(PastelTheme.secondaryText)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
+                    )
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                } else if !locationSuggestions.isEmpty {
+                    // Results
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(locationSuggestions, id: \.self) { suggestion in
+                            locationSuggestionRow(suggestion)
+                            
+                            if suggestion != locationSuggestions.last {
+                                Divider()
+                                    .padding(.leading, 48)
+                            }
                         }
                     }
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
+                    )
+                    .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }
-                .background(Color.white)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
-                )
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
             }
         }
     }
@@ -2744,19 +2780,92 @@ struct CreateCalendarEventView: View {
     }
     
     private func searchLocationSuggestions(query: String) {
-        let commonPlaces = [
-            "Coffee Shop", "Restaurant", "Office", "Home", "Gym", "Park",
-            "Shopping Mall", "Airport", "Hotel", "Hospital", "School", "University",
-            "Library", "Museum", "Theater", "Cinema", "Stadium", "Beach",
-            "Mountain", "Lake", "Forest", "Gas Station", "Bank", "Post Office",
-            "Pharmacy", "Supermarket", "Gas Station", "Car Wash", "Salon", "Spa"
-        ]
+        let startTime = Date()
         
-        let filtered = commonPlaces.filter { place in
-            place.lowercased().contains(query.lowercased())
+        // Rate limiting: prevent searches more frequent than 100ms
+        if let lastSearch = lastSearchTime, startTime.timeIntervalSince(lastSearch) < 0.1 {
+            print("⏸️ Search rate limited: too frequent (last search was \(String(format: "%.3f", startTime.timeIntervalSince(lastSearch)))s ago)")
+            return
         }
         
-        locationSuggestions = filtered.isEmpty ? ["No suggestions found"] : filtered
+        searchCount += 1
+        let currentSearchId = searchCount
+        lastSearchTime = startTime
+        print("🔍 Location search #\(currentSearchId) started for query: '\(query)' at \(startTime)")
+        
+        // Cancel any ongoing search task
+        searchTask?.cancel()
+        
+        // Show loading state
+        isSearching = true
+        
+        // Create new search task with debouncing
+        searchTask = Task {
+            do {
+                print("⏳ Search #\(currentSearchId): Starting 300ms debounce delay...")
+                // Add 300ms debouncing delay
+                try await Task.sleep(nanoseconds: 300_000_000) // 300ms
+                
+                // Check if task was cancelled during delay
+                if Task.isCancelled { 
+                    print("❌ Search #\(currentSearchId): Cancelled during delay")
+                    return 
+                }
+                
+                print("🔍 Search #\(currentSearchId): Performing search operation...")
+                
+                // Add timeout protection: cancel if search takes too long
+                let searchTimeout = Task {
+                    try await Task.sleep(nanoseconds: 2_000_000_000) // 2 second timeout
+                    if !Task.isCancelled {
+                        print("⏰ Search #\(currentSearchId): Timeout reached, cancelling search")
+                        searchTask?.cancel()
+                    }
+                }
+                
+                // Perform search on background thread
+                let commonPlaces = [
+                    "Coffee Shop", "Restaurant", "Office", "Home", "Gym", "Park",
+                    "Shopping Mall", "Airport", "Hotel", "Hospital", "School", "University",
+                    "Library", "Museum", "Theater", "Cinema", "Stadium", "Beach",
+                    "Mountain", "Lake", "Forest", "Gas Station", "Bank", "Post Office",
+                    "Pharmacy", "Supermarket", "Car Wash", "Salon", "Spa"
+                ]
+                
+                let filtered = commonPlaces.filter { place in
+                    place.lowercased().contains(query.lowercased())
+                }
+                
+                // Cancel timeout task since search completed successfully
+                searchTimeout.cancel()
+                
+                let endTime = Date()
+                let duration = endTime.timeIntervalSince(startTime)
+                print("✅ Search #\(currentSearchId): Completed in \(String(format: "%.3f", duration))s, found \(filtered.count) suggestions")
+                
+                // Update UI on main thread only if task wasn't cancelled
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        locationSuggestions = filtered.isEmpty ? ["No suggestions found"] : filtered
+                        isSearching = false
+                        print("🎯 Search #\(currentSearchId): UI updated with \(locationSuggestions.count) suggestions")
+                    }
+                } else {
+                    print("❌ Search #\(currentSearchId): Cancelled before UI update")
+                }
+            } catch {
+                let endTime = Date()
+                let duration = endTime.timeIntervalSince(startTime)
+                print("⚠️ Search #\(currentSearchId): Error after \(String(format: "%.3f", duration))s: \(error)")
+                // Handle any errors gracefully
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        locationSuggestions = ["Error loading suggestions"]
+                        isSearching = false
+                    }
+                }
+            }
+        }
     }
     
     private func createEvent() {
