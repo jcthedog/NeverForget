@@ -2487,9 +2487,8 @@ struct CreateCalendarEventView: View {
                 VStack(spacing: 24) {
                     eventTitleSection
                     eventDescriptionSection
-                    dateTimeSection
-                    locationSection
-                    recurringPatternSection
+                    locationSection  // Moved here, below description
+                    dateTimeSection  // Now includes recurring patterns
                     
                     Spacer(minLength: 100)
                 }
@@ -2521,90 +2520,7 @@ struct CreateCalendarEventView: View {
                     .foregroundColor(eventTitle.isEmpty ? PastelTheme.secondaryText : PastelTheme.primary)
                 }
             }
-            .overlay(
-                Group {
-                    if showingRecurringPatternView {
-                        // Background overlay for dismissal
-                        Color.black.opacity(0.3)
-                            .ignoresSafeArea()
-                            .onTapGesture {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    showingRecurringPatternView = false
-                                }
-                            }
-                        
-                        // Small, compact popup
-                        VStack(spacing: 16) {
-                            // Header
-                            HStack {
-                                Text("Recurring Pattern")
-                                    .font(.headline)
-                                    .foregroundColor(PastelTheme.primaryText)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        showingRecurringPatternView = false
-                                    }
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(PastelTheme.secondaryText)
-                                        .font(.title2)
-                                }
-                            }
-                            
-                            // Compact recurring options
-                            VStack(spacing: 12) {
-                                recurringOptionButton("Every Day", isSelected: isDailyPattern)
-                                recurringOptionButton("Every Week", isSelected: isWeeklyPattern)
-                                recurringOptionButton("Every Month", isSelected: isMonthlyPattern)
-                                recurringOptionButton("Custom", isSelected: isCustomPattern)
-                            }
-                            
-                            // Action buttons
-                            HStack(spacing: 12) {
-                                Button("Cancel") {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        showingRecurringPatternView = false
-                                    }
-                                }
-                                .foregroundColor(PastelTheme.secondaryText)
-                                
-                                Button("Advanced") {
-                                    // Open full RecurringPatternView in sheet
-                                    showingRecurringPatternView = false
-                                    showingAdvancedRecurringView = true
-                                }
-                                .foregroundColor(PastelTheme.primary)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(PastelTheme.primary.opacity(0.1))
-                                )
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                            }
-                        }
-                        .padding(20)
-                        .frame(maxWidth: 300)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(PastelTheme.cardBackground)
-                                .shadow(color: PastelTheme.shadow.opacity(0.15), radius: 10, x: 0, y: 5)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(PastelTheme.inputBorder, lineWidth: 0.5)
-                        )
-                        .offset(y: -60) // Position above the button
-                        .transition(.asymmetric(
-                            insertion: .scale(scale: 0.9).combined(with: .opacity),
-                            removal: .scale(scale: 0.9).combined(with: .opacity)
-                        ))
-                        .animation(.easeInOut(duration: 0.2), value: showingRecurringPatternView)
-                    }
-                }
-            )
+
             .onTapGesture {
                 showingLocationSuggestions = false
             }
@@ -2739,6 +2655,117 @@ struct CreateCalendarEventView: View {
                     endDateTimeView
                 } else {
                     allDayDateView
+                }
+                
+                // Recurring Pattern Section - Integrated into Date & Time
+                VStack(alignment: .leading, spacing: 12) {
+                    Divider()
+                        .padding(.vertical, 8)
+                    
+                    HStack {
+                        Label("Recurring Pattern", systemImage: "repeat")
+                            .font(.subheadline)
+                            .foregroundColor(PastelTheme.primaryText)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            print("🔘 Set Recurring Pattern button tapped")
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showingRecurringPatternView.toggle()
+                            }
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: selectedRecurringPattern != nil ? "repeat.circle.fill" : "repeat.circle")
+                                    .foregroundColor(PastelTheme.softMint)
+                                    .font(.caption)
+                                
+                                Text(selectedRecurringPattern != nil ? "Pattern Set" : "Set Pattern")
+                                    .font(.caption)
+                                    .foregroundColor(PastelTheme.softMint)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(PastelTheme.softMint.opacity(0.1))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(PastelTheme.softMint, lineWidth: 0.5)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    
+                    // Expandable Recurring Pattern Options
+                    if showingRecurringPatternView {
+                        VStack(spacing: 8) {
+                            // Simple pattern options
+                            Button("Every Day") {
+                                print("📅 Every Day selected")
+                                selectedRecurringPattern = .daily(interval: 1)
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showingRecurringPatternView = false
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(PastelTheme.softMint.opacity(0.1))
+                            .foregroundColor(PastelTheme.softMint)
+                            .cornerRadius(6)
+                            
+                            Button("Every Week") {
+                                print("📅 Every Week selected")
+                                selectedRecurringPattern = .weekly(interval: 1, days: [1, 2, 3, 4, 5, 6, 0])
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showingRecurringPatternView = false
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(PastelTheme.softMint.opacity(0.1))
+                            .foregroundColor(PastelTheme.softMint)
+                            .cornerRadius(6)
+                            
+                            Button("Every Month") {
+                                print("📅 Every Month selected")
+                                selectedRecurringPattern = .monthly(interval: 1)
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showingRecurringPatternView = false
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(PastelTheme.softMint.opacity(0.1))
+                            .foregroundColor(PastelTheme.softMint)
+                            .cornerRadius(6)
+                            
+                            // Advanced button
+                            Button("Advanced Options") {
+                                showingRecurringPatternView = false
+                                showingAdvancedRecurringView = true
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(PastelTheme.primary.opacity(0.1))
+                            .foregroundColor(PastelTheme.primary)
+                            .cornerRadius(6)
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                    
+                    // Show selected pattern if one is set
+                    if let pattern = selectedRecurringPattern {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(PastelTheme.softMint)
+                                .font(.caption)
+                            Text(pattern.description)
+                                .font(.caption)
+                                .foregroundColor(PastelTheme.secondaryText)
+                            Spacer()
+                        }
+                        .padding(.top, 4)
+                    }
                 }
             }
             .padding()
@@ -2910,51 +2937,7 @@ struct CreateCalendarEventView: View {
         .buttonStyle(PlainButtonStyle())
     }
     
-    private var recurringPatternSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("Recurring Pattern", systemImage: "repeat")
-                .font(.headline)
-                .foregroundColor(PastelTheme.primaryText)
-            
-            recurringPatternButton
-            
-            if let pattern = selectedRecurringPattern {
-                Text(pattern.description)
-                    .font(.subheadline)
-                    .foregroundColor(PastelTheme.secondaryText)
-                    .padding(.horizontal)
-            }
-        }
-        .padding(.horizontal)
-    }
-    
-    private var recurringPatternButton: some View {
-        Button(action: {
-            showingRecurringPatternView = true
-        }) {
-            HStack {
-                Image(systemName: selectedRecurringPattern != nil ? "repeat.circle.fill" : "repeat.circle")
-                    .foregroundColor(PastelTheme.softMint)
-                
-                Text(selectedRecurringPattern != nil ? "Recurring Pattern Set" : "Set Recurring Pattern")
-                    .foregroundColor(PastelTheme.primaryText)
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(PastelTheme.secondaryText)
-                    .font(.caption)
-            }
-            .padding()
-            .background(selectedRecurringPattern != nil ? PastelTheme.softMint.opacity(0.1) : PastelTheme.inputBackground)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(selectedRecurringPattern != nil ? PastelTheme.softMint : PastelTheme.inputBorder, lineWidth: 0.5)
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
+    // Recurring pattern functionality is now integrated into dateTimeSection
     
     private func searchLocationSuggestions(query: String) {
         let startTime = Date()

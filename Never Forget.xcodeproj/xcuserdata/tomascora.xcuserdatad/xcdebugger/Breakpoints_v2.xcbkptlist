@@ -16,15 +16,15 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2654"
             endingLineNumber = "2654"
-            landmarkName = "recurringOptionButton(_:isSelected:)"
-            landmarkType = "7">
+            landmarkName = "dateTimeSection"
+            landmarkType = "24">
             <Locations>
                <Location
-                  uuid = "55104590-829A-48A1-94B4-DCB2C455AD3A - 565f508839070a81"
+                  uuid = "55104590-829A-48A1-94B4-DCB2C455AD3A - 14e6d5b51df1566c"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0)&gt; in Never_Forget.CreateCalendarEventView.dateTimeSection.getter : some"
+                  symbolName = "Never_Forget.CreateCalendarEventView.isCustomPattern.getter : Swift.Bool"
                   moduleName = "Never Forget.debug.dylib"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/tomascora/Library/Mobile%20Documents/com~apple~CloudDocs/App%20Builds/Never%20Forget/ContentView.swift"
@@ -34,11 +34,11 @@
                   endingLineNumber = "2654">
                </Location>
                <Location
-                  uuid = "55104590-829A-48A1-94B4-DCB2C455AD3A - 86f6ff96c855b6fd"
+                  uuid = "55104590-829A-48A1-94B4-DCB2C455AD3A - c70833fc87dd6658"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onChange&lt;&#x3c4;_0_0 where &#x3c4;_1_0: Swift.Equatable&gt;(of: &#x3c4;_1_0, initial: Swift.Bool, _: (&#x3c4;_1_0, &#x3c4;_1_0) -&gt; ()) -&gt; some&gt;&gt;.0, Swift.Optional&lt;&lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0&gt;)&gt; in Never_Forget.CreateCalendarEventView.locationInputView.getter : some"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.toggleStyle&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.ToggleStyle&gt;(&#x3c4;_1_0) -&gt; some&gt;&gt;.0, SwiftUI._ConditionalContent&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of Never_Forget.CreateCalendarEventView.startDateTimeView : some&gt;&gt;.0, &lt;&lt;opaque return type of Never_Forget.CreateCalendarEventView.endDateTimeView : some&gt;&gt;.0)&gt;, &lt;&lt;opaque return type of Never_Forget.CreateCalendarEventView.allDayDateView : some&gt;&gt;.0&gt;, SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0, SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0, SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.buttonStyle&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.PrimitiveButtonStyle&gt;(&#x3c4;_1_0) -&gt; some&gt;&gt;.0)&gt;&gt;, Swift.Optional&lt;&lt;&lt;opaque return type of SwiftUI.View.transition&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.Transition&gt;(&#x3c4;_1_0) -&gt; some&gt;&gt;.0&gt;, Swift.Optional&lt;&lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0&gt;)&gt;&gt;)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0)&gt; in Never_Forget.CreateCalendarEventView.dateTimeSection.getter : some"
                   moduleName = "Never Forget.debug.dylib"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/tomascora/Library/Mobile%20Documents/com~apple~CloudDocs/App%20Builds/Never%20Forget/ContentView.swift"
@@ -62,8 +62,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2598"
             endingLineNumber = "2598"
-            landmarkName = "body"
-            landmarkType = "24">
+            landmarkName = "recurringOptionButton(_:isSelected:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -78,15 +78,15 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "2602"
             endingLineNumber = "2602"
-            landmarkName = "body"
-            landmarkType = "24">
+            landmarkName = "recurringOptionButton(_:isSelected:)"
+            landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "2BAF8F37-068C-4ED6-A709-D17EEC48ECC6 - 84d82b259b19bb82"
+                  uuid = "2BAF8F37-068C-4ED6-A709-D17EEC48ECC6 - d728390d9bb843de"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "closure #5 () -&gt; () in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.onDisappear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0 in Never_Forget.CreateCalendarEventView.body.getter : some"
+                  symbolName = "closure #2 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0)&gt; in closure #6 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0)&gt;&gt;, SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0)&gt;&gt;, SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0, &lt;&lt;opaque return type of SwiftUI.View.cornerRadius(_: CoreGraphics.CGFloat, antialiased: Swift.Bool) -&gt; some&gt;&gt;.0)&gt;&gt;)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onDisappear(perform: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; some&gt;&gt;.0, Swift.Optional&lt;&lt;&lt;opaque return type of SwiftUI.View.animation&lt;&#x3c4;_0_0 where &#x3c4;_1_0: Swift.Equatable&gt;(_: Swift.Optional&lt;SwiftUI.Animation&gt;, value: &#x3c4;_1_0) -&gt; some&gt;&gt;.0&gt;)&gt; in Never_Forget.CreateCalendarEventView.body.getter : some"
                   moduleName = "Never Forget.debug.dylib"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/tomascora/Library/Mobile%20Documents/com~apple~CloudDocs/App%20Builds/Never%20Forget/ContentView.swift"
@@ -96,11 +96,11 @@
                   endingLineNumber = "2602">
                </Location>
                <Location
-                  uuid = "2BAF8F37-068C-4ED6-A709-D17EEC48ECC6 - e63bb4224665f853"
+                  uuid = "2BAF8F37-068C-4ED6-A709-D17EEC48ECC6 - e014a2030bdfc4a4"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (Foundation.Date, Foundation.Date) -&gt; () in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Text, &lt;&lt;opaque return type of SwiftUI.View.onChange&lt;&#x3c4;_0_0 where &#x3c4;_1_0: Swift.Equatable&gt;(of: &#x3c4;_1_0, initial: Swift.Bool, _: (&#x3c4;_1_0, &#x3c4;_1_0) -&gt; ()) -&gt; some&gt;&gt;.0)&gt; in Never_Forget.CreateCalendarEventView.startDateTimeView.getter : some"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Spacer, Swift.Optional&lt;&lt;&lt;opaque return type of SwiftUI.View.font(Swift.Optional&lt;SwiftUI.Font&gt;) -&gt; some&gt;&gt;.0&gt;)&gt; in closure #2 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.overlay&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.View&gt;(_: &#x3c4;_1_0, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0 in Never_Forget.CreateCalendarEventView.recurringOptionButton(_: Swift.String, isSelected: Swift.Bool) -&gt; some"
                   moduleName = "Never Forget.debug.dylib"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/tomascora/Library/Mobile%20Documents/com~apple~CloudDocs/App%20Builds/Never%20Forget/ContentView.swift"
