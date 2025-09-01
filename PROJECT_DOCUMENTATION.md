@@ -1,15 +1,21 @@
 # Never Forget - iOS Task Management App
 
-## 🎯 **WORKING VERSION v4.0 - FULL DATA INTEGRATION COMPLETE**
+## 🎯 **WORKING VERSION v4.1 - BUG FIXES & UI IMPROVEMENTS COMPLETE**
 
-### **📅 Last Updated: September 1, 2025 - WORKING VERSION WITH REAL DATA**
-### **🏷️ Version: v4.0 - Full Data Integration & Clean Slate**
+### **📅 Last Updated: September 1, 2025 - BUG FIXES APPLIED**
+### **🏷️ Version: v4.1 - Bug Fixes & UI Improvements**
 ### **🚀 Build Status: SUCCESSFUL - Production Ready**
-### **🏷️ Git Tag: v4.0-working - Clean working version for real user testing**
+### **🏷️ Git Tag: v4.1-bugfixes - Stable version with all critical bugs fixed**
 
-**✅ COMPLETED: Full data integration with clean slate - NO SAMPLE DATA**
+**✅ COMPLETED: All critical bugs fixed - App fully functional without freezing**
 
-### **🆕 NEW FEATURES IN v4.0:**
+### **🆕 BUG FIXES IN v4.1:**
+- **Fixed "Create New" Button Freeze**: Resolved app freeze when clicking "Create New" in Category section by changing sheet to popover presentation
+- **Fixed Non-Functional + Button**: Made the "+" button in Today's Focus section fully functional by converting it from display image to working button
+- **Connected + Button to Add Todo**: The "+" button now properly opens the Add Todo form sheet
+- **Improved UI Responsiveness**: App no longer freezes when interacting with category creation or todo addition
+
+### **🆕 FEATURES IN v4.0:**
 - **Full Data Integration**: CalendarView now uses real data from DashboardViewModel instead of empty arrays
 - **CalendarEvent Management**: Complete CRUD operations for calendar events with persistence
 - **Data Persistence**: Calendar events automatically save/load using UserDefaults
