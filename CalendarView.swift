@@ -10,6 +10,7 @@ struct CalendarView: View {
     @State private var showingCreateTodo = false
     @State private var showingEventDetail: CalendarEvent?
     @State private var showingTodoDetail: Todo?
+    @State private var showingDayDetail: DayDetailData?
     
     // MARK: - Calendar Data
     @State private var calendarEvents: [CalendarEvent] = []
@@ -65,32 +66,23 @@ struct CalendarView: View {
             CreateTodoView(viewModel: viewModel)
         }
         .sheet(item: $showingEventDetail) { event in
-            // Placeholder for EventDetailView - will be implemented later
-            VStack {
-                Text("Event Details")
-                    .font(.title)
-                    .padding()
-                Text("Event: \(event.title)")
-                    .padding()
-                Button("Close") {
-                    showingEventDetail = nil
-                }
-                .padding()
-            }
+            EventDetailView(event: event, todo: nil, viewModel: viewModel)
         }
         .sheet(item: $showingTodoDetail) { todo in
-            // Placeholder for TodoDetailView - will be implemented later
-            VStack {
-                Text("Todo Details")
-                    .font(.title)
-                    .padding()
-                Text("Todo: \(todo.title)")
-                    .padding()
-                Button("Close") {
-                    showingTodoDetail = nil
+            EventDetailView(event: nil, todo: todo, viewModel: viewModel)
+        }
+        .sheet(item: $showingDayDetail) { dayData in
+            DayDetailView(
+                dayData: dayData,
+                onEventTap: { event in
+                    showingDayDetail = nil
+                    showingEventDetail = event
+                },
+                onTodoTap: { todo in
+                    showingDayDetail = nil
+                    showingTodoDetail = todo
                 }
-                .padding()
-            }
+            )
         }
         .onAppear {
             loadCalendarData()
@@ -195,7 +187,12 @@ struct CalendarView: View {
                     events: eventsForDate(selectedDate),
                     todos: todosForDate(selectedDate),
                     onEventTap: { event in showingEventDetail = event },
-                    onTodoTap: { todo in showingTodoDetail = todo }
+                    onTodoTap: { todo in showingTodoDetail = todo },
+                    onDateTap: { date in
+                        let dayEvents = eventsForDate(date)
+                        let dayTodos = todosForDate(date)
+                        showingDayDetail = DayDetailData(date: date, events: dayEvents, todos: dayTodos)
+                    }
                 )
             case .week:
                 WeekView(
@@ -203,7 +200,12 @@ struct CalendarView: View {
                     events: calendarEvents,
                     todos: calendarTodos,
                     onEventTap: { event in showingEventDetail = event },
-                    onTodoTap: { todo in showingTodoDetail = todo }
+                    onTodoTap: { todo in showingTodoDetail = todo },
+                    onDateTap: { date in
+                        let dayEvents = eventsForDate(date)
+                        let dayTodos = todosForDate(date)
+                        showingDayDetail = DayDetailData(date: date, events: dayEvents, todos: dayTodos)
+                    }
                 )
             case .month:
                 MonthView(
@@ -211,7 +213,12 @@ struct CalendarView: View {
                     events: calendarEvents,
                     todos: calendarTodos,
                     onEventTap: { event in showingEventDetail = event },
-                    onTodoTap: { todo in showingTodoDetail = todo }
+                    onTodoTap: { todo in showingTodoDetail = todo },
+                    onDateTap: { date in
+                        let dayEvents = eventsForDate(date)
+                        let dayTodos = todosForDate(date)
+                        showingDayDetail = DayDetailData(date: date, events: dayEvents, todos: dayTodos)
+                    }
                 )
             }
         }
@@ -380,6 +387,14 @@ struct CalendarView: View {
     }
 }
 
+// MARK: - Day Detail Data
+struct DayDetailData: Identifiable {
+    let id = UUID()
+    let date: Date
+    let events: [CalendarEvent]
+    let todos: [Todo]
+}
+
 // MARK: - Calendar View Type Enum
 enum CalendarViewType: String, CaseIterable {
     case today = "Today"
@@ -394,6 +409,7 @@ struct TodayView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         ScrollView {
@@ -406,7 +422,8 @@ struct TodayView: View {
                             events: eventsForHour(hour),
                             todos: todosForHour(hour),
                             onEventTap: onEventTap,
-                            onTodoTap: onTodoTap
+                            onTodoTap: onTodoTap,
+                            onDateTap: onDateTap
                         )
                     }
                 }
@@ -441,6 +458,7 @@ struct WeekView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         ScrollView {
@@ -451,7 +469,8 @@ struct WeekView: View {
                     events: events,
                     todos: todos,
                     onEventTap: onEventTap,
-                    onTodoTap: onTodoTap
+                    onTodoTap: onTodoTap,
+                    onDateTap: onDateTap
                 )
                 .background(Color.white)
                 .cornerRadius(12)
@@ -469,6 +488,7 @@ struct MonthView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         ScrollView {
@@ -479,7 +499,8 @@ struct MonthView: View {
                     events: events,
                     todos: todos,
                     onEventTap: onEventTap,
-                    onTodoTap: onTodoTap
+                    onTodoTap: onTodoTap,
+                    onDateTap: onDateTap
                 )
                 .background(Color.white)
                 .cornerRadius(12)
@@ -497,6 +518,7 @@ struct TimeSlotView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -537,6 +559,12 @@ struct TimeSlotView: View {
         }
         .frame(height: 60)
         .background(Color.white)
+        .onTapGesture {
+            // Create a date for this hour on the current day
+            let calendar = Calendar.current
+            let date = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
+            onDateTap(date)
+        }
     }
     
     private var timeLabel: String {
@@ -636,6 +664,7 @@ struct WeekGridView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -665,7 +694,8 @@ struct WeekGridView: View {
                         events: events,
                         todos: todos,
                         onEventTap: onEventTap,
-                        onTodoTap: onTodoTap
+                        onTodoTap: onTodoTap,
+                        onDateTap: onDateTap
                     )
                 }
             }
@@ -695,6 +725,7 @@ struct WeekTimeSlotView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -731,6 +762,14 @@ struct WeekTimeSlotView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 2)
+                    .onTapGesture {
+                        // Create a date for this day and hour
+                        let calendar = Calendar.current
+                        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+                        let targetDate = calendar.date(byAdding: .day, value: dayIndex, to: weekStart) ?? weekStart
+                        let dateWithHour = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: targetDate) ?? targetDate
+                        onDateTap(dateWithHour)
+                    }
                     
                     if dayIndex < 6 {
                         Rectangle()
@@ -784,6 +823,7 @@ struct MonthGridView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -809,7 +849,8 @@ struct MonthGridView: View {
                         events: eventsForDate(date),
                         todos: todosForDate(date),
                         onEventTap: onEventTap,
-                        onTodoTap: onTodoTap
+                        onTodoTap: onTodoTap,
+                        onDateTap: onDateTap
                     )
                 }
             }
@@ -861,6 +902,7 @@ struct MonthDayView: View {
     let todos: [Todo]
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onDateTap: (Date) -> Void
     
     var body: some View {
         VStack(spacing: 4) {
@@ -893,19 +935,221 @@ struct MonthDayView: View {
         .frame(height: 60)
         .background(Color.white)
         .onTapGesture {
-            if !events.isEmpty || !todos.isEmpty {
-                // Show day detail or first event/todo
-                if let firstEvent = events.first {
-                    onEventTap(firstEvent)
-                } else if let firstTodo = todos.first {
-                    onTodoTap(firstTodo)
-                }
-            }
+            // Always show day detail popup when tapping on a date
+            onDateTap(date)
         }
     }
     
     private var isToday: Bool {
         Calendar.current.isDateInToday(date)
+    }
+}
+
+// MARK: - Day Detail View
+struct DayDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    let dayData: DayDetailData
+    let onEventTap: (CalendarEvent) -> Void
+    let onTodoTap: (Todo) -> Void
+    
+    private var backgroundGradient: some View {
+        LinearGradient(
+            colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+    }
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                backgroundGradient
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Date Header
+                        VStack(spacing: 8) {
+                            Text(dayData.date.formatted(date: .complete, time: .omitted))
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            
+                            Text("\(dayData.events.count) events, \(dayData.todos.count) todos")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.top, 20)
+                        
+                        // Events Section
+                        if !dayData.events.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Events")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                
+                                LazyVStack(spacing: 8) {
+                                    ForEach(dayData.events) { event in
+                                        DayDetailEventRow(event: event) {
+                                            onEventTap(event)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        
+                        // Todos Section
+                        if !dayData.todos.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Todos")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                
+                                LazyVStack(spacing: 8) {
+                                    ForEach(dayData.todos) { todo in
+                                        DayDetailTodoRow(todo: todo) {
+                                            onTodoTap(todo)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        
+                        // Empty State
+                        if dayData.events.isEmpty && dayData.todos.isEmpty {
+                            VStack(spacing: 16) {
+                                Image(systemName: "calendar")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(.secondary)
+                                
+                                Text("No events or todos")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                
+                                Text("Tap the + button to create an event or todo")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(.top, 60)
+                        }
+                        
+                        Spacer(minLength: 100)
+                    }
+                }
+            }
+            .navigationTitle("Day Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Day Detail Event Row
+struct DayDetailEventRow: View {
+    let event: CalendarEvent
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                // Priority indicator
+                Circle()
+                    .fill(event.priority.color)
+                    .frame(width: 12, height: 12)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(event.title)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                    
+                    HStack {
+                        Text(event.formattedStartTime)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        if let location = event.location, !location.isEmpty {
+                            Text("• \(location)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.white)
+            .cornerRadius(8)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+// MARK: - Day Detail Todo Row
+struct DayDetailTodoRow: View {
+    let todo: Todo
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                // Priority indicator
+                Circle()
+                    .fill(todo.priority.color)
+                    .frame(width: 12, height: 12)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(todo.title)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                    
+                    if let dueDate = todo.dueDate {
+                        Text(formatTime(dueDate))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color.white)
+            .cornerRadius(8)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
