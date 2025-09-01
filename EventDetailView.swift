@@ -11,6 +11,271 @@ struct EventDetailView: View {
     @State private var showingEditTodo = false
     @State private var showingDeleteConfirmation = false
     
+    // MARK: - Computed Views
+    private var backgroundGradient: some View {
+        LinearGradient(
+            colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+    }
+    
+    private var headerSection: some View {
+        VStack(spacing: 16) {
+            // Title and Priority
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(isTodo ? todo?.title ?? "" : event.title)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                    
+                    if let description = isTodo ? todo?.description : event.description, !description.isEmpty {
+                        Text(description)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+                
+                Spacer()
+                
+                // Priority Badge
+                PriorityBadge(priority: isTodo ? convertTodoPriority(todo?.priority ?? .none) : event.priority)
+            }
+            
+            // Type Badge
+            HStack {
+                Image(systemName: isTodo ? "checklist" : "calendar")
+                    .foregroundColor(isTodo ? .purple : .blue)
+                Text(isTodo ? "Todo" : "Event")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                // Category Badge
+                CategoryBadge(category: isTodo ? convertTodoCategory(todo?.category ?? .personal) : event.calendarType)
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+    }
+    
+    private var dateTimeSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Date & Time")
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            if isTodo {
+                if let todo = todo {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Due Date")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            if let dueDate = todo.dueDate {
+                                Text(dueDate, style: .date)
+                                    .font(.body)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        if !todo.isAllDay {
+                            VStack(alignment: .trailing, spacing: 8) {
+                                Text("Due Time")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                if let dueDate = todo.dueDate {
+                                    Text(dueDate, style: .time)
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                }
+                            }
+                        }
+                    }
+                    
+                    if todo.isAllDay {
+                        Text("All Day")
+                            .font(.body)
+                            .foregroundColor(.blue)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                    }
+                }
+            } else {
+                HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Start")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Text(event.startDate, style: .date)
+                            .font(.body)
+                            .fontWeight(.medium)
+                        if !event.isAllDay {
+                            Text(event.startDate, style: .time)
+                                .font(.body)
+                                .fontWeight(.medium)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 8) {
+                        Text("End")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Text(event.endDate, style: .date)
+                            .font(.body)
+                            .fontWeight(.medium)
+                        if !event.isAllDay {
+                            Text(event.endDate, style: .time)
+                                .font(.body)
+                                .fontWeight(.medium)
+                        }
+                    }
+                }
+                
+                if event.isAllDay {
+                    Text("All Day")
+                        .font(.body)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
+                }
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+    }
+    
+    private var locationSection: some View {
+        Group {
+            if let location = isTodo ? todo?.location : event.location, !location.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Location")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    HStack {
+                        Image(systemName: "location.circle.fill")
+                            .foregroundColor(.blue)
+                        Text(location)
+                            .font(.body)
+                        Spacer()
+                    }
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+            }
+        }
+    }
+    
+    private var recurringSection: some View {
+        Group {
+            if isTodo ? (todo?.isRecurring ?? false) : event.isRecurring {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Recurring")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    if isTodo {
+                        if let todo = todo, let pattern = todo.recurringPattern {
+                            RecurringPatternView(pattern: pattern)
+                        }
+                    } else if let pattern = event.recurringPattern {
+                        RecurringPatternView(pattern: pattern)
+                    }
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+            }
+        }
+    }
+    
+    private var reminderSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Reminder")
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            if isTodo {
+                if let todo = todo {
+                    EventReminderView(reminderSettings: ReminderSettings(
+                        isEnabled: todo.alarmSettings.isEnabled,
+                        timing: .onTheDay
+                    ))
+                }
+            } else {
+                EventReminderView(reminderSettings: event.reminderSettings)
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+    }
+    
+    private var notesSection: some View {
+        Group {
+            if let notes = isTodo ? todo?.notes : event.notes, !notes.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Notes")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Text(notes)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+            }
+        }
+    }
+    
+    private var inviteesSection: some View {
+        Group {
+            if let invitees = isTodo ? todo?.invitees : event.invitees, !invitees.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Invitees")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(invitees, id: \.self) { invitee in
+                            HStack {
+                                Image(systemName: "person.circle.fill")
+                                    .foregroundColor(.green)
+                                Text(invitee)
+                                    .font(.body)
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(12)
+            }
+        }
+    }
+    
     // Initialize with either an event or todo
     init(event: CalendarEvent? = nil, todo: Todo? = nil, viewModel: DashboardViewModel) {
         self.event = event ?? CalendarEvent(
@@ -29,149 +294,13 @@ struct EventDetailView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background
-                LinearGradient(
-                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                backgroundGradient
                 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Header Section
-                        VStack(spacing: 16) {
-                            // Title and Priority
-                            HStack {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(isTodo ? todo?.title ?? "" : event.title)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                        .multilineTextAlignment(.leading)
-                                    
-                                    if let description = isTodo ? todo?.description : event.description, !description.isEmpty {
-                                        Text(description)
-                                            .font(.body)
-                                            .foregroundColor(.secondary)
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                // Priority Badge
-                                PriorityBadge(priority: isTodo ? convertTodoPriority(todo?.priority ?? .none) : event.priority)
-                            }
-                            
-                            // Type Badge
-                            HStack {
-                                Image(systemName: isTodo ? "checklist" : "calendar")
-                                    .foregroundColor(isTodo ? .purple : .blue)
-                                Text(isTodo ? "Todo" : "Event")
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.secondary)
-                                
-                                Spacer()
-                                
-                                // Category Badge
-                                CategoryBadge(category: isTodo ? convertTodoCategory(todo?.category ?? .personal) : event.calendarType)
-                            }
-                        }
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
+                        headerSection
                         
-                        // Date & Time Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Date & Time")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                            
-                            if isTodo {
-                                if let todo = todo {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Text("Due Date")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                            Text(todo.dueDate, style: .date)
-                                                .font(.body)
-                                                .fontWeight(.medium)
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        if !todo.isAllDay {
-                                            VStack(alignment: .trailing, spacing: 8) {
-                                                Text("Due Time")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                                Text(todo.dueDate, style: .time)
-                                                    .font(.body)
-                                                    .fontWeight(.medium)
-                                            }
-                                        }
-                                    }
-                                    
-                                    if todo.isAllDay {
-                                        Text("All Day")
-                                            .font(.body)
-                                            .foregroundColor(.blue)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 6)
-                                            .background(Color.blue.opacity(0.1))
-                                            .cornerRadius(8)
-                                    }
-                                }
-                            } else {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Start")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                        Text(event.startDate, style: .date)
-                                            .font(.body)
-                                            .fontWeight(.medium)
-                                        if !event.isAllDay {
-                                            Text(event.startDate, style: .time)
-                                                .font(.body)
-                                                .fontWeight(.medium)
-                                        }
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    VStack(alignment: .trailing, spacing: 8) {
-                                        Text("End")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                        Text(event.endDate, style: .date)
-                                            .font(.body)
-                                            .fontWeight(.medium)
-                                        if !event.isAllDay {
-                                            Text(event.endDate, style: .time)
-                                                .font(.body)
-                                                .fontWeight(.medium)
-                                        }
-                                    }
-                                }
-                                
-                                if event.isAllDay {
-                                    Text("All Day")
-                                        .font(.body)
-                                        .foregroundColor(.blue)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.blue.opacity(0.1))
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
+                        dateTimeSection
                         
                         // Location Section
                         if let location = isTodo ? todo?.location : event.location, !location.isEmpty {
@@ -381,6 +510,7 @@ struct EventDetailView: View {
         case .work: return .work
         case .family: return .family
         case .other: return .other
+        case .custom: return .other
         }
     }
 }
@@ -434,13 +564,13 @@ struct RecurringPatternView: View {
             HStack {
                 Image(systemName: "repeat")
                     .foregroundColor(.blue)
-                Text("\(pattern.type.rawValue)")
+                Text(pattern.type)
                     .font(.body)
                     .fontWeight(.medium)
                 Spacer()
             }
             
-            Text("Every \(pattern.interval) \(pattern.type.rawValue.lowercased())")
+            Text("Every \(pattern.interval) \(pattern.type.lowercased())")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             

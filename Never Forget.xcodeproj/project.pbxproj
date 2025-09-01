@@ -29,9 +29,13 @@
 		CC5D15722E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15712E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl */; };
 		CC5D15742E596D52007168FF /* GoogleAPIClientForREST_AccessApproval in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15732E596D52007168FF /* GoogleAPIClientForREST_AccessApproval */; };
 		CC5D15762E596D52007168FF /* GoogleAPIClientForREST_Calendar in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15752E596D52007168FF /* GoogleAPIClientForREST_Calendar */; };
+		CC86DFE02E6600A000196CE2 /* CalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */; };
 		CC9440C02E63905500D64DEF /* PastelTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9440BF2E63905500D64DEF /* PastelTheme.swift */; };
 		CCF29A4D2E5AAF870036BABD /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A4C2E5AAF870036BABD /* CalendarView.swift */; };
 		CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */; };
+		CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A532E5AB63D0036BABD /* CreateEventView.swift */; };
+		CCF29A542E5AB63D0036BABD /* CreateTodoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A552E5AB63D0036BABD /* CreateTodoView.swift */; };
+		CCF29A562E5AB63D0036BABD /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A572E5AB63D0036BABD /* EventDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,9 +70,13 @@
 		CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarConfig.swift; sourceTree = "<group>"; };
 		CC1F3DF32E580A4F00FC027A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CC6F0B022E5983F4009CE3CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEvent.swift; sourceTree = "<group>"; };
 		CC9440BF2E63905500D64DEF /* PastelTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastelTheme.swift; sourceTree = "<group>"; };
 		CCF29A4C2E5AAF870036BABD /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_ForgetApp.swift; sourceTree = "<group>"; };
+		CCF29A532E5AB63D0036BABD /* CreateEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventView.swift; sourceTree = "<group>"; };
+		CCF29A552E5AB63D0036BABD /* CreateTodoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTodoView.swift; sourceTree = "<group>"; };
+		CCF29A572E5AB63D0036BABD /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -130,7 +138,11 @@
 			isa = PBXGroup;
 			children = (
 				CC6F0B022E5983F4009CE3CF /* Info.plist */,
+				CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */,
 				CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */,
+				CCF29A532E5AB63D0036BABD /* CreateEventView.swift */,
+				CCF29A552E5AB63D0036BABD /* CreateTodoView.swift */,
+				CCF29A572E5AB63D0036BABD /* EventDetailView.swift */,
 				CCF29A4C2E5AAF870036BABD /* CalendarView.swift */,
 				CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */,
 				CC1F3DDF2E58094F00FC027A /* DashboardView.swift */,
@@ -327,6 +339,7 @@
 				CC1F3DE32E58094F00FC027A /* DashboardView.swift in Sources */,
 				CC1F3DE42E58094F00FC027A /* EventImportView.swift in Sources */,
 				CC1F3DDB2E58080700FC027A /* PersistentAlarm.swift in Sources */,
+				CC86DFE02E6600A000196CE2 /* CalendarEvent.swift in Sources */,
 				CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */,
 				CC1F3DDC2E58080700FC027A /* Todo.swift in Sources */,
 				CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */,
@@ -334,6 +347,9 @@
 				CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */,
 				CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */,
 				CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */,
+				CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */,
+				CCF29A542E5AB63D0036BABD /* CreateTodoView.swift in Sources */,
+				CCF29A562E5AB63D0036BABD /* EventDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

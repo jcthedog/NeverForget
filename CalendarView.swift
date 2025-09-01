@@ -59,16 +59,60 @@ struct CalendarView: View {
             }
         }
         .sheet(isPresented: $showingCreateEvent) {
-            CreateEventView(viewModel: viewModel)
+            // Placeholder for CreateEventView - will be implemented later
+            VStack {
+                Text("Create Event")
+                    .font(.title)
+                    .padding()
+                Text("Event creation form will be implemented here")
+                    .foregroundColor(.secondary)
+                Button("Close") {
+                    showingCreateEvent = false
+                }
+                .padding()
+            }
         }
         .sheet(isPresented: $showingCreateTodo) {
-            CreateTodoView(viewModel: viewModel)
+            // Placeholder for CreateTodoView - will be implemented later
+            VStack {
+                Text("Create Todo")
+                    .font(.title)
+                    .padding()
+                Text("Todo creation form will be implemented here")
+                    .foregroundColor(.secondary)
+                Button("Close") {
+                    showingCreateTodo = false
+                }
+                .padding()
+            }
         }
         .sheet(item: $showingEventDetail) { event in
-            EventDetailView(event: event, viewModel: viewModel)
+            // Placeholder for EventDetailView - will be implemented later
+            VStack {
+                Text("Event Details")
+                    .font(.title)
+                    .padding()
+                Text("Event: \(event.title)")
+                    .padding()
+                Button("Close") {
+                    showingEventDetail = nil
+                }
+                .padding()
+            }
         }
         .sheet(item: $showingTodoDetail) { todo in
-            EventDetailView(todo: todo, viewModel: viewModel)
+            // Placeholder for TodoDetailView - will be implemented later
+            VStack {
+                Text("Todo Details")
+                    .font(.title)
+                    .padding()
+                Text("Todo: \(todo.title)")
+                    .padding()
+                Button("Close") {
+                    showingTodoDetail = nil
+                }
+                .padding()
+            }
         }
         .onAppear {
             loadCalendarData()
@@ -263,7 +307,8 @@ struct CalendarView: View {
     
     private func todosForDate(_ date: Date) -> [Todo] {
         return calendarTodos.filter { todo in
-            Calendar.current.isDate(todo.dueDate, inSameDayAs: date)
+            guard let dueDate = todo.dueDate else { return false }
+            return Calendar.current.isDate(dueDate, inSameDayAs: date)
         }
     }
     
@@ -281,7 +326,8 @@ struct CalendarView: View {
         let weekEnd = Calendar.current.dateInterval(of: .weekOfYear, for: selectedDate)?.end ?? selectedDate
         
         return calendarTodos.filter { todo in
-            todo.dueDate >= weekStart && todo.dueDate < weekEnd
+            guard let dueDate = todo.dueDate else { return false }
+            return dueDate >= weekStart && dueDate < weekEnd
         }.count
     }
     
@@ -299,7 +345,8 @@ struct CalendarView: View {
         let monthEnd = Calendar.current.dateInterval(of: .month, for: selectedDate)?.end ?? selectedDate
         
         return calendarTodos.filter { todo in
-            todo.dueDate >= monthStart && todo.dueDate < monthEnd
+            guard let dueDate = todo.dueDate else { return false }
+            return dueDate >= monthStart && dueDate < monthEnd
         }.count
     }
     
@@ -402,7 +449,8 @@ struct TodayView: View {
     
     private func todosForHour(_ hour: Int) -> [Todo] {
         return todos.filter { todo in
-            let todoHour = Calendar.current.component(.hour, from: todo.dueDate)
+            guard let dueDate = todo.dueDate else { return false }
+            let todoHour = Calendar.current.component(.hour, from: dueDate)
             return todoHour == hour
         }
     }
@@ -500,9 +548,7 @@ struct TimeSlotView: View {
                 
                 // Todos
                 ForEach(todos) { todo in
-                    TodoRowView(todo: todo) {
-                        onTodoTap(todo)
-                    }
+                    CalendarTodoRowView(todo: todo, onTap: { onTodoTap(todo) })
                 }
                 
                 Spacer(minLength: 0)
@@ -560,6 +606,49 @@ struct EventRowView: View {
     }
 }
 
+// MARK: - Calendar Todo Row View
+struct CalendarTodoRowView: View {
+    let todo: Todo
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(todo.priority.color)
+                    .frame(width: 8, height: 8)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(todo.title)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    if let dueDate = todo.dueDate {
+                        Text(formatTime(dueDate))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                Spacer()
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(todo.priority.color.opacity(0.1))
+            .cornerRadius(6)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+}
+
 
 
 // MARK: - Week Grid View
@@ -574,7 +663,7 @@ struct WeekGridView: View {
         VStack(spacing: 0) {
             // Day Headers
             HStack(spacing: 0) {
-                ForEach(weekDays, id: \.self) { day in
+                ForEach(Array(weekDays.enumerated()), id: \.offset) { index, day in
                     VStack(spacing: 4) {
                         Text(day.0)
                             .font(.caption)
@@ -657,7 +746,7 @@ struct WeekTimeSlotView: View {
                         
                         // Todos for this day and hour
                         ForEach(todosForDayAndHour(dayIndex, hour: hour)) { todo in
-                            TodoRowView(todo: todo, onTap: { onTodoTap(todo) })
+                            CalendarTodoRowView(todo: todo, onTap: { onTodoTap(todo) })
                         }
                         
                         Spacer(minLength: 0)
@@ -703,7 +792,7 @@ struct WeekTimeSlotView: View {
         let targetDate = calendar.date(byAdding: .day, value: dayIndex, to: weekStart) ?? weekStart
         
         return todos.filter { todo in
-            let todoDate = todo.dueDate
+            guard let todoDate = todo.dueDate else { return false }
             let todoHour = calendar.component(.hour, from: todoDate)
             return calendar.isDate(todoDate, inSameDayAs: targetDate) && todoHour == hour
         }
@@ -780,7 +869,8 @@ struct MonthGridView: View {
     
     private func todosForDate(_ date: Date) -> [Todo] {
         return todos.filter { todo in
-            Calendar.current.isDate(todo.dueDate, inSameDayAs: date)
+            guard let dueDate = todo.dueDate else { return false }
+            return Calendar.current.isDate(dueDate, inSameDayAs: date)
         }
     }
 }

@@ -1561,7 +1561,7 @@ struct AddTodoFormView: View {
                 }
             }
             .popover(isPresented: $showingRecurringOptions, arrowEdge: .bottom) {
-                RecurringPatternView(recurringPattern: $recurringPattern, selectedDate: dueDate, viewModel: viewModel)
+                EditRecurringPatternView(recurringPattern: $recurringPattern, selectedDate: dueDate, viewModel: viewModel)
             }
             .sheet(isPresented: $showingCreateCategory) {
                 CreateCustomCategoryView(viewModel: viewModel)
@@ -1911,206 +1911,7 @@ struct EditTodoView: View {
     }
 }
 
-struct RecurringPatternView: View {
-    @Binding var recurringPattern: RecurringPattern?
-    let selectedDate: Date
-    let viewModel: DashboardViewModel
-    @Environment(\.dismiss) private var dismiss
-    @State private var selectedOption: RecurringOption = .everyDay
-    @State private var customInterval = 1
-    @State private var customUnit: CustomUnit = .weeks
-    @State private var selectedDays: Set<Int> = []
-    
-    private let calendar = Calendar.current
-    
-    private let dayOfWeekFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE"
-        return formatter
-    }()
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter
-    }()
-    
-    enum RecurringOption: String, CaseIterable, Identifiable {
-        case everyDay = "everyDay"
-        case everyWeek = "everyWeek"
-        case everyMonth = "everyMonth"
-        case yearly = "yearly"
-        case custom = "custom"
-        
-        var id: String { rawValue }
-    }
-    
-    // Method to get display name with selected date context
-    private func displayName(for option: RecurringOption) -> String {
-        switch option {
-        case .everyDay: return "Every Day(s) of the Week"
-        case .everyWeek: return "Every Week (On \(dayOfWeekFormatter.string(from: selectedDate)))"
-        case .everyMonth: return "Every Month (On the \(calendar.component(.day, from: selectedDate).ordinalString))"
-        case .yearly: return "Every Year (On \(dateFormatter.string(from: selectedDate)))"
-        case .custom: return "Custom"
-        }
-    }
-    
-    enum CustomUnit: String, CaseIterable, Identifiable {
-        case weeks = "weeks"
-        case months = "months"
-        case years = "years"
-        
-        var id: String { rawValue }
-        
-        var displayName: String {
-            switch self {
-            case .weeks: return "Weeks"
-            case .months: return "Months"
-            case .years: return "Years"
-            }
-        }
-    }
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            Text("Recurring Pattern")
-                .font(.headline)
-                .padding(.top)
-            
-            // Pattern Selection
-            VStack(spacing: 16) {
-                ForEach(RecurringOption.allCases) { option in
-                    Button(action: { selectedOption = option }) {
-                        HStack {
-                            Text(displayName(for: option))
-                                .foregroundColor(selectedOption == option ? .white : .primary)
-                                .multilineTextAlignment(.leading)
-                            
-                            Spacer()
-                            
-                            if selectedOption == option {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(selectedOption == option ? Color.blue : Color(.systemGray6))
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            
-            // Custom Interval Section
-            if selectedOption == .custom {
-                VStack(spacing: 12) {
-                    HStack {
-                        Text("Every")
-                        Stepper("\(customInterval)", value: $customInterval, in: 1...30)
-                            .labelsHidden()
-                        Picker("Unit", selection: $customUnit) {
-                            ForEach(CustomUnit.allCases) { unit in
-                                Text(unit.displayName).tag(unit)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                    }
-                    .padding(.horizontal, 16)
-                }
-            }
-            
-            // Day Selection Section (Only for Every Day)
-            if selectedOption == .everyDay {
-                VStack(spacing: 12) {
-                    Text("Select Days")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                        ForEach(0..<7, id: \.self) { day in
-                            let dayName = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day]
-                            Button(action: {
-                                if selectedDays.contains(day) {
-                                    selectedDays.remove(day)
-                                } else {
-                                    selectedDays.insert(day)
-                                }
-                            }) {
-                                Text(dayName)
-                                    .font(.caption)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(selectedDays.contains(day) ? .white : .primary)
-                                    .frame(width: 50, height: 30)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 15)
-                                            .fill(selectedDays.contains(day) ? Color.blue : Color(.systemGray6))
-                                    )
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                }
-            }
-            
-            Spacer()
-            
-            // Action Buttons
-            HStack(spacing: 16) {
-                Button("Cancel") {
-                    dismiss()
-                }
-                .foregroundColor(.secondary)
-                
-                Button("Save") {
-                    savePattern()
-                }
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(selectedOption == .everyDay && selectedDays.isEmpty ? Color.gray : Color.blue)
-                )
-                .disabled(selectedOption == .everyDay && selectedDays.isEmpty)
-            }
-            .padding(.bottom)
-        }
-        .frame(width: 350, height: 500)
-    }
-    
-    private func savePattern() {
-        let pattern: RecurringPattern
-        
-        switch selectedOption {
-        case .everyDay:
-            pattern = .daily(interval: 1)
-        case .everyWeek:
-            pattern = .weekly(interval: 1, days: selectedDays)
-        case .everyMonth:
-            pattern = .monthly(interval: 1)
-        case .yearly:
-            pattern = .yearly(interval: 1)
-        case .custom:
-            switch customUnit {
-            case .weeks:
-                pattern = .weekly(interval: customInterval, days: selectedDays.isEmpty ? [1] : selectedDays)
-            case .months:
-                pattern = .monthly(interval: customInterval)
-            case .years:
-                pattern = .yearly(interval: customInterval)
-            }
-        }
-        
-        recurringPattern = pattern
-        dismiss()
-    }
-}
+
 
 // MARK: - Add Alarm View
 struct AddAlarmView: View {
@@ -2448,6 +2249,197 @@ struct NotificationIntervalPickerView: View {
     }
 }
 
+// MARK: - Recurring Pattern View for Editing
+struct EditRecurringPatternView: View {
+    @Binding var recurringPattern: RecurringPattern?
+    let selectedDate: Date
+    let viewModel: DashboardViewModel
+    
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedOption: RecurringOption = .everyDay
+    @State private var customInterval = 1
+    @State private var customUnit: CustomUnit = .weeks
+    @State private var selectedDays: Set<Int> = []
+    
+    private let calendar = Calendar.current
+    
+    private let dayOfWeekFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        return formatter
+    }()
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter
+    }()
+    
+    enum RecurringOption: String, CaseIterable, Identifiable {
+        case everyDay = "everyDay"
+        case everyWeek = "everyWeek"
+        case everyMonth = "everyMonth"
+        case everyYear = "everyYear"
+        case custom = "custom"
+        
+        var id: String { rawValue }
+        
+        var displayName: String {
+            switch self {
+            case .everyDay: return "Every Day"
+            case .everyWeek: return "Every Week"
+            case .everyMonth: return "Every Month"
+            case .everyYear: return "Every Year"
+            case .custom: return "Custom"
+            }
+        }
+    }
+    
+    enum CustomUnit: String, CaseIterable, Identifiable {
+        case days = "days"
+        case weeks = "weeks"
+        case months = "months"
+        case years = "years"
+        
+        var id: String { rawValue }
+        
+        var displayName: String {
+            switch self {
+            case .days: return "Days"
+            case .weeks: return "Weeks"
+            case .months: return "Months"
+            case .years: return "Years"
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Recurring Options
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Recurring Pattern")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+                        ForEach(RecurringOption.allCases) { option in
+                            Button(action: { selectedOption = option }) {
+                                VStack(spacing: 8) {
+                                    Image(systemName: option == .custom ? "slider.horizontal.3" : "repeat")
+                                        .font(.title2)
+                                        .foregroundColor(selectedOption == option ? .white : .blue)
+                                    
+                                    Text(option.displayName)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(selectedOption == option ? .white : .primary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(selectedOption == option ? .blue : Color(.systemGray6))
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+                
+                // Custom Settings
+                if selectedOption == .custom {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Custom Pattern")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        HStack {
+                            Text("Every")
+                            Stepper("\(customInterval)", value: $customInterval, in: 1...99)
+                            Text(customUnit.displayName)
+                        }
+                        
+                        if customUnit == .weeks {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Days of Week")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
+                                    ForEach(0..<7, id: \.self) { dayIndex in
+                                        Button(action: {
+                                            if selectedDays.contains(dayIndex) {
+                                                selectedDays.remove(dayIndex)
+                                            } else {
+                                                selectedDays.insert(dayIndex)
+                                            }
+                                        }) {
+                                            Text(dayOfWeekFormatter.shortWeekdaySymbols[dayIndex])
+                                                .font(.caption)
+                                                .fontWeight(.medium)
+                                                .frame(width: 32, height: 32)
+                                                .background(
+                                                    Circle()
+                                                        .fill(selectedDays.contains(dayIndex) ? .blue : Color(.systemGray5))
+                                                )
+                                                .foregroundColor(selectedDays.contains(dayIndex) ? .white : .primary)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Recurring Pattern")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        applyRecurringPattern()
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func applyRecurringPattern() {
+        switch selectedOption {
+        case .everyDay:
+            recurringPattern = .daily(interval: 1)
+        case .everyWeek:
+            recurringPattern = .weekly(interval: 1, days: [1, 2, 3, 4, 5, 6, 0])
+        case .everyMonth:
+            recurringPattern = .monthly(interval: 1)
+        case .everyYear:
+            recurringPattern = .yearly(interval: 1)
+        case .custom:
+            switch customUnit {
+            case .days:
+                recurringPattern = .daily(interval: customInterval)
+            case .weeks:
+                recurringPattern = .weekly(interval: customInterval, days: selectedDays)
+            case .months:
+                recurringPattern = .monthly(interval: customInterval)
+            case .years:
+                recurringPattern = .yearly(interval: customInterval)
+            }
+        }
+    }
+}
+
 #Preview {
     ContentView()
 }
@@ -2525,7 +2517,7 @@ struct CreateCalendarEventView: View {
                 showingLocationSuggestions = false
             }
             .sheet(isPresented: $showingAdvancedRecurringView) {
-                RecurringPatternView(
+                EditRecurringPatternView(
                     recurringPattern: $selectedRecurringPattern,
                     selectedDate: startDate,
                     viewModel: viewModel

@@ -64,7 +64,7 @@ struct AlarmSettings: Codable, Equatable {
 }
 
 // MARK: - Recurring Pattern
-enum RecurringPattern: Codable, Equatable {
+enum RecurringPattern: Codable, Equatable, Hashable {
     case daily(interval: Int)
     case weekly(interval: Int, days: Set<Int>)
     case monthly(interval: Int)
@@ -126,9 +126,21 @@ enum RecurringPattern: Codable, Equatable {
         }
     }
     
-
+    // MARK: - Additional Properties for CalendarEvent Compatibility
+    var endDate: Date? { nil } // CalendarEvent compatibility
+    var occurrences: Int? { nil } // CalendarEvent compatibility
+    var daysOfWeek: [Int]? {
+        switch self {
+        case .weekly(_, let days):
+            return Array(days).sorted()
+        default:
+            return nil
+        }
+    }
+    var dayOfMonth: Int? { nil } // CalendarEvent compatibility
+    var dayOfYear: Int? { nil } // CalendarEvent compatibility
     
-
+    var isInfinite: Bool { true } // CalendarEvent compatibility
 }
 
 struct Todo: Identifiable, Codable, Equatable {
@@ -195,10 +207,6 @@ struct Todo: Identifiable, Codable, Equatable {
     // MARK: - Computed Properties
     var isRecurring: Bool {
         return recurringPattern != nil
-    }
-    
-    var isAllDay: Bool {
-        return dueDate == nil
     }
 }
 

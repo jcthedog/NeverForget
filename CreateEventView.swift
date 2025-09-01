@@ -18,13 +18,9 @@ struct CreateEventView: View {
     
     // MARK: - Recurring Pattern
     @State private var isRecurring = false
-    @State private var recurrenceType: RecurrenceType = .daily
+    @State private var recurrencePattern: RecurringPattern = .daily(interval: 1)
     @State private var recurrenceInterval = 1
-    @State private var recurrenceEndDate: Date?
-    @State private var recurrenceOccurrences: Int?
-    @State private var selectedDaysOfWeek: Set<Int> = []
-    @State private var dayOfMonth = 1
-    @State private var dayOfYear = 1
+    @State private var selectedDaysOfWeek: Set<Int> = [1, 2, 3, 4, 5, 6, 7] // Default to all days
     
     // MARK: - Reminder Settings
     @State private var reminderTiming: ReminderTiming = .onTheDay
@@ -192,50 +188,27 @@ struct CreateEventView: View {
                             
                             if isRecurring {
                                 VStack(spacing: 12) {
-                                    Picker("Pattern", selection: $recurrenceType) {
-                                        ForEach(RecurrenceType.allCases) { type in
-                                            Text(type.rawValue).tag(type)
-                                        }
+                                    Picker("Pattern", selection: $recurrencePattern) {
+                                        Text("Daily").tag(RecurringPattern.daily(interval: recurrenceInterval))
+                                        Text("Weekly").tag(RecurringPattern.weekly(interval: recurrenceInterval, days: selectedDaysOfWeek))
+                                        Text("Monthly").tag(RecurringPattern.monthly(interval: recurrenceInterval))
+                                        Text("Yearly").tag(RecurringPattern.yearly(interval: recurrenceInterval))
                                     }
                                     .pickerStyle(SegmentedPickerStyle())
                                     
                                     HStack {
                                         Text("Every")
                                         Stepper("\(recurrenceInterval)", value: $recurrenceInterval, in: 1...99)
-                                        Text(recurrenceType == .daily ? "days" : 
-                                             recurrenceType == .weekly ? "weeks" :
-                                             recurrenceType == .monthly ? "months" : "years")
+                                        Text(recurrencePattern.displayName.components(separatedBy: " ").last ?? "days")
                                     }
                                     
-                                    if recurrenceType == .weekly {
+                                    if case .weekly = recurrencePattern {
                                         DaysOfWeekSelector(selectedDays: $selectedDaysOfWeek)
                                     }
                                     
-                                    if recurrenceType == .monthly {
-                                        HStack {
-                                            Text("Day of month:")
-                                            Picker("", selection: $dayOfMonth) {
-                                                ForEach(1...31, id: \.self) { day in
-                                                    Text("\(day)").tag(day)
-                                                }
-                                            }
-                                            .pickerStyle(WheelPickerStyle())
-                                            .frame(width: 100)
-                                        }
-                                    }
+
                                     
-                                    if recurrenceType == .yearly {
-                                        HStack {
-                                            Text("Day of year:")
-                                            Picker("", selection: $dayOfYear) {
-                                                ForEach(1...365, id: \.self) { day in
-                                                    Text("\(day)").tag(day)
-                                                }
-                                            }
-                                            .pickerStyle(WheelPickerStyle())
-                                            .frame(width: 100)
-                                        }
-                                    }
+
                                 }
                                 .padding()
                                 .background(Color.gray.opacity(0.1))
@@ -376,15 +349,16 @@ struct CreateEventView: View {
     }
     
     private func createRecurringPattern() -> RecurringPattern {
-        return RecurringPattern(
-            type: recurrenceType,
-            interval: recurrenceInterval,
-            endDate: recurrenceEndDate,
-            occurrences: recurrenceOccurrences,
-            daysOfWeek: recurrenceType == .weekly ? Array(selectedDaysOfWeek) : nil,
-            dayOfMonth: recurrenceType == .monthly ? dayOfMonth : nil,
-            dayOfYear: recurrenceType == .yearly ? dayOfYear : nil
-        )
+        switch recurrencePattern {
+        case .daily:
+            return .daily(interval: recurrenceInterval)
+        case .weekly:
+            return .weekly(interval: recurrenceInterval, days: selectedDaysOfWeek)
+        case .monthly:
+            return .monthly(interval: recurrenceInterval)
+        case .yearly:
+            return .yearly(interval: recurrenceInterval)
+        }
     }
     
     private func createReminderSettings() -> ReminderSettings {
