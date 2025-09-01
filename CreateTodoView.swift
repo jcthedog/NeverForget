@@ -38,6 +38,8 @@ struct CreateTodoView: View {
     @State private var showingRecurrencePicker = false
     @State private var showingReminderPicker = false
     @State private var showingPersistentReminderSettings = false
+    @State private var showingCustomCategoryCreator = false
+    @State private var selectedCustomCategory: CustomCategory?
     
     // MARK: - Computed Views
     private var backgroundGradient: some View {
@@ -139,18 +141,62 @@ struct CreateTodoView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            Picker("Category", selection: $category) {
-                ForEach(CalendarType.allCases) { type in
-                    HStack {
-                        Image(systemName: type.icon)
-                            .foregroundColor(type.color)
-                        Text(type.rawValue)
+            VStack(spacing: 12) {
+                // Standard Categories
+                Picker("Category", selection: $category) {
+                    ForEach(CalendarType.allCases) { type in
+                        HStack {
+                            Image(systemName: type.icon)
+                                .foregroundColor(type.color)
+                            Text(type.rawValue)
+                        }
+                        .tag(type)
                     }
-                    .tag(type)
+                }
+                .pickerStyle(MenuPickerStyle())
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Custom Categories
+                if !viewModel.customCategories.isEmpty {
+                    Divider()
+                    
+                    Text("Custom Categories")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    ForEach(viewModel.customCategories) { customCategory in
+                        Button(action: {
+                            selectedCustomCategory = customCategory
+                        }) {
+                            HStack {
+                                Text(customCategory.icon)
+                                Text(customCategory.name)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if selectedCustomCategory?.id == customCategory.id {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.blue)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                }
+                
+                // Create New Button
+                Button(action: {
+                    showingCustomCategoryCreator = true
+                }) {
+                    HStack {
+                        Image(systemName: "plus.circle")
+                            .foregroundColor(.blue)
+                        Text("Create New Category")
+                            .foregroundColor(.blue)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
                 }
             }
-            .pickerStyle(MenuPickerStyle())
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding()
         .background(Color.white)
@@ -404,6 +450,9 @@ struct CreateTodoView: View {
         .sheet(isPresented: $showingLocationPicker) {
             LocationPickerView(location: $location)
         }
+        .sheet(isPresented: $showingCustomCategoryCreator) {
+            CustomCategoryCreatorView(viewModel: viewModel)
+        }
     }
     
     private func createTodo() {
@@ -413,7 +462,7 @@ struct CreateTodoView: View {
             description: todoDescription.isEmpty ? nil : todoDescription,
             priority: convertPriority(priority),
             dueDate: dueDate,
-            category: convertCategory(category),
+            category: getSelectedCategory(),
             recurringPattern: isRecurring ? createRecurringPattern() : nil,
             alarmSettings: createAlarmSettings(),
             location: location.isEmpty ? nil : location,
@@ -435,7 +484,15 @@ struct CreateTodoView: View {
         }
     }
     
-    private func convertCategory(_ calendarType: CalendarType) -> TodoCategory {
+    private func getSelectedCategory() -> Category {
+        if let customCategory = selectedCustomCategory {
+            return .custom(customCategory)
+        } else {
+            return convertCategory(category)
+        }
+    }
+    
+    private func convertCategory(_ calendarType: CalendarType) -> Category {
         switch calendarType {
         case .personal: return .personal
         case .work: return .work
@@ -498,6 +555,101 @@ struct CreateTodoView: View {
                 return calendar.date(byAdding: .day, value: -customReminderDays, to: dueDate)
             }
         }
+    }
+}
+
+// MARK: - Custom Category Creator View
+struct CustomCategoryCreatorView: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: DashboardViewModel
+    
+    @State private var categoryName = ""
+    @State private var selectedIcon = "📝"
+    @State private var selectedColor = Color.gray
+    
+    private let availableIcons = ["📝", "📋", "📌", "🏷️", "⭐", "💡", "🎯", "📊", "📈", "📉", "🔔", "⏰", "📅", "📆", "🗓️", "📋", "📝", "✏️", "✍️", "📄"]
+    private let availableColors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple, .pink, .gray, .brown, .cyan, .mint, .indigo]
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Category Name
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Category Name")
+                        .font(.headline)
+                    TextField("Enter category name", text: $categoryName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                
+                // Icon Selection
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Icon")
+                        .font(.headline)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 10) {
+                        ForEach(availableIcons, id: \.self) { icon in
+                            Button(action: {
+                                selectedIcon = icon
+                            }) {
+                                Text(icon)
+                                    .font(.title2)
+                                    .frame(width: 50, height: 50)
+                                    .background(selectedIcon == icon ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
+                                    .cornerRadius(8)
+                            }
+                        }
+                    }
+                }
+                
+                // Color Selection
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Color")
+                        .font(.headline)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 10) {
+                        ForEach(availableColors, id: \.self) { color in
+                            Button(action: {
+                                selectedColor = color
+                            }) {
+                                Circle()
+                                    .fill(color)
+                                    .frame(width: 40, height: 40)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(selectedColor == color ? Color.primary : Color.clear, lineWidth: 3)
+                                    )
+                            }
+                        }
+                    }
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Create Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        saveCustomCategory()
+                    }
+                    .disabled(categoryName.isEmpty)
+                }
+            }
+        }
+    }
+    
+    private func saveCustomCategory() {
+        let newCategory = CustomCategory(
+            name: categoryName,
+            icon: selectedIcon,
+            color: selectedColor
+        )
+        viewModel.addCustomCategory(newCategory)
+        dismiss()
     }
 }
 
