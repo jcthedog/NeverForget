@@ -696,15 +696,16 @@ struct WeekGridView: View {
             // Week Content
             LazyVStack(spacing: 0) {
                 ForEach(0..<24, id: \.self) { hour in
-                    WeekTimeSlotView(
-                        hour: hour,
-                        weekDays: weekDays,
-                        events: events,
-                        todos: todos,
-                        onEventTap: onEventTap,
-                        onTodoTap: onTodoTap,
-                        onDateTap: onDateTap
-                    )
+                                    WeekTimeSlotView(
+                    hour: hour,
+                    weekDays: weekDays,
+                    events: events,
+                    todos: todos,
+                    selectedDate: selectedDate,
+                    onEventTap: onEventTap,
+                    onTodoTap: onTodoTap,
+                    onDateTap: onDateTap
+                )
                 }
             }
         }
@@ -731,6 +732,7 @@ struct WeekTimeSlotView: View {
     let weekDays: [(String, String)]
     let events: [CalendarEvent]
     let todos: [Todo]
+    let selectedDate: Date
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
     let onDateTap: (Date) -> Void
@@ -755,28 +757,35 @@ struct WeekTimeSlotView: View {
             // Day Columns
             HStack(spacing: 0) {
                 ForEach(0..<7, id: \.self) { dayIndex in
-                    VStack(spacing: 2) {
-                        // Events for this day and hour
-                        ForEach(eventsForDayAndHour(dayIndex, hour: hour)) { event in
-                            EventRowView(event: event, onTap: { onEventTap(event) })
-                        }
+                    ZStack {
+                        // Background tap area
+                        Rectangle()
+                            .fill(Color.clear)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                // Create a date for this day and hour
+                                let calendar = Calendar.current
+                                let weekStart = calendar.dateInterval(of: .weekOfYear, for: selectedDate)?.start ?? selectedDate
+                                let targetDate = calendar.date(byAdding: .day, value: dayIndex, to: weekStart) ?? weekStart
+                                let dateWithHour = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: targetDate) ?? targetDate
+                                onDateTap(dateWithHour)
+                            }
                         
-                        // Todos for this day and hour
-                        ForEach(todosForDayAndHour(dayIndex, hour: hour)) { todo in
-                            CalendarTodoRowView(todo: todo, onTap: { onTodoTap(todo) })
+                        VStack(spacing: 2) {
+                            // Events for this day and hour
+                            ForEach(eventsForDayAndHour(dayIndex, hour: hour)) { event in
+                                EventRowView(event: event, onTap: { onEventTap(event) })
+                            }
+                            
+                            // Todos for this day and hour
+                            ForEach(todosForDayAndHour(dayIndex, hour: hour)) { todo in
+                                CalendarTodoRowView(todo: todo, onTap: { onTodoTap(todo) })
+                            }
+                            
+                            Spacer(minLength: 0)
                         }
-                        
-                        Spacer(minLength: 0)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 2)
-                    .onTapGesture {
-                        // Create a date for this day and hour
-                        let calendar = Calendar.current
-                        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
-                        let targetDate = calendar.date(byAdding: .day, value: dayIndex, to: weekStart) ?? weekStart
-                        let dateWithHour = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: targetDate) ?? targetDate
-                        onDateTap(dateWithHour)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 2)
                     }
                     
                     if dayIndex < 6 {
@@ -801,7 +810,7 @@ struct WeekTimeSlotView: View {
     
     private func eventsForDayAndHour(_ dayIndex: Int, hour: Int) -> [CalendarEvent] {
         let calendar = Calendar.current
-        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let weekStart = calendar.dateInterval(of: .weekOfYear, for: selectedDate)?.start ?? selectedDate
         let targetDate = calendar.date(byAdding: .day, value: dayIndex, to: weekStart) ?? weekStart
         
         return events.filter { event in
@@ -813,7 +822,7 @@ struct WeekTimeSlotView: View {
     
     private func todosForDayAndHour(_ dayIndex: Int, hour: Int) -> [Todo] {
         let calendar = Calendar.current
-        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let weekStart = calendar.dateInterval(of: .weekOfYear, for: selectedDate)?.start ?? selectedDate
         let targetDate = calendar.date(byAdding: .day, value: dayIndex, to: weekStart) ?? weekStart
         
         return todos.filter { todo in
