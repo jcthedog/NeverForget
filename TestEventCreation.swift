@@ -65,3 +65,4 @@ struct MinimalEventForm: View {
 #Preview {
     TestEventCreation()
 }
+
