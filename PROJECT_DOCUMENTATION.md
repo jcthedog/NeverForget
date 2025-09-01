@@ -1,15 +1,22 @@
 # Never Forget - iOS Task Management App
 
-## 🎯 **STABLE VERSION v3.1 - DATE/TIME CLICK FUNCTIONALITY COMPLETE**
+## 🎯 **STABLE VERSION v3.2 - CALENDAR POPUP CREATE BUTTONS COMPLETE**
 
-### **📅 Last Updated: January 8, 2025 - STABLE WORKING VERSION ESTABLISHED**
-### **🏷️ Version: v3.1 - Complete Date/Time Click Functionality**
+### **📅 Last Updated: September 1, 2025 - STABLE WORKING VERSION ESTABLISHED**
+### **🏷️ Version: v3.2 - Calendar Popup Create Buttons**
 ### **🚀 Build Status: SUCCESSFUL - Production Ready**
-### **🏷️ Git Tag: v3.1-stable - Use as 'go to' fallback version**
+### **🏷️ Git Tag: v3.2-stable - Use as 'go to' fallback version**
 
-**✅ COMPLETED: Full date/time click functionality implemented across all calendar views - STABLE BUILD**
+**✅ COMPLETED: Calendar popup create buttons implemented - STABLE BUILD**
 
-### **🆕 NEW FEATURES IN v3.1:**
+### **🆕 NEW FEATURES IN v3.2:**
+- **Calendar Popup Create Buttons**: Direct "Create New Event" and "Create Todo" buttons in date popup
+- **Empty State Enhancement**: Prominent create buttons when no events/todos exist for a date
+- **Always-Available Creation**: "Add More" section with create buttons even when content exists
+- **Seamless Workflow**: Click date → See popup → Click create button → Form opens
+- **Visual Design**: Blue event buttons and green todo buttons with appropriate icons
+
+### **🆕 PREVIOUS FEATURES IN v3.1:**
 - **Date/Time Click Functionality**: Click anywhere on calendar to see events/todos for that date/time
 - **DayDetailView Popup**: Comprehensive popup showing all events and todos for selected date/time
 - **Drill-Down Navigation**: Click on any event/todo in popup to see full details with edit capability

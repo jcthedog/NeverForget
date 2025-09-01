@@ -81,6 +81,14 @@ struct CalendarView: View {
                 onTodoTap: { todo in
                     showingDayDetail = nil
                     showingTodoDetail = todo
+                },
+                onCreateEvent: {
+                    showingDayDetail = nil
+                    showingCreateEvent = true
+                },
+                onCreateTodo: {
+                    showingDayDetail = nil
+                    showingCreateTodo = true
                 }
             )
         }
@@ -951,6 +959,8 @@ struct DayDetailView: View {
     let dayData: DayDetailData
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
+    let onCreateEvent: () -> Void
+    let onCreateTodo: () -> Void
     
     private var backgroundGradient: some View {
         LinearGradient(
@@ -1021,7 +1031,7 @@ struct DayDetailView: View {
                         
                         // Empty State
                         if dayData.events.isEmpty && dayData.todos.isEmpty {
-                            VStack(spacing: 16) {
+                            VStack(spacing: 20) {
                                 Image(systemName: "calendar")
                                     .font(.system(size: 48))
                                     .foregroundColor(.secondary)
@@ -1030,13 +1040,97 @@ struct DayDetailView: View {
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                 
-                                Text("Tap the + button to create an event or todo")
+                                Text("Create your first event or todo for this day")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                     .multilineTextAlignment(.center)
+                                
+                                // Create Buttons
+                                VStack(spacing: 12) {
+                                    Button(action: {
+                                        dismiss()
+                                        onCreateEvent()
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "calendar.badge.plus")
+                                            Text("Create New Event")
+                                        }
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                        .background(Color.blue)
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    Button(action: {
+                                        dismiss()
+                                        onCreateTodo()
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "checkmark.circle.badge.plus")
+                                            Text("Create New Todo")
+                                        }
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                        .background(Color.green)
+                                        .cornerRadius(8)
+                                    }
+                                }
+                                .padding(.horizontal, 40)
                             }
-                            .padding(.top, 60)
+                            .padding(.top, 40)
                         }
+                        
+                        // Always show create buttons (even when there are existing events/todos)
+                        VStack(spacing: 12) {
+                            Text("Add More")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            HStack(spacing: 12) {
+                                Button(action: {
+                                    dismiss()
+                                    onCreateEvent()
+                                }) {
+                                    HStack {
+                                        Image(systemName: "calendar.badge.plus")
+                                        Text("New Event")
+                                    }
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 10)
+                                    .background(Color.blue)
+                                    .cornerRadius(8)
+                                }
+                                
+                                Button(action: {
+                                    dismiss()
+                                    onCreateTodo()
+                                }) {
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.badge.plus")
+                                        Text("New Todo")
+                                    }
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 10)
+                                    .background(Color.green)
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
                         
                         Spacer(minLength: 100)
                     }
