@@ -405,7 +405,7 @@ struct TodaysFocusSection: View {
             }
             
             if todos.isEmpty {
-                EmptyTodosView()
+                EmptyTodosView(viewModel: viewModel)
             } else {
                 ForEach(todos.prefix(3)) { todo in
                     DashboardTodoRowView(todo: todo, viewModel: viewModel)
@@ -421,11 +421,18 @@ struct TodaysFocusSection: View {
 
 // MARK: - Empty Todos View
 struct EmptyTodosView: View {
+    @State private var showingAddTodo = false
+    @ObservedObject var viewModel: DashboardViewModel
+    
     var body: some View {
         VStack(spacing: 12) {
-            Image(systemName: "plus.circle")
-                .foregroundColor(.purple)
-                .font(.title2)
+            Button(action: {
+                showingAddTodo = true
+            }) {
+                Image(systemName: "plus.circle")
+                    .foregroundColor(.purple)
+                    .font(.title2)
+            }
             
             Text("No todos for today")
                 .font(.subheadline)
@@ -440,6 +447,9 @@ struct EmptyTodosView: View {
         .padding(.vertical, 24)
         .background(Color(.tertiarySystemBackground))
         .cornerRadius(12)
+        .sheet(isPresented: $showingAddTodo) {
+            AddTodoFormView(viewModel: viewModel)
+        }
     }
 }
 

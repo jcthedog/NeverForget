@@ -1563,7 +1563,7 @@ struct AddTodoFormView: View {
             .popover(isPresented: $showingRecurringOptions, arrowEdge: .bottom) {
                 EditRecurringPatternView(recurringPattern: $recurringPattern, selectedDate: dueDate, viewModel: viewModel)
             }
-            .sheet(isPresented: $showingCreateCategory) {
+            .popover(isPresented: $showingCreateCategory) {
                 CreateCustomCategoryView(viewModel: viewModel)
             }
             .sheet(isPresented: $showingNotificationIntervalPicker) {
@@ -1846,7 +1846,7 @@ struct EditTodoView: View {
                     .disabled(title.isEmpty)
                 }
             }
-            .sheet(isPresented: $showingCreateCategory) {
+            .popover(isPresented: $showingCreateCategory) {
                 CreateCustomCategoryView(viewModel: viewModel)
             }
         }
