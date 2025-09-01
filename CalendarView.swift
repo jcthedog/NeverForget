@@ -12,9 +12,15 @@ struct CalendarView: View {
     @State private var showingTodoDetail: Todo?
     @State private var showingDayDetail: DayDetailData?
     
-    // MARK: - Calendar Data
-    @State private var calendarEvents: [CalendarEvent] = []
-    @State private var calendarTodos: [Todo] = []
+    // MARK: - Calendar Data (Connected to DashboardViewModel)
+    // Using computed properties to get real data from viewModel
+    private var calendarEvents: [CalendarEvent] {
+        viewModel.calendarEvents
+    }
+    
+    private var calendarTodos: [Todo] {
+        viewModel.todos
+    }
     
     var body: some View {
         NavigationView {
@@ -93,7 +99,7 @@ struct CalendarView: View {
             )
         }
         .onAppear {
-            loadCalendarData()
+            // Data is now loaded automatically via computed properties
         }
     }
     
@@ -286,11 +292,7 @@ struct CalendarView: View {
     }
     
     // MARK: - Data Methods
-    private func loadCalendarData() {
-        // Load sample data for now (to be replaced with real data)
-        calendarEvents = sampleCalendarEvents()
-        calendarTodos = viewModel.todos
-    }
+    // loadCalendarData() removed - now using computed properties connected to viewModel
     
     private func eventsForDate(_ date: Date) -> [CalendarEvent] {
         return calendarEvents.filter { event in
@@ -343,56 +345,8 @@ struct CalendarView: View {
         }.count
     }
     
-    // MARK: - Sample Data
-    private func sampleCalendarEvents() -> [CalendarEvent] {
-        let now = Date()
-        let calendar = Calendar.current
-        
-        return [
-            CalendarEvent(
-                title: "Team Meeting",
-                description: "Weekly team sync",
-                startDate: calendar.date(bySettingHour: 9, minute: 0, second: 0, of: now) ?? now,
-                endDate: calendar.date(bySettingHour: 10, minute: 0, second: 0, of: now) ?? now,
-                isAllDay: false,
-                priority: .important,
-                location: "Conference Room A",
-                notes: "Prepare quarterly report",
-                calendarType: .work,
-                recurringPattern: nil,
-                reminderSettings: ReminderSettings(timing: .oneDayEarly),
-                invitees: ["team@company.com"]
-            ),
-            CalendarEvent(
-                title: "Doctor Appointment",
-                description: "Annual checkup",
-                startDate: calendar.date(bySettingHour: 14, minute: 30, second: 0, of: now) ?? now,
-                endDate: calendar.date(bySettingHour: 15, minute: 30, second: 0, of: now) ?? now,
-                isAllDay: false,
-                priority: .low,
-                location: "Medical Center",
-                notes: "Bring insurance card",
-                calendarType: .personal,
-                recurringPattern: nil,
-                reminderSettings: ReminderSettings(timing: .threeDaysEarly),
-                invitees: []
-            ),
-            CalendarEvent(
-                title: "Family Dinner",
-                description: "Sunday family gathering",
-                startDate: calendar.date(bySettingHour: 18, minute: 0, second: 0, of: now) ?? now,
-                endDate: calendar.date(bySettingHour: 20, minute: 0, second: 0, of: now) ?? now,
-                isAllDay: false,
-                priority: .none,
-                location: "Home",
-                notes: "Mom's cooking",
-                calendarType: .family,
-                recurringPattern: nil,
-                reminderSettings: ReminderSettings(timing: .onTheDay),
-                invitees: ["mom@family.com", "dad@family.com"]
-            )
-        ]
-    }
+    // MARK: - Sample Data (Removed for Clean Working Version)
+    // All sample data removed - calendar now uses real data from DashboardViewModel
 }
 
 // MARK: - Day Detail Data

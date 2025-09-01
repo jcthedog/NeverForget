@@ -342,8 +342,8 @@ struct CreateEventView: View {
             invitees: invitees.isEmpty ? [] : invitees.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         )
         
-        // Add to view model (to be implemented)
-        // viewModel.addCalendarEvent(event)
+        // Add to view model
+        viewModel.addCalendarEvent(event)
         
         dismiss()
     }

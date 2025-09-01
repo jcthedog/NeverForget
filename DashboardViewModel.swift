@@ -12,6 +12,7 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var todos: [Todo] = []
+    @Published var calendarEvents: [CalendarEvent] = []
     @Published var customCategories: [CustomCategory] = []
     @Published var isGoogleSignedIn = false
     @Published var lastSyncTime: String?
@@ -43,6 +44,7 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     override init() {
         super.init()
         loadDashboardData()
+        loadCalendarEvents()
         setupSampleData()
         setupNotifications()
     }
@@ -135,6 +137,24 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     func deleteTodo(_ todo: Todo) {
         todos.removeAll { $0.id == todo.id }
         calculateTodayStats()
+    }
+    
+    // MARK: - Calendar Event Management
+    func addCalendarEvent(_ event: CalendarEvent) {
+        calendarEvents.append(event)
+        saveCalendarEvents()
+    }
+    
+    func updateCalendarEvent(_ event: CalendarEvent) {
+        if let index = calendarEvents.firstIndex(where: { $0.id == event.id }) {
+            calendarEvents[index] = event
+            saveCalendarEvents()
+        }
+    }
+    
+    func deleteCalendarEvent(_ event: CalendarEvent) {
+        calendarEvents.removeAll { $0.id == event.id }
+        saveCalendarEvents()
     }
     
     func toggleTodoCompletion(_ todo: Todo) {
@@ -236,6 +256,20 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
         lastSyncTime = formatter.string(from: Date())
     }
     
+    // MARK: - Data Persistence
+    private func saveCalendarEvents() {
+        if let encoded = try? JSONEncoder().encode(calendarEvents) {
+            UserDefaults.standard.set(encoded, forKey: "SavedCalendarEvents")
+        }
+    }
+    
+    private func loadCalendarEvents() {
+        if let data = UserDefaults.standard.data(forKey: "SavedCalendarEvents"),
+           let decoded = try? JSONDecoder().decode([CalendarEvent].self, from: data) {
+            calendarEvents = decoded
+        }
+    }
+    
     // MARK: - Sample Calendar Events
     func getSampleEventsForDateRange(startDate: Date, endDate: Date) -> [GoogleCalendarEvent] {
         let calendar = Calendar.current
@@ -269,6 +303,12 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     
     // MARK: - Sample Data for Development
     private func setupSampleData() {
+        // Clean slate - no sample data for real user testing
+        calculateTodayStats()
+    }
+    
+    // MARK: - Legacy Sample Data (Commented Out)
+    private func setupSampleDataLegacy() {
         // Sample todos
         let sampleTodos = [
             Todo(
