@@ -1,0 +1,22 @@
+Our next step is to add what we need to the Calendar page. This text will describe in detail, what is expected of the Calendar page.
+
+The main Calendar page will have a "Today" view, a "Week" view, and a "Month" view, in traditional Google Calendar format.
+All Events and Todos displayed in the Calendar, are to be "clickable", by that I mean, if the user clicks on an entry within the Calendar, a popup sheet will appear displaying the details of that event or todo. Also, within that popup there will be an "Edit" button, allowing the User to make edits to the event/todo. If the "Edit" button is activated, then bring up the "Create Event" popup that will be described later.
+On all calendar views, I want all entries (events and todos) to be visible with time and title of event displayed. 
+
+Whenever a "Create New Event" is activated, I want a popup or sheet to appear with the following inputs.
+"Event Title"
+"Date & Time" pickers for start and end. Also add a "All Day Event" toggle.
+A "Priority" selector with the options of, "None", "Low", "Important", and "Urgent"
+An "invite Others" input option
+An "Add Location" button that will auto populate the data for location as it is being typed in.
+A "Calendar" button with a drop down selector for saving to a specific calendar. 
+A "Recurring" button that will display options for recurring events. The options must include, "Every Day", "Every Week (On The nth day), "Every Month (On The n)", and 'Every Year (On The nth of Month). I also want to add the ability to detail how often the recurring event occurs, for example, "payday is every 2 weeks". Allow them to pick up to 4 weeks.
+A "Reminder" button. which will have the following features. Allow the user to be able to pick reminders of, "On The Day", "1 Day Early", "3 Days Early", "7 Days Early", and Custom. When "Custom" is chosen, give the user the options of, in a drop down "Day" and "Week", then give the user a "scroll selector" for the amount of days in advance they would like to be reminded, make the number of days selectable to be from 1-99, and the number of weeks to 1-9. Then add a "Remind Me At" with a scrolling time picker, that will set at what time the alarm begins.
+A "Notes" section for text input.
+
+We also need to create a "Create Todo" input screen. For this screen I want it identical to the "Create New Event" above, with the addition of a "Persistent Reminder" toggle option. if this is selected, the notifications and alarms will continue every 10 minutes for a duration of 30 Minutes, after the first 30 minutes, then user will receive a reminder every hour until the user either, "Snooze" the alarm, with snooze times of, "10 Minutes", "30 Minutes", "1 Hour", "3 Hours", "6 Hours", "12 Hours" and "1 Day", "Completed Task" which will then send it to the "Completed" category of the Todos, or deletes the Todo.
+
+This calendar needs to sync two ways with a user's Google Calendar.
+
+This calendar and todos need to integrate with iOS's notification system.

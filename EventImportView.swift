@@ -230,7 +230,7 @@ struct EventImportView: View {
         var includeAllDayEvents = true
         var includeRecurringEvents = true
         var includeEventsWithAttendees = true
-        var defaultPriority: Priority = .medium
+        var defaultPriority: Priority = .important
         var addCalendarSourceAsTag = true
         var addEventTypeAsTag = true
     }

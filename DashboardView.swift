@@ -492,7 +492,7 @@ struct DashboardTodoRowView: View {
         switch todo.priority {
         case .none: return .gray
         case .low: return .green
-        case .medium: return .yellow
+        case .important: return .orange
         case .urgent: return .red
         }
     }

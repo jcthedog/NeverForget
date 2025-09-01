@@ -3050,7 +3050,7 @@ struct CreateCalendarEventView: View {
             title: eventTitle,
             description: eventDescription.isEmpty ? nil : eventDescription,
             isCompleted: false,
-            priority: .medium,
+            priority: .important,
             dueDate: startDate,
             category: .personal
         )

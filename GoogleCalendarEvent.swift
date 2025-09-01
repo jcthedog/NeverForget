@@ -30,7 +30,7 @@ struct GoogleCalendarEvent: Identifiable, Codable {
         } else if !isAllDay && endDate.timeIntervalSince(startDate) < 3600 {
             return .urgent // Short, focused event
         } else if location != nil && !location!.isEmpty {
-            return .medium // Event with location
+            return .important // Event with location
         } else {
             return .low // Default priority
         }

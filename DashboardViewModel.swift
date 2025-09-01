@@ -281,7 +281,7 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
             Todo(
                 title: "Team Meeting",
                 description: "Weekly standup",
-                priority: Priority.medium,
+                priority: Priority.important,
                 dueDate: Date().addingTimeInterval(-5 * 60), // 5 minutes ago
                 category: Category.work
             ),
@@ -295,7 +295,7 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
             Todo(
                 title: "Family Dinner Planning",
                 description: "Plan weekend family dinner",
-                priority: Priority.medium,
+                priority: Priority.important,
                 dueDate: Date().addingTimeInterval(4 * 60 * 60), // 4 hours from now
                 category: Category.family
             )

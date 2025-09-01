@@ -2,6 +2,11 @@ import Foundation
 import SwiftUI
 import UIKit
 
+// MARK: - Type Aliases for Calendar Integration
+typealias TodoAlarmSettings = AlarmSettings
+typealias TodoPriority = Priority
+typealias TodoCategory = Category
+
 // MARK: - Notification Type
 enum NotificationType: String, CaseIterable, Codable {
     case standard = "standard"
@@ -31,6 +36,10 @@ struct AlarmSettings: Codable, Equatable {
     var isPersistentAlarm: Bool
     var persistentAlarmInterval: TimeInterval // Interval in seconds between notifications
     
+    // MARK: - Calendar Integration Properties
+    var persistentAlarmDuration: TimeInterval = 1800 // Duration in seconds (30 minutes default)
+    var persistentAlarmHourly: Bool = true // Switch to hourly after duration
+    
     init(
         isEnabled: Bool = false,
         reminderTime: Date? = nil,
@@ -38,7 +47,9 @@ struct AlarmSettings: Codable, Equatable {
         soundEnabled: Bool = true,
         vibrationEnabled: Bool = true,
         isPersistentAlarm: Bool = false,
-        persistentAlarmInterval: TimeInterval = 600 // Default: 10 minutes (600 seconds)
+        persistentAlarmInterval: TimeInterval = 600, // Default: 10 minutes (600 seconds)
+        persistentAlarmDuration: TimeInterval = 1800, // Default: 30 minutes (1800 seconds)
+        persistentAlarmHourly: Bool = true
     ) {
         self.isEnabled = isEnabled
         self.reminderTime = reminderTime
@@ -47,6 +58,8 @@ struct AlarmSettings: Codable, Equatable {
         self.vibrationEnabled = vibrationEnabled
         self.isPersistentAlarm = isPersistentAlarm
         self.persistentAlarmInterval = persistentAlarmInterval
+        self.persistentAlarmDuration = persistentAlarmDuration
+        self.persistentAlarmHourly = persistentAlarmHourly
     }
 }
 
@@ -56,6 +69,25 @@ enum RecurringPattern: Codable, Equatable {
     case weekly(interval: Int, days: Set<Int>)
     case monthly(interval: Int)
     case yearly(interval: Int)
+    
+    // MARK: - Calendar Integration Properties
+    var type: String {
+        switch self {
+        case .daily: return "Daily"
+        case .weekly: return "Weekly"
+        case .monthly: return "Monthly"
+        case .yearly: return "Yearly"
+        }
+    }
+    
+    var interval: Int {
+        switch self {
+        case .daily(let interval): return interval
+        case .weekly(let interval, _): return interval
+        case .monthly(let interval): return interval
+        case .yearly(let interval): return interval
+        }
+    }
     
     var displayName: String {
         switch self {
@@ -113,6 +145,12 @@ struct Todo: Identifiable, Codable, Equatable {
     var createdAt: Date
     var modifiedAt: Date
     
+    // MARK: - Calendar Integration Properties
+    var isAllDay: Bool = false
+    var location: String?
+    var notes: String?
+    var invitees: [String] = []
+    
     init(
         id: UUID = UUID(),
         title: String,
@@ -125,7 +163,11 @@ struct Todo: Identifiable, Codable, Equatable {
         recurringPattern: RecurringPattern? = nil,
         alarmSettings: AlarmSettings = AlarmSettings(),
         createdAt: Date = Date(),
-        modifiedAt: Date = Date()
+        modifiedAt: Date = Date(),
+        isAllDay: Bool = false,
+        location: String? = nil,
+        notes: String? = nil,
+        invitees: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -139,25 +181,38 @@ struct Todo: Identifiable, Codable, Equatable {
         self.alarmSettings = alarmSettings
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+        self.isAllDay = isAllDay
+        self.location = location
+        self.notes = notes
+        self.invitees = invitees
         
         // Auto-enable persistent alarm for urgent priority
         if priority == .urgent && !alarmSettings.isPersistentAlarm {
             self.alarmSettings.isPersistentAlarm = true
         }
     }
+    
+    // MARK: - Computed Properties
+    var isRecurring: Bool {
+        return recurringPattern != nil
+    }
+    
+    var isAllDay: Bool {
+        return dueDate == nil
+    }
 }
 
 enum Priority: String, CaseIterable, Codable {
     case none = "none"
     case low = "low"
-    case medium = "medium"
+    case important = "important"
     case urgent = "urgent"
     
     var displayName: String {
         switch self {
         case .none: return "None"
         case .low: return "Low"
-        case .medium: return "Medium"
+        case .important: return "Important"
         case .urgent: return "Urgent"
         }
     }
@@ -166,7 +221,7 @@ enum Priority: String, CaseIterable, Codable {
         switch self {
         case .none: return "⚪"
         case .low: return "🟢"
-        case .medium: return "🟡"
+        case .important: return "🟠"
         case .urgent: return "🔴"
         }
     }
@@ -175,7 +230,7 @@ enum Priority: String, CaseIterable, Codable {
         switch self {
         case .none: return .white
         case .low: return .green
-        case .medium: return .yellow
+        case .important: return .orange
         case .urgent: return .red
         }
     }
@@ -228,6 +283,7 @@ enum Category: Codable, Equatable, Hashable {
     case personal
     case work
     case family
+    case other
     case custom(CustomCategory)
     
     var displayName: String {
@@ -235,6 +291,7 @@ enum Category: Codable, Equatable, Hashable {
         case .personal: return "Personal"
         case .work: return "Work"
         case .family: return "Family"
+        case .other: return "Other"
         case .custom(let custom): return custom.name
         }
     }
@@ -244,22 +301,26 @@ enum Category: Codable, Equatable, Hashable {
         case .personal: return "👤"
         case .work: return "💼"
         case .family: return "👨‍👩‍👧‍👦"
+        case .other: return "📁"
         case .custom(let custom): return custom.icon
         }
     }
     
     var color: Color {
         switch self {
-        case .personal: return .purple
-        case .work: return .blue
-        case .family: return .green
+        case .personal: return .blue
+        case .work: return .green
+        case .family: return .purple
+        case .other: return .gray
         case .custom(let custom): return custom.color
         }
     }
     
+
+    
     var isDefault: Bool {
         switch self {
-        case .personal, .work, .family: return true
+        case .personal, .work, .family, .other: return true
         case .custom: return false
         }
     }
@@ -280,6 +341,8 @@ enum Category: Codable, Equatable, Hashable {
             self = .work
         case "family":
             self = .family
+        case "other":
+            self = .other
         case "custom":
             let customCategory = try container.decode(CustomCategory.self, forKey: .customCategory)
             self = .custom(customCategory)
@@ -298,6 +361,8 @@ enum Category: Codable, Equatable, Hashable {
             try container.encode("work", forKey: .type)
         case .family:
             try container.encode("family", forKey: .type)
+        case .other:
+            try container.encode("other", forKey: .type)
         case .custom(let customCategory):
             try container.encode("custom", forKey: .type)
             try container.encode(customCategory, forKey: .customCategory)

@@ -1,0 +1,24 @@
+Calendar with Day, Week, Month view. Possibly a List view
+Clickable Dates, Events, and Todos within the calendar
+Full view of Events in the calendar (not just dots)
+Click on Event to bring up a Details sheet about the event
+
+*********Create Event Page***************
+Event Title
+Date & Time Picker (All Day Event toggle)
+Invite Others
+Add Location (Auto Populate)
+Calendar (which calendar to save to)
+Recurring
+Reminder
+Category
+"Save" button
+
+
+**********Create Todo Page**************
+Same as Event page without Calendar input (save to)
+Persistent Reminder
+
+
+************Import Events*************
+.ics ability
