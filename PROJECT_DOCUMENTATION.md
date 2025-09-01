@@ -1,5 +1,28 @@
 # Never Forget - iOS Task Management App
 
+## 🎯 **STABLE VERSION v3.1 - DATE/TIME CLICK FUNCTIONALITY COMPLETE**
+
+### **📅 Last Updated: January 8, 2025 - STABLE WORKING VERSION ESTABLISHED**
+### **🏷️ Version: v3.1 - Complete Date/Time Click Functionality**
+### **🚀 Build Status: SUCCESSFUL - Production Ready**
+### **🏷️ Git Tag: v3.1-stable - Use as 'go to' fallback version**
+
+**✅ COMPLETED: Full date/time click functionality implemented across all calendar views - STABLE BUILD**
+
+### **🆕 NEW FEATURES IN v3.1:**
+- **Date/Time Click Functionality**: Click anywhere on calendar to see events/todos for that date/time
+- **DayDetailView Popup**: Comprehensive popup showing all events and todos for selected date/time
+- **Drill-Down Navigation**: Click on any event/todo in popup to see full details with edit capability
+- **Enhanced User Experience**: Intuitive click-anywhere functionality across all calendar views
+- **Beautiful UI**: Consistent with app's pastel theme and modern design
+
+### **📱 CALENDAR VIEW UPDATES:**
+- **Today View**: Click any time slot to see hourly events/todos
+- **Week View**: Click any day/time cell for specific date/time details  
+- **Month View**: Click any date to see all events/todos for that day
+
+---
+
 ## 📱 **PROJECT OVERVIEW**
 
 **Never Forget** is a comprehensive iOS application built with SwiftUI that combines task management, calendar integration, and persistent alarm functionality. The app provides an intuitive interface for managing todos, events, and reminders with seamless Google Calendar integration.
