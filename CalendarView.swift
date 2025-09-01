@@ -59,32 +59,10 @@ struct CalendarView: View {
             }
         }
         .sheet(isPresented: $showingCreateEvent) {
-            // Placeholder for CreateEventView - will be implemented later
-            VStack {
-                Text("Create Event")
-                    .font(.title)
-                    .padding()
-                Text("Event creation form will be implemented here")
-                    .foregroundColor(.secondary)
-                Button("Close") {
-                    showingCreateEvent = false
-                }
-                .padding()
-            }
+            CreateEventView(viewModel: viewModel)
         }
         .sheet(isPresented: $showingCreateTodo) {
-            // Placeholder for CreateTodoView - will be implemented later
-            VStack {
-                Text("Create Todo")
-                    .font(.title)
-                    .padding()
-                Text("Todo creation form will be implemented here")
-                    .foregroundColor(.secondary)
-                Button("Close") {
-                    showingCreateTodo = false
-                }
-                .padding()
-            }
+            CreateTodoView(viewModel: viewModel)
         }
         .sheet(item: $showingEventDetail) { event in
             // Placeholder for EventDetailView - will be implemented later
