@@ -24,7 +24,8 @@ struct DashboardView: View {
     @State private var showingAddTodo = false
     @State private var showingCalendar = false
     @State private var showingSearch = false
-    @State private var showingGoogleCalendar = false
+    @State private var showingCreateEvent = false
+    @State private var showingSearchPopup = false
     
     var body: some View {
         NavigationView {
@@ -47,7 +48,8 @@ struct DashboardView: View {
                             showingAddTodo: $showingAddTodo,
                             showingCalendar: $showingCalendar,
                             showingSearch: $showingSearch,
-                            showingGoogleCalendar: $showingGoogleCalendar
+                            showingCreateEvent: $showingCreateEvent,
+                            showingSearchPopup: $showingSearchPopup
                         )
                         
                         // Google Calendar Status Section
@@ -82,9 +84,20 @@ struct DashboardView: View {
             .sheet(isPresented: $showingSearch) {
                 SearchView(viewModel: viewModel)
             }
-            .sheet(isPresented: $showingGoogleCalendar) {
-                GoogleCalendarSelectionView(viewModel: viewModel)
+            .sheet(isPresented: $showingCreateEvent) {
+                CreateEventView(viewModel: viewModel)
             }
+            .overlay(
+                // Search Popup
+                Group {
+                    if showingSearchPopup {
+                        SearchPopupView(
+                            viewModel: viewModel,
+                            isPresented: $showingSearchPopup
+                        )
+                    }
+                }
+            )
         }
     }
 }
@@ -251,7 +264,8 @@ struct QuickActionsSection: View {
     @Binding var showingAddTodo: Bool
     @Binding var showingCalendar: Bool
     @Binding var showingSearch: Bool
-    @Binding var showingGoogleCalendar: Bool
+    @Binding var showingCreateEvent: Bool
+    @Binding var showingSearchPopup: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -264,19 +278,11 @@ struct QuickActionsSection: View {
                 GridItem(.flexible())
             ], spacing: 12) {
                 QuickActionButton(
-                    title: "Add Todo",
-                    icon: "plus.circle.fill",
-                    color: .blue
+                    title: "New Event to Calendar",
+                    icon: "calendar.badge.plus",
+                    color: .purple
                 ) {
-                    showingAddTodo = true
-                }
-                
-                QuickActionButton(
-                    title: "View Calendar",
-                    icon: "calendar",
-                    color: .green
-                ) {
-                    showingCalendar = true
+                    showingCreateEvent = true
                 }
                 
                 QuickActionButton(
@@ -284,15 +290,7 @@ struct QuickActionsSection: View {
                     icon: "magnifyingglass",
                     color: .orange
                 ) {
-                    showingSearch = true
-                }
-                
-                QuickActionButton(
-                    title: "Google Calendar",
-                    icon: "calendar.badge.plus",
-                    color: .purple
-                ) {
-                    showingGoogleCalendar = true
+                    showingSearchPopup = true
                 }
             }
         }
@@ -455,6 +453,159 @@ struct EmptyTodosView: View {
 
 // MARK: - Dashboard Todo Row View
 struct DashboardTodoRowView: View {
+    let todo: Todo
+    let viewModel: DashboardViewModel
+    
+    var body: some View {
+        HStack {
+            Button(action: {
+                viewModel.toggleTodoCompletion(todo)
+            }) {
+                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(todo.isCompleted ? .green : .blue)
+                    .font(.title3)
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(todo.title)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                    .strikethrough(todo.isCompleted)
+                
+                if let dueDate = todo.dueDate {
+                    Text(dueDate, style: .time)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            if todo.priority != .none {
+                Text(todo.priority.displayName)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(priorityColor.opacity(0.2))
+                    .foregroundColor(priorityColor)
+                    .cornerRadius(4)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+    
+    private var priorityColor: Color {
+        switch todo.priority {
+        case .none: return .gray
+        case .low: return .green
+        case .important: return .orange
+        case .urgent: return .red
+        }
+    }
+}
+
+// MARK: - Search Popup View
+struct SearchPopupView: View {
+    @ObservedObject var viewModel: DashboardViewModel
+    @Binding var isPresented: Bool
+    @State private var searchText = ""
+    @State private var searchResults: [Todo] = []
+    
+    var body: some View {
+        ZStack {
+            // Background overlay
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    isPresented = false
+                }
+            
+            // Search popup
+            VStack(spacing: 16) {
+                // Search header
+                HStack {
+                    Text("Find Task")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                    .foregroundColor(.blue)
+                }
+                
+                // Search field
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    
+                    TextField("Search tasks...", text: $searchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .onChange(of: searchText) {
+                            performSearch(searchText)
+                        }
+                    
+                    if !searchText.isEmpty {
+                        Button(action: {
+                            searchText = ""
+                            searchResults = []
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+                
+                // Search results
+                if searchResults.isEmpty && !searchText.isEmpty {
+                    Text("No tasks found")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if searchResults.isEmpty {
+                    Text("Start typing to search tasks...")
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(searchResults) { todo in
+                                SearchResultRow(todo: todo, viewModel: viewModel)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(20)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(radius: 10)
+            .frame(maxWidth: 350, maxHeight: 400)
+        }
+    }
+    
+    private func performSearch(_ query: String) {
+        guard !query.isEmpty else {
+            searchResults = []
+            return
+        }
+        
+        searchResults = viewModel.todos.filter { todo in
+            todo.title.localizedCaseInsensitiveContains(query) ||
+            (todo.description?.localizedCaseInsensitiveContains(query) ?? false)
+        }
+    }
+}
+
+// MARK: - Search Result Row
+struct SearchResultRow: View {
     let todo: Todo
     let viewModel: DashboardViewModel
     
