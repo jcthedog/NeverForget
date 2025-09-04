@@ -51,22 +51,24 @@ struct CreateEventView: View {
     var body: some View {
         NavigationView {
             mainContent
-        }
-        .navigationTitle("Create Event")
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
+                .navigationTitle("Create Event")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Save") {
+                            saveEvent()
+                            dismiss()
+                        }
+                        .fontWeight(.semibold)
+                        .disabled(eventTitle.isEmpty)
+                    }
                 }
-            }
-            
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    saveEvent()
-                    dismiss()
-                }
-                .disabled(eventTitle.isEmpty)
-            }
         }
         .sheet(isPresented: $showingLocationPicker) {
             LocationPickerView(location: $location)
@@ -248,9 +250,34 @@ struct CreateEventView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            Toggle("Make this a recurring event", isOn: $isRecurring)
+            Toggle("Make this event recurring", isOn: $isRecurring)
+                .toggleStyle(SwitchToggleStyle(tint: .blue))
+            
+            if isRecurring {
+                VStack(spacing: 12) {
+                    Picker("Pattern", selection: $recurrencePattern) {
+                        Text("Daily").tag(RecurringPattern.daily(interval: recurrenceInterval))
+                        Text("Weekly").tag(RecurringPattern.weekly(interval: recurrenceInterval, days: selectedDaysOfWeek))
+                        Text("Monthly").tag(RecurringPattern.monthly(interval: recurrenceInterval))
+                        Text("Yearly").tag(RecurringPattern.yearly(interval: recurrenceInterval))
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    
+                    HStack {
+                        Text("Every")
+                        Stepper("\(recurrenceInterval)", value: $recurrenceInterval, in: 1...99)
+                        Text(recurrencePattern.displayName.components(separatedBy: " ").last ?? "days")
+                    }
+                    
+                    if case .weekly = recurrencePattern {
+                        DaysOfWeekSelector(selectedDays: $selectedDaysOfWeek)
+                    }
+                }
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(8)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color.white)
         .cornerRadius(12)
@@ -386,7 +413,16 @@ struct CreateEventView: View {
     }
     
     private func createRecurringPattern() -> RecurringPattern {
-        return recurrencePattern
+        switch recurrencePattern {
+        case .daily:
+            return .daily(interval: recurrenceInterval)
+        case .weekly:
+            return .weekly(interval: recurrenceInterval, days: selectedDaysOfWeek)
+        case .monthly:
+            return .monthly(interval: recurrenceInterval)
+        case .yearly:
+            return .yearly(interval: recurrenceInterval)
+        }
     }
     
     private func createReminderSettings() -> ReminderSettings {
