@@ -3,7 +3,7 @@ import SwiftUI
 
 // MARK: - Calendar Event Model
 struct CalendarEvent: Identifiable, Codable {
-    let id = UUID()
+    var id: UUID = UUID()
     var title: String
     var description: String?
     var startDate: Date

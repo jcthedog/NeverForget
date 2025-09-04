@@ -16,9 +16,11 @@
 		CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */; };
 		CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */; };
 		CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */; };
-		CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1F3DF32E580A4F00FC027A /* ContentView.swift */; };
 		CC1F3DF92E580BC700FC027A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC1F3DF82E580BC700FC027A /* GoogleSignIn */; };
 		CC1F3DFB2E580BC700FC027A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CC1F3DFA2E580BC700FC027A /* GoogleSignInSwift */; };
+		CC434B7A2E69E5900018DE06 /* SharedTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC434B782E69E5900018DE06 /* SharedTypes.swift */; };
+		CC434B7B2E69E5900018DE06 /* TestEventCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC434B792E69E5900018DE06 /* TestEventCreation.swift */; };
+		CC434B7F2E69E7850018DE06 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC434B7E2E69E7850018DE06 /* ContentView.swift */; };
 		CC5D15642E596D52007168FF /* GoogleAPIClientForRESTCore in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15632E596D52007168FF /* GoogleAPIClientForRESTCore */; };
 		CC5D15662E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15652E596D52007168FF /* GoogleAPIClientForREST_ACMEDNS */; };
 		CC5D15682E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15672E596D52007168FF /* GoogleAPIClientForREST_AIPlatformNotebooks */; };
@@ -68,7 +70,9 @@
 		CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarEvent.swift; sourceTree = "<group>"; };
 		CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarService.swift; sourceTree = "<group>"; };
 		CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarConfig.swift; sourceTree = "<group>"; };
-		CC1F3DF32E580A4F00FC027A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CC434B782E69E5900018DE06 /* SharedTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedTypes.swift; sourceTree = "<group>"; };
+		CC434B792E69E5900018DE06 /* TestEventCreation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestEventCreation.swift; sourceTree = "<group>"; };
+		CC434B7E2E69E7850018DE06 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CC6F0B022E5983F4009CE3CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEvent.swift; sourceTree = "<group>"; };
 		CC9440BF2E63905500D64DEF /* PastelTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastelTheme.swift; sourceTree = "<group>"; };
@@ -137,28 +141,30 @@
 		CC1F3DA62E58076400FC027A = {
 			isa = PBXGroup;
 			children = (
-				CC6F0B022E5983F4009CE3CF /* Info.plist */,
 				CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */,
-				CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */,
+				CCF29A4C2E5AAF870036BABD /* CalendarView.swift */,
+				CC434B7E2E69E7850018DE06 /* ContentView.swift */,
 				CCF29A532E5AB63D0036BABD /* CreateEventView.swift */,
 				CCF29A552E5AB63D0036BABD /* CreateTodoView.swift */,
-				CCF29A572E5AB63D0036BABD /* EventDetailView.swift */,
-				CCF29A4C2E5AAF870036BABD /* CalendarView.swift */,
-				CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */,
 				CC1F3DDF2E58094F00FC027A /* DashboardView.swift */,
+				CC1F3DDD2E58086300FC027A /* DashboardViewModel.swift */,
+				CCF29A572E5AB63D0036BABD /* EventDetailView.swift */,
 				CC1F3DE02E58094F00FC027A /* EventImportView.swift */,
+				CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */,
+				CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */,
 				CC1F3DE12E58094F00FC027A /* GoogleCalendarSelectionView.swift */,
-				CC9440BF2E63905500D64DEF /* PastelTheme.swift */,
-				CC1F3DD92E58080700FC027A /* PersistentAlarm.swift */,
-				CC1F3DDA2E58080700FC027A /* Todo.swift */,
+				CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */,
+				CC6F0B022E5983F4009CE3CF /* Info.plist */,
 				CC1F3DB12E58076400FC027A /* Never Forget */,
 				CC1F3DBF2E58076500FC027A /* Never ForgetTests */,
 				CC1F3DC92E58076500FC027A /* Never ForgetUITests */,
+				CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */,
+				CC9440BF2E63905500D64DEF /* PastelTheme.swift */,
+				CC1F3DD92E58080700FC027A /* PersistentAlarm.swift */,
 				CC1F3DB02E58076400FC027A /* Products */,
-				CC1F3DE52E5809A900FC027A /* GoogleCalendarEvent.swift */,
-				CC1F3DEF2E5809FA00FC027A /* GoogleCalendarService.swift */,
-				CC1F3DF12E580A1400FC027A /* GoogleCalendarConfig.swift */,
-				CC1F3DF32E580A4F00FC027A /* ContentView.swift */,
+				CC434B782E69E5900018DE06 /* SharedTypes.swift */,
+				CC434B792E69E5900018DE06 /* TestEventCreation.swift */,
+				CC1F3DDA2E58080700FC027A /* Todo.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -341,10 +347,12 @@
 				CC1F3DDB2E58080700FC027A /* PersistentAlarm.swift in Sources */,
 				CC86DFE02E6600A000196CE2 /* CalendarEvent.swift in Sources */,
 				CC1F3DF22E580A1400FC027A /* GoogleCalendarConfig.swift in Sources */,
+				CC434B7F2E69E7850018DE06 /* ContentView.swift in Sources */,
 				CC1F3DDC2E58080700FC027A /* Todo.swift in Sources */,
 				CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */,
+				CC434B7A2E69E5900018DE06 /* SharedTypes.swift in Sources */,
+				CC434B7B2E69E5900018DE06 /* TestEventCreation.swift in Sources */,
 				CC9440C02E63905500D64DEF /* PastelTheme.swift in Sources */,
-				CC1F3DF62E580A4F00FC027A /* ContentView.swift in Sources */,
 				CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */,
 				CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */,
 				CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */,
@@ -516,6 +524,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -528,6 +537,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomascora.neverforgettasks;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -547,6 +560,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -559,6 +573,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomascora.neverforgettasks;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

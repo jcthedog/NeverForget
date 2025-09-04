@@ -18,8 +18,7 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     @Published var lastSyncTime: String?
     @Published var sampleCalendarEvents: [GoogleCalendarEvent] = []
     @Published var use24HourTime = false
-    
-
+    @Published var isDarkMode = false
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -27,6 +26,19 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     func toggleTimeFormat() {
         use24HourTime.toggle()
         print("Time format toggled to: \(use24HourTime ? "24-hour" : "12-hour")")
+    }
+    
+    // MARK: - Dark Mode Management
+    func toggleDarkMode() {
+        isDarkMode.toggle()
+        print("Dark mode toggled to: \(isDarkMode ? "dark" : "light")")
+        
+        // Apply the dark mode setting to the app
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            windowScene.windows.forEach { window in
+                window.overrideUserInterfaceStyle = isDarkMode ? .dark : .light
+            }
+        }
     }
     
     func formatTime(_ date: Date) -> String {

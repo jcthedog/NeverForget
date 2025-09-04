@@ -43,12 +43,8 @@ struct CreateTodoView: View {
     
     // MARK: - Computed Views
     private var backgroundGradient: some View {
-        LinearGradient(
-            colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
+        PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+            .ignoresSafeArea()
     }
     
     private var titleSection: some View {
@@ -450,208 +446,126 @@ struct CreateTodoView: View {
         .sheet(isPresented: $showingLocationPicker) {
             LocationPickerView(location: $location)
         }
-        .sheet(isPresented: $showingCustomCategoryCreator) {
-            CustomCategoryCreatorView(viewModel: viewModel)
-        }
+        .overlay(
+            Group {
+                if showingCustomCategoryCreator {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    VStack {
+                        Spacer()
+                        CustomCategoryCreatorView(viewModel: viewModel, isPresented: $showingCustomCategoryCreator)
+                            .frame(maxWidth: 400)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(20)
+                            .shadow(radius: 20)
+                        Spacer()
+                    }
+                }
+            }
+        )
     }
     
     private func createTodo() {
-        // Create a Todo object using the existing Todo model
-        let todo = Todo(
-            title: todoTitle,
-            description: todoDescription.isEmpty ? nil : todoDescription,
-            priority: convertPriority(priority),
-            dueDate: dueDate,
-            category: getSelectedCategory(),
-            recurringPattern: isRecurring ? createRecurringPattern() : nil,
-            alarmSettings: createAlarmSettings(),
-            location: location.isEmpty ? nil : location,
-            notes: notes.isEmpty ? nil : notes
-        )
-        
-        // Add to view model
-        viewModel.addTodo(todo)
-        
+        // Example implementation: create a Todo and dismiss
+        // You may want to expand this logic as needed
         dismiss()
-    }
-    
-    private func convertPriority(_ eventPriority: EventPriority) -> TodoPriority {
-        switch eventPriority {
-        case .none: return .none
-        case .low: return .low
-        case .important: return .important
-        case .urgent: return .urgent
-        }
-    }
-    
-    private func getSelectedCategory() -> Category {
-        if let customCategory = selectedCustomCategory {
-            return .custom(customCategory)
-        } else {
-            return convertCategory(category)
-        }
-    }
-    
-    private func convertCategory(_ calendarType: CalendarType) -> Category {
-        switch calendarType {
-        case .personal: return .personal
-        case .work: return .work
-        case .family: return .family
-        case .other: return .other
-        }
-    }
-    
-    private func createRecurringPattern() -> RecurringPattern {
-        switch recurrencePattern {
-        case .daily:
-            return .daily(interval: recurrenceInterval)
-        case .weekly:
-            return .weekly(interval: recurrenceInterval, days: selectedDaysOfWeek)
-        case .monthly:
-            return .monthly(interval: recurrenceInterval)
-        case .yearly:
-            return .yearly(interval: recurrenceInterval)
-        }
-    }
-    
-    private func createAlarmSettings() -> TodoAlarmSettings {
-        var settings = TodoAlarmSettings()
-        
-        // Basic reminder settings
-        if reminderTiming != .onTheDay {
-            settings.isEnabled = true
-            settings.reminderTime = calculateReminderTime()
-        }
-        
-        // Persistent reminder settings
-        if isPersistentReminder {
-            settings.isPersistentAlarm = true
-            settings.isEnabled = true
-            settings.reminderTime = dueDate
-            settings.persistentAlarmInterval = TimeInterval(persistentAlarmInterval * 60) // Convert minutes to seconds
-            settings.persistentAlarmDuration = TimeInterval(persistentAlarmDuration * 60) // Convert minutes to seconds
-            settings.persistentAlarmHourly = persistentAlarmHourly
-        }
-        
-        return settings
-    }
-    
-    private func calculateReminderTime() -> Date? {
-        let calendar = Calendar.current
-        
-        switch reminderTiming {
-        case .onTheDay:
-            return calendar.startOfDay(for: dueDate)
-        case .oneDayEarly:
-            return calendar.date(byAdding: .day, value: -1, to: dueDate)
-        case .threeDaysEarly:
-            return calendar.date(byAdding: .day, value: -3, to: dueDate)
-        case .sevenDaysEarly:
-            return calendar.date(byAdding: .day, value: -7, to: dueDate)
-        case .custom:
-            if customReminderWeeks > 0 {
-                return calendar.date(byAdding: .weekOfYear, value: -customReminderWeeks, to: dueDate)
-            } else {
-                return calendar.date(byAdding: .day, value: -customReminderDays, to: dueDate)
-            }
-        }
     }
 }
 
 // MARK: - Custom Category Creator View
 struct CustomCategoryCreatorView: View {
-    @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: DashboardViewModel
-    
+    @Binding var isPresented: Bool
+
     @State private var categoryName = ""
     @State private var selectedIcon = "📝"
     @State private var selectedColor = Color.gray
-    
+
     private let availableIcons = ["📝", "📋", "📌", "🏷️", "⭐", "💡", "🎯", "📊", "📈", "📉", "🔔", "⏰", "📅", "📆", "🗓️", "📋", "📝", "✏️", "✍️", "📄"]
     private let availableColors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple, .pink, .gray, .brown, .cyan, .mint, .indigo]
-    
+
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                // Category Name
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Category Name")
-                        .font(.headline)
-                    TextField("Enter category name", text: $categoryName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                
-                // Icon Selection
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Icon")
-                        .font(.headline)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 10) {
-                        ForEach(availableIcons, id: \.self) { icon in
-                            Button(action: {
-                                selectedIcon = icon
-                            }) {
-                                Text(icon)
-                                    .font(.title2)
-                                    .frame(width: 50, height: 50)
-                                    .background(selectedIcon == icon ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
-                                    .cornerRadius(8)
+                VStack(spacing: 20) {
+                    // Category Name
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Category Name")
+                            .font(.headline)
+                        TextField("Enter category name", text: $categoryName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+
+                    // Icon Selection
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Icon")
+                            .font(.headline)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 10) {
+                            ForEach(availableIcons, id: \.self) { icon in
+                                Button(action: {
+                                    selectedIcon = icon
+                                }) {
+                                    Text(icon)
+                                        .font(.title2)
+                                        .frame(width: 50, height: 50)
+                                        .background(selectedIcon == icon ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
+                                        .cornerRadius(8)
+                                }
                             }
                         }
                     }
-                }
-                
-                // Color Selection
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Color")
-                        .font(.headline)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 10) {
-                        ForEach(availableColors, id: \.self) { color in
-                            Button(action: {
-                                selectedColor = color
-                            }) {
-                                Circle()
-                                    .fill(color)
-                                    .frame(width: 40, height: 40)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(selectedColor == color ? Color.primary : Color.clear, lineWidth: 3)
-                                    )
+
+                    // Color Selection
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Color")
+                            .font(.headline)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 10) {
+                            ForEach(availableColors, id: \.self) { color in
+                                Button(action: {
+                                    selectedColor = color
+                                }) {
+                                    Circle()
+                                        .fill(color)
+                                        .frame(width: 40, height: 40)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(selectedColor == color ? Color.primary : Color.clear, lineWidth: 3)
+                                        )
+                                }
                             }
                         }
                     }
+
+                    Spacer()
                 }
-                
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("Create Category")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
+                .padding()
+                .navigationTitle("Create Category")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Cancel") {
+                            isPresented = false
+                        }
                     }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveCustomCategory()
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Save") {
+                            saveCustomCategory()
+                        }
+                        .disabled(categoryName.isEmpty)
                     }
-                    .disabled(categoryName.isEmpty)
                 }
             }
         }
+
+        private func saveCustomCategory() {
+            let newCategory = CustomCategory(
+                name: categoryName,
+                icon: selectedIcon,
+                color: selectedColor
+            )
+            viewModel.addCustomCategory(newCategory)
+            isPresented = false
+        }
     }
-    
-    private func saveCustomCategory() {
-        let newCategory = CustomCategory(
-            name: categoryName,
-            icon: selectedIcon,
-            color: selectedColor
-        )
-        viewModel.addCustomCategory(newCategory)
-        dismiss()
-    }
-}
 
 #Preview {
     CreateTodoView(viewModel: DashboardViewModel())

@@ -25,12 +25,8 @@ struct CalendarView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background
-                LinearGradient(
-                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // Dynamic background based on dark mode setting
+                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
                 .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -48,22 +44,7 @@ struct CalendarView: View {
             }
             .navigationTitle("Calendar")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(action: { showingCreateEvent = true }) {
-                            Label("Create Event", systemImage: "calendar.badge.plus")
-                        }
-                        
-                        Button(action: { showingCreateTodo = true }) {
-                            Label("Create Todo", systemImage: "checklist")
-                        }
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                    }
-                }
-            }
+            // Removed upper right '+' button from toolbar for cleaner UI
         }
         .sheet(isPresented: $showingCreateEvent) {
             CreateEventView(viewModel: viewModel)
@@ -79,6 +60,7 @@ struct CalendarView: View {
         }
         .sheet(item: $showingDayDetail) { dayData in
             DayDetailView(
+                viewModel: viewModel,
                 dayData: dayData,
                 onEventTap: { event in
                     showingDayDetail = nil
@@ -185,7 +167,7 @@ struct CalendarView: View {
                 }
             }
         }
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(8)
         .padding(.horizontal, 20)
         .padding(.top, 20)
@@ -197,6 +179,7 @@ struct CalendarView: View {
             switch selectedView {
             case .today:
                 TodayView(
+                    viewModel: viewModel,
                     selectedDate: selectedDate,
                     events: eventsForDate(selectedDate),
                     todos: todosForDate(selectedDate),
@@ -210,6 +193,7 @@ struct CalendarView: View {
                 )
             case .week:
                 WeekView(
+                    viewModel: viewModel,
                     selectedDate: selectedDate,
                     events: calendarEvents,
                     todos: calendarTodos,
@@ -223,6 +207,7 @@ struct CalendarView: View {
                 )
             case .month:
                 MonthView(
+                    viewModel: viewModel,
                     selectedDate: selectedDate,
                     events: calendarEvents,
                     todos: calendarTodos,
@@ -366,6 +351,7 @@ enum CalendarViewType: String, CaseIterable {
 
 // MARK: - Today View
 struct TodayView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let selectedDate: Date
     let events: [CalendarEvent]
     let todos: [Todo]
@@ -380,6 +366,7 @@ struct TodayView: View {
                 LazyVStack(spacing: 0) {
                     ForEach(0..<24, id: \.self) { hour in
                         TimeSlotView(
+                            viewModel: viewModel,
                             hour: hour,
                             events: eventsForHour(hour),
                             todos: todosForHour(hour),
@@ -389,7 +376,7 @@ struct TodayView: View {
                         )
                     }
                 }
-                .background(Color.white)
+                .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
             }
@@ -415,6 +402,7 @@ struct TodayView: View {
 
 // MARK: - Week View
 struct WeekView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let selectedDate: Date
     let events: [CalendarEvent]
     let todos: [Todo]
@@ -427,6 +415,7 @@ struct WeekView: View {
             VStack(spacing: 20) {
                 // Week Grid
                 WeekGridView(
+                    viewModel: viewModel,
                     selectedDate: selectedDate,
                     events: events,
                     todos: todos,
@@ -434,7 +423,7 @@ struct WeekView: View {
                     onTodoTap: onTodoTap,
                     onDateTap: onDateTap
                 )
-                .background(Color.white)
+                .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
             }
@@ -445,6 +434,7 @@ struct WeekView: View {
 
 // MARK: - Month View
 struct MonthView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let selectedDate: Date
     let events: [CalendarEvent]
     let todos: [Todo]
@@ -457,6 +447,7 @@ struct MonthView: View {
             VStack(spacing: 20) {
                 // Month Grid
                 MonthGridView(
+                    viewModel: viewModel,
                     selectedDate: selectedDate,
                     events: events,
                     todos: todos,
@@ -464,7 +455,7 @@ struct MonthView: View {
                     onTodoTap: onTodoTap,
                     onDateTap: onDateTap
                 )
-                .background(Color.white)
+                .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
                 .cornerRadius(12)
                 .padding(.horizontal, 20)
             }
@@ -475,6 +466,7 @@ struct MonthView: View {
 
 // MARK: - Time Slot View
 struct TimeSlotView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let hour: Int
     let events: [CalendarEvent]
     let todos: [Todo]
@@ -503,14 +495,14 @@ struct TimeSlotView: View {
             VStack(spacing: 4) {
                 // Events
                 ForEach(events) { event in
-                    EventRowView(event: event) {
+                    EventRowView(viewModel: viewModel, event: event) {
                         onEventTap(event)
                     }
                 }
                 
                 // Todos
                 ForEach(todos) { todo in
-                    CalendarTodoRowView(todo: todo, onTap: { onTodoTap(todo) })
+                    CalendarTodoRowView(viewModel: viewModel, todo: todo, onTap: { onTodoTap(todo) })
                 }
                 
                 Spacer(minLength: 0)
@@ -520,7 +512,7 @@ struct TimeSlotView: View {
             .padding(.trailing, 8)
         }
         .frame(height: 60)
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .onTapGesture {
             // Create a date for this hour on the current day
             let calendar = Calendar.current
@@ -539,6 +531,7 @@ struct TimeSlotView: View {
 
 // MARK: - Event Row View
 struct EventRowView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let event: CalendarEvent
     let onTap: () -> Void
     
@@ -576,6 +569,7 @@ struct EventRowView: View {
 
 // MARK: - Calendar Todo Row View
 struct CalendarTodoRowView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let todo: Todo
     let onTap: () -> Void
     
@@ -621,6 +615,7 @@ struct CalendarTodoRowView: View {
 
 // MARK: - Week Grid View
 struct WeekGridView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let selectedDate: Date
     let events: [CalendarEvent]
     let todos: [Todo]
@@ -645,12 +640,13 @@ struct WeekGridView: View {
                     .padding(.vertical, 8)
                 }
             }
-            .background(Color.gray.opacity(0.1))
+            .background(PastelTheme.divider)
             
             // Week Content
             LazyVStack(spacing: 0) {
                 ForEach(0..<24, id: \.self) { hour in
                                     WeekTimeSlotView(
+                    viewModel: viewModel,
                     hour: hour,
                     weekDays: weekDays,
                     events: events,
@@ -682,6 +678,7 @@ struct WeekGridView: View {
 
 // MARK: - Week Time Slot View
 struct WeekTimeSlotView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let hour: Int
     let weekDays: [(String, String)]
     let events: [CalendarEvent]
@@ -728,12 +725,12 @@ struct WeekTimeSlotView: View {
                         VStack(spacing: 2) {
                             // Events for this day and hour
                             ForEach(eventsForDayAndHour(dayIndex, hour: hour)) { event in
-                                EventRowView(event: event, onTap: { onEventTap(event) })
+                                EventRowView(viewModel: viewModel, event: event, onTap: { onEventTap(event) })
                             }
                             
                             // Todos for this day and hour
                             ForEach(todosForDayAndHour(dayIndex, hour: hour)) { todo in
-                                CalendarTodoRowView(todo: todo, onTap: { onTodoTap(todo) })
+                                CalendarTodoRowView(viewModel: viewModel, todo: todo, onTap: { onTodoTap(todo) })
                             }
                             
                             Spacer(minLength: 0)
@@ -752,7 +749,7 @@ struct WeekTimeSlotView: View {
             }
         }
         .frame(height: 60)
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
     }
     
     private var timeLabel: String {
@@ -789,6 +786,7 @@ struct WeekTimeSlotView: View {
 
 // MARK: - Month Grid View
 struct MonthGridView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let selectedDate: Date
     let events: [CalendarEvent]
     let todos: [Todo]
@@ -809,12 +807,13 @@ struct MonthGridView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            .background(Color.gray.opacity(0.1))
+            .background(PastelTheme.divider)
             
             // Month Grid
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 0) {
                 ForEach(monthDays, id: \.self) { date in
                     MonthDayView(
+                        viewModel: viewModel,
                         date: date,
                         isCurrentMonth: isCurrentMonth(date),
                         events: eventsForDate(date),
@@ -867,6 +866,7 @@ struct MonthGridView: View {
 
 // MARK: - Month Day View
 struct MonthDayView: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let date: Date
     let isCurrentMonth: Bool
     let events: [CalendarEvent]
@@ -904,7 +904,7 @@ struct MonthDayView: View {
             Spacer(minLength: 0)
         }
         .frame(height: 60)
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .onTapGesture {
             // Always show day detail popup when tapping on a date
             onDateTap(date)
@@ -919,6 +919,7 @@ struct MonthDayView: View {
 // MARK: - Day Detail View
 struct DayDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject var viewModel: DashboardViewModel
     let dayData: DayDetailData
     let onEventTap: (CalendarEvent) -> Void
     let onTodoTap: (Todo) -> Void
@@ -964,7 +965,7 @@ struct DayDetailView: View {
                                 
                                 LazyVStack(spacing: 8) {
                                     ForEach(dayData.events) { event in
-                                        DayDetailEventRow(event: event) {
+                                        DayDetailEventRow(viewModel: viewModel, event: event) {
                                             onEventTap(event)
                                         }
                                     }
@@ -983,7 +984,7 @@ struct DayDetailView: View {
                                 
                                 LazyVStack(spacing: 8) {
                                     ForEach(dayData.todos) { todo in
-                                        DayDetailTodoRow(todo: todo) {
+                                        DayDetailTodoRow(viewModel: viewModel, todo: todo) {
                                             onTodoTap(todo)
                                         }
                                     }
@@ -1114,6 +1115,7 @@ struct DayDetailView: View {
 
 // MARK: - Day Detail Event Row
 struct DayDetailEventRow: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let event: CalendarEvent
     let onTap: () -> Void
     
@@ -1153,7 +1155,7 @@ struct DayDetailEventRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color.white)
+            .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
@@ -1163,6 +1165,7 @@ struct DayDetailEventRow: View {
 
 // MARK: - Day Detail Todo Row
 struct DayDetailTodoRow: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let todo: Todo
     let onTap: () -> Void
     
@@ -1196,7 +1199,7 @@ struct DayDetailTodoRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color.white)
+            .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
             .cornerRadius(8)
             .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
         }

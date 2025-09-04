@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import UIKit
 
 
 
@@ -32,10 +33,7 @@ enum NotificationInterval: String, CaseIterable, Identifiable {
         case .every30Minutes: return 1800 // 30 minutes
         case .everyHour: return 3600 // 1 hour
         case .every12Hours: return 43200 // 12 hours
-        case .every24Hours: return 86400 // 24 hours
-        }
-    }
-}
+    case .every24Hours: return 86400 // 24 hours
 
 struct ContentView: View {
     @StateObject private var sharedViewModel = DashboardViewModel()
@@ -1986,75 +1984,74 @@ struct AlarmDetailView: View {
                 PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
                     .ignoresSafeArea()
                 List {
-                    Section("Alarm Details") {
-                        HStack {
-                            Text("Title")
-                            Spacer()
-                            Text(alarm.title)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        if !alarm.message.isEmpty {
-                            HStack {
-                                Text("Message")
-                                Spacer()
-                                Text(alarm.message)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        
-                        HStack {
-                            Text("Time")
-                            Spacer()
-                            Text(formatTime(alarm.time))
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        HStack {
-                            Text("Status")
-                            Spacer()
-                            Text(alarm.isEnabled ? "Enabled" : "Disabled")
-                                .foregroundColor(alarm.isEnabled ? .green : .red)
-                        }
+                Section("Alarm Details") {
+                    HStack {
+                        Text("Title")
+                        Spacer()
+                        Text(alarm.title)
+                            .foregroundColor(.secondary)
                     }
                     
-                    Section("Notification") {
+                    if !alarm.message.isEmpty {
                         HStack {
-                            Text("Type")
+                            Text("Message")
                             Spacer()
-                            Text(alarm.notificationType.displayName)
+                            Text(alarm.message)
                                 .foregroundColor(.secondary)
                         }
                     }
                     
-                    if !alarm.repeatDays.isEmpty {
-                        Section("Repeat") {
-                            HStack {
-                                Text("Days")
-                                Spacer()
-                                Text(formatRepeatDays(alarm.repeatDays))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
+                    HStack {
+                        Text("Time")
+                        Spacer()
+                        Text(formatTime(alarm.time))
+                            .foregroundColor(.secondary)
                     }
                     
-                    Section("Actions") {
-                        Button("Edit Alarm") {
-                            showingEditAlarm = true
-                        }
-                        .foregroundColor(.blue)
-                        
-                        Button(alarm.isEnabled ? "Disable" : "Enable") {
-                            viewModel.toggleAlarm(alarm)
-                        }
-                        .foregroundColor(alarm.isEnabled ? .orange : .green)
-                        
-                        Button("Delete Alarm") {
-                            viewModel.deleteAlarm(alarm)
-                            dismiss()
-                        }
-                        .foregroundColor(.red)
+                    HStack {
+                        Text("Status")
+                        Spacer()
+                        Text(alarm.isEnabled ? "Enabled" : "Disabled")
+                            .foregroundColor(alarm.isEnabled ? .green : .red)
                     }
+                }
+                
+                Section("Notification") {
+                    HStack {
+                        Text("Type")
+                        Spacer()
+                        Text(alarm.notificationType.displayName)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                if !alarm.repeatDays.isEmpty {
+                    Section("Repeat") {
+                        HStack {
+                            Text("Days")
+                            Spacer()
+                            Text(formatRepeatDays(alarm.repeatDays))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                Section("Actions") {
+                    Button("Edit Alarm") {
+                        showingEditAlarm = true
+                    }
+                    .foregroundColor(.blue)
+                    
+                    Button(alarm.isEnabled ? "Disable" : "Enable") {
+                        viewModel.toggleAlarm(alarm)
+                    }
+                    .foregroundColor(alarm.isEnabled ? .orange : .green)
+                    
+                    Button("Delete Alarm") {
+                        viewModel.deleteAlarm(alarm)
+                        dismiss()
+                    }
+                    .foregroundColor(.red)
                 }
             }
             .navigationTitle("Alarm Details")

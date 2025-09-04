@@ -30,12 +30,8 @@ struct DashboardView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Beautiful background
-                LinearGradient(
-                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // Dynamic background based on dark mode setting
+                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -45,6 +41,7 @@ struct DashboardView: View {
                         
                         // Quick Actions Section
                         QuickActionsSection(
+                            viewModel: viewModel,
                             showingAddTodo: $showingAddTodo,
                             showingCalendar: $showingCalendar,
                             showingSearch: $showingSearch,
@@ -53,7 +50,7 @@ struct DashboardView: View {
                         )
                         
                         // Google Calendar Status Section
-                        GoogleCalendarStatusSection(service: googleCalendarService)
+                        GoogleCalendarStatusSection(viewModel: viewModel, service: googleCalendarService)
                         
                         // Today's Focus Section
                         TodaysFocusSection(
@@ -72,7 +69,7 @@ struct DashboardView: View {
                 viewModel.loadDashboardData()
             }
             .sheet(isPresented: $showingAddTodo) {
-                AddTodoFormView(viewModel: viewModel)
+                CreateTodoView(viewModel: viewModel)
             }
             .sheet(isPresented: $showingCalendar) {
                 // TODO: Add CalendarView back once it's properly added to the project
@@ -144,9 +141,9 @@ struct ActiveAlarmsSection: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
     }
 }
 
@@ -261,6 +258,7 @@ struct ActiveAlarmCard: View {
 
 // MARK: - Quick Actions Section
 struct QuickActionsSection: View {
+    @ObservedObject var viewModel: DashboardViewModel
     @Binding var showingAddTodo: Bool
     @Binding var showingCalendar: Bool
     @Binding var showingSearch: Bool
@@ -278,6 +276,7 @@ struct QuickActionsSection: View {
                 GridItem(.flexible())
             ], spacing: 12) {
                 QuickActionButton(
+                    viewModel: viewModel,
                     title: "New Event to Calendar",
                     icon: "calendar.badge.plus",
                     color: .purple
@@ -286,6 +285,7 @@ struct QuickActionsSection: View {
                 }
                 
                 QuickActionButton(
+                    viewModel: viewModel,
                     title: "Find Task",
                     icon: "magnifyingglass",
                     color: .orange
@@ -295,14 +295,15 @@ struct QuickActionsSection: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
     }
 }
 
 // MARK: - Quick Action Button
 struct QuickActionButton: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let title: String
     let icon: String
     let color: Color
@@ -323,7 +324,7 @@ struct QuickActionButton: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color(.secondarySystemBackground))
+            .background(PastelTheme.secondaryBackground(isDarkMode: viewModel.isDarkMode))
             .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())
@@ -332,6 +333,7 @@ struct QuickActionButton: View {
 
 // MARK: - Google Calendar Status Section
 struct GoogleCalendarStatusSection: View {
+    @ObservedObject var viewModel: DashboardViewModel
     let service: GoogleCalendarService
     
     var body: some View {
@@ -368,9 +370,9 @@ struct GoogleCalendarStatusSection: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
     }
 }
 
@@ -411,9 +413,9 @@ struct TodaysFocusSection: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        .shadow(color: PastelTheme.shadow, radius: 8, x: 0, y: 2)
     }
 }
 
@@ -443,10 +445,10 @@ struct EmptyTodosView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
-        .background(Color(.tertiarySystemBackground))
+        .background(PastelTheme.secondaryBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(12)
         .sheet(isPresented: $showingAddTodo) {
-            AddTodoFormView(viewModel: viewModel)
+            CreateTodoView(viewModel: viewModel)
         }
     }
 }
@@ -561,7 +563,7 @@ struct SearchPopupView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color(.systemGray6))
+                .background(PastelTheme.inputBackground)
                 .cornerRadius(8)
                 
                 // Search results
@@ -584,7 +586,7 @@ struct SearchPopupView: View {
                 }
             }
             .padding(20)
-            .background(Color.white)
+            .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
             .cornerRadius(16)
             .shadow(radius: 10)
             .frame(maxWidth: 350, maxHeight: 400)

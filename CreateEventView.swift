@@ -36,12 +36,8 @@ struct CreateEventView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background
-                LinearGradient(
-                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // Background using new color scheme
+                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
                 .ignoresSafeArea()
                 
                 ScrollView {
