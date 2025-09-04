@@ -20,6 +20,10 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     @Published var use24HourTime = false
     @Published var isDarkMode = false
     
+    // MARK: - Google Calendar Integration
+    @Published var googleCalendarService = GoogleCalendarService()
+    // @Published var syncManager: GoogleCalendarSyncManager?
+    
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Time Format Management
@@ -59,6 +63,32 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
         loadCalendarEvents()
         setupSampleData()
         setupNotifications()
+        setupGoogleCalendarIntegration()
+    }
+    
+    // MARK: - Google Calendar Integration Setup
+    private func setupGoogleCalendarIntegration() {
+        // Initialize sync manager
+        // TODO: Re-enable when GoogleCalendarSyncManager is properly accessible
+        /*
+        syncManager = GoogleCalendarSyncManager(
+            calendarService: googleCalendarService,
+            viewModel: self
+        )
+        */
+        
+        // Monitor authentication status
+        googleCalendarService.$isAuthenticated
+            .sink { [weak self] isAuthenticated in
+                self?.isGoogleSignedIn = isAuthenticated
+                if isAuthenticated {
+                    Task { @MainActor in
+                        // TODO: Re-enable sync when GoogleCalendarSyncManager is accessible
+                        // await self?.syncManager?.performFullSync()
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
     
     func loadDashboardData() {
@@ -153,20 +183,52 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     
     // MARK: - Calendar Event Management
     func addCalendarEvent(_ event: CalendarEvent) {
-        calendarEvents.append(event)
+        var newEvent = event
+        newEvent.lastModified = Date()
+        newEvent.needsGoogleSync = true
+        calendarEvents.append(newEvent)
         saveCalendarEvents()
+        
+        // Trigger sync if Google Calendar is connected
+        // TODO: Re-enable when GoogleCalendarSyncManager is accessible
+        /*
+        if isGoogleSignedIn, let syncManager = syncManager {
+            Task {
+                await syncManager.performIncrementalSync()
+            }
+        }
+        */
     }
     
     func updateCalendarEvent(_ event: CalendarEvent) {
         if let index = calendarEvents.firstIndex(where: { $0.id == event.id }) {
-            calendarEvents[index] = event
+            var updatedEvent = event
+            updatedEvent.lastModified = Date()
+            updatedEvent.needsGoogleSync = true
+            calendarEvents[index] = updatedEvent
             saveCalendarEvents()
+            
+            // Trigger sync if Google Calendar is connected
+            // TODO: Re-enable when GoogleCalendarSyncManager is accessible
+            /*
+            if isGoogleSignedIn, let syncManager = syncManager {
+                Task {
+                    await syncManager.performIncrementalSync()
+                }
+            }
+            */
         }
     }
     
     func deleteCalendarEvent(_ event: CalendarEvent) {
         calendarEvents.removeAll { $0.id == event.id }
         saveCalendarEvents()
+        
+        // TODO: Delete from Google Calendar if it exists there
+        if let googleEventId = event.googleEventId, !googleEventId.isEmpty {
+            // Mark for deletion in Google Calendar
+            // This would need to be implemented in the sync manager
+        }
     }
     
     func toggleTodoCompletion(_ todo: Todo) {
@@ -270,15 +332,27 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     
     // MARK: - Data Persistence
     private func saveCalendarEvents() {
-        if let encoded = try? JSONEncoder().encode(calendarEvents) {
-            UserDefaults.standard.set(encoded, forKey: "SavedCalendarEvents")
+        do {
+            let data = try JSONEncoder().encode(calendarEvents)
+            UserDefaults.standard.set(data, forKey: "SavedCalendarEvents")
+            print("✅ Calendar events saved successfully")
+        } catch {
+            print("❌ Failed to save calendar events: \(error)")
+            errorMessage = "Failed to save calendar events"
         }
     }
     
     private func loadCalendarEvents() {
-        if let data = UserDefaults.standard.data(forKey: "SavedCalendarEvents"),
-           let decoded = try? JSONDecoder().decode([CalendarEvent].self, from: data) {
-            calendarEvents = decoded
+        if let data = UserDefaults.standard.data(forKey: "SavedCalendarEvents") {
+            do {
+                calendarEvents = try JSONDecoder().decode([CalendarEvent].self, from: data)
+                print("✅ Loaded \(calendarEvents.count) calendar events")
+            } catch {
+                print("❌ Failed to load calendar events: \(error)")
+                errorMessage = "Failed to load calendar events"
+            }
+        } else {
+            print("📅 No saved calendar events found")
         }
     }
     
