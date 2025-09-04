@@ -326,12 +326,8 @@ struct AlarmCenterView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Beautiful light beige background matching other screens
-                LinearGradient(
-                    colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // Use the same pastel theme as other screens
+                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -785,6 +781,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showingGoogleSignIn) {
@@ -1903,8 +1900,12 @@ struct AddAlarmView: View {
     
     var body: some View {
         NavigationView {
-            Form {
-                Section("Alarm Details") {
+            ZStack {
+                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+                    .ignoresSafeArea()
+                
+                Form {
+                    Section("Alarm Details") {
                     TextField("Title", text: $title)
                     TextField("Message (optional)", text: $message)
                     DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
@@ -1938,6 +1939,7 @@ struct AddAlarmView: View {
                     Toggle("Enable alarm", isOn: $isEnabled)
                 }
             }
+            .scrollContentBackground(.hidden)
             .navigationTitle("Add Alarm")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -1953,6 +1955,7 @@ struct AddAlarmView: View {
                     }
                     .disabled(title.isEmpty)
                 }
+            }
             }
         }
     }

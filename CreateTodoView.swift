@@ -81,24 +81,12 @@ struct CreateTodoView: View {
                 .toggleStyle(SwitchToggleStyle(tint: .blue))
             
             if !isAllDay {
-                HStack {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Due Date")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
-                            .labelsHidden()
-                    }
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Due Time")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        DatePicker("", selection: $dueDate, displayedComponents: [.hourAndMinute])
-                            .labelsHidden()
-                    }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Due Date")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+                        .labelsHidden()
                 }
             } else {
                 DatePicker("Due Date", selection: $dueDate, displayedComponents: [.date])
