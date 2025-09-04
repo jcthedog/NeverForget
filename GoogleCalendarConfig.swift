@@ -29,10 +29,12 @@ struct GoogleCalendarConfig {
     // Replace this with your actual Google OAuth 2.0 Client ID
     static let clientID = "519057443924-3d35diia7erod7o0mja9vij80nldh5eh.apps.googleusercontent.com"
     
-    // Google Calendar API scopes
+    // Google Calendar API scopes - Enhanced for two-way sync
     static let scopes = [
         "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/calendar.events.readonly"
+        "https://www.googleapis.com/auth/calendar.events.readonly",
+        "https://www.googleapis.com/auth/calendar.events",  // Write access to events
+        "https://www.googleapis.com/auth/calendar"          // Full calendar access
     ]
     
     // App bundle identifier for URL scheme

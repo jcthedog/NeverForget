@@ -22,7 +22,7 @@ struct CreateTodoView: View {
     @State private var selectedDaysOfWeek: Set<Int> = [1, 2, 3, 4, 5, 6, 7] // Default to all days
     
     // MARK: - Reminder Settings
-    @State private var reminderTiming: ReminderTiming = .onTheDay
+    @State private var reminderTiming: EventReminderTiming = .onTheDay
     @State private var customReminderDays = 1
     @State private var customReminderWeeks = 1
     @State private var customReminderTime = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()
@@ -255,7 +255,7 @@ struct CreateTodoView: View {
                 .foregroundColor(.primary)
             
             Picker("Remind me", selection: $reminderTiming) {
-                ForEach(ReminderTiming.allCases) { timing in
+                ForEach(EventReminderTiming.allCases) { timing in
                     Text(timing.rawValue).tag(timing)
                 }
             }

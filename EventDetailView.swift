@@ -197,7 +197,7 @@ struct EventDetailView: View {
                             RecurringPatternView(pattern: pattern)
                         }
                     } else if let pattern = event.recurringPattern {
-                        RecurringPatternView(pattern: pattern)
+                        RecurringPatternView(pattern: convertToRecurringPattern(pattern))
                     }
                 }
                 .padding()
@@ -215,7 +215,7 @@ struct EventDetailView: View {
             
             if isTodo {
                 if let todo = todo {
-                    EventReminderView(reminderSettings: ReminderSettings(
+                    EventReminderView(reminderSettings: EventReminderSettings(
                         isEnabled: todo.alarmSettings.isEnabled,
                         timing: .onTheDay
                     ))
@@ -284,8 +284,7 @@ struct EventDetailView: View {
             endDate: Date(),
             isAllDay: false,
             priority: .none,
-            calendarType: .personal,
-            reminderSettings: ReminderSettings()
+            calendarType: .personal
         )
         self.todo = todo
         self.viewModel = viewModel
@@ -334,7 +333,7 @@ struct EventDetailView: View {
                                         RecurringPatternView(pattern: pattern)
                                     }
                                 } else if let pattern = event.recurringPattern {
-                                    RecurringPatternView(pattern: pattern)
+                                    RecurringPatternView(pattern: convertToRecurringPattern(pattern))
                                 }
                             }
                             .padding()
@@ -589,7 +588,7 @@ struct RecurringPatternView: View {
 
 // MARK: - Event Reminder View Component
 struct EventReminderView: View {
-    let reminderSettings: ReminderSettings
+    let reminderSettings: EventReminderSettings
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -635,6 +634,20 @@ struct TodoReminderView: View {
     }
 }
 
+// MARK: - Helper Functions
+private func convertToRecurringPattern(_ patternType: RecurringPatternType) -> RecurringPattern {
+    switch patternType {
+    case .daily:
+        return .daily(interval: 1)
+    case .weekly:
+        return .weekly(interval: 1, days: [])
+    case .monthly:
+        return .monthly(interval: 1)
+    case .yearly:
+        return .yearly(interval: 1)
+    }
+}
+
 #Preview {
     EventDetailView(
         event: CalendarEvent(
@@ -643,8 +656,7 @@ struct TodoReminderView: View {
             endDate: Date().addingTimeInterval(3600),
             isAllDay: false,
             priority: .important,
-            calendarType: .work,
-            reminderSettings: ReminderSettings()
+            calendarType: .work
         ),
         viewModel: DashboardViewModel()
     )

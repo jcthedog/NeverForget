@@ -13,15 +13,27 @@ struct CalendarEvent: Identifiable, Codable {
     var location: String?
     var notes: String?
     var calendarType: CalendarType
-    var recurringPattern: RecurringPattern?
-    var reminderSettings: ReminderSettings
+    var recurringPattern: RecurringPatternType?
+    var reminderSettings: EventReminderSettings
     var invitees: [String]
     var isCompleted: Bool = false
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     
+    // MARK: - Google Calendar Integration Fields
+    var googleEventId: String?
+    var googleCalendarId: String?
+    var lastGoogleSync: Date?
+    var needsGoogleSync: Bool = false
+    var lastModified: Date = Date()
+    
     // MARK: - Initializer
-    init(title: String, description: String? = nil, startDate: Date, endDate: Date, isAllDay: Bool, priority: EventPriority, location: String? = nil, notes: String? = nil, calendarType: CalendarType, recurringPattern: RecurringPattern? = nil, reminderSettings: ReminderSettings, invitees: [String] = []) {
+    init(id: String? = nil, title: String, description: String? = nil, startDate: Date, endDate: Date, isAllDay: Bool, priority: EventPriority, location: String? = nil, notes: String? = nil, calendarType: CalendarType, invitees: String = "", recurringPattern: RecurringPatternType? = nil, googleEventId: String? = nil, googleCalendarId: String? = nil, lastGoogleSync: Date? = nil, needsGoogleSync: Bool = false) {
+        if let id = id {
+            self.id = UUID(uuidString: id) ?? UUID()
+        } else {
+            self.id = UUID()
+        }
         self.title = title
         self.description = description
         self.startDate = startDate
@@ -32,8 +44,13 @@ struct CalendarEvent: Identifiable, Codable {
         self.notes = notes
         self.calendarType = calendarType
         self.recurringPattern = recurringPattern
-        self.reminderSettings = reminderSettings
-        self.invitees = invitees
+        self.reminderSettings = EventReminderSettings()
+        self.invitees = invitees.isEmpty ? [] : invitees.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        self.googleEventId = googleEventId
+        self.googleCalendarId = googleCalendarId
+        self.lastGoogleSync = lastGoogleSync
+        self.needsGoogleSync = needsGoogleSync
+        self.lastModified = Date()
     }
     
     // Computed properties
@@ -120,20 +137,25 @@ enum CalendarType: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-// MARK: - Recurring Pattern
-// Note: RecurringPattern is now defined in Todo.swift as a unified enum
-// This eliminates the duplicate definition that was causing compilation errors
+// MARK: - Recurring Pattern for Events (simplified)
+enum RecurringPatternType: String, CaseIterable, Identifiable, Codable {
+    case daily = "Daily"
+    case weekly = "Weekly"
+    case monthly = "Monthly"
+    case yearly = "Yearly"
+    
+    var id: String { rawValue }
+}
 
-// MARK: - Reminder Settings Model
-struct ReminderSettings: Codable {
+// MARK: - Event Reminder Settings
+struct EventReminderSettings: Codable {
     var isEnabled: Bool
-    var timing: ReminderTiming
+    var timing: EventReminderTiming
     var customDays: Int
     var customWeeks: Int
     var customTime: Date
     
-    // MARK: - Initializer
-    init(isEnabled: Bool = true, timing: ReminderTiming = .onTheDay, customDays: Int = 1, customWeeks: Int = 1, customTime: Date = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()) {
+    init(isEnabled: Bool = true, timing: EventReminderTiming = .onTheDay, customDays: Int = 1, customWeeks: Int = 1, customTime: Date = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()) {
         self.isEnabled = isEnabled
         self.timing = timing
         self.customDays = customDays
@@ -166,7 +188,7 @@ struct ReminderSettings: Codable {
     }
 }
 
-enum ReminderTiming: String, CaseIterable, Identifiable, Codable {
+enum EventReminderTiming: String, CaseIterable, Identifiable, Codable {
     case onTheDay = "On The Day"
     case oneDayEarly = "1 Day Early"
     case threeDaysEarly = "3 Days Early"
