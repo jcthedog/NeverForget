@@ -295,6 +295,7 @@ struct CreateTodoView: View {
                 .cornerRadius(8)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color.white)
         .cornerRadius(12)
@@ -354,6 +355,7 @@ struct CreateTodoView: View {
                 .cornerRadius(8)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .background(Color.white)
         .cornerRadius(12)
