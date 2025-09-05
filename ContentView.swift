@@ -755,7 +755,7 @@ struct SettingsView: View {
                             HStack {
                                 Image(systemName: "info.circle.fill")
                                     .foregroundColor(.blue)
-                                Text("About Never Forget")
+                                Text("About Never Forget Tasks")
                             }
                         }
                         HStack {
@@ -902,7 +902,7 @@ struct AboutView: View {
                     .foregroundColor(.purple)
                 
                 VStack(spacing: 16) {
-                    Text("Never Forget")
+                    Text("Never Forget Tasks")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
@@ -922,7 +922,7 @@ struct AboutView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text("© 2024 Never Forget App")
+                    Text("© 2024 Never Forget Tasks")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

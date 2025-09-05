@@ -124,7 +124,7 @@ enum GoogleCalendarSetupError: LocalizedError {
         case .apiNotEnabled:
             return "Go to Google Cloud Console → APIs & Services → Library → Enable Google Calendar API"
         case .permissionsDenied:
-            return "Go to Settings → Privacy & Security → Calendars → Enable for Never Forget"
+            return "Go to Settings → Privacy & Security → Calendars → Enable for Never Forget Tasks"
         }
     }
 }
