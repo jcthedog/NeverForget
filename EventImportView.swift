@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import Foundation
 
 // MARK: - ICS Parser for Calendar Event Import
 struct ICSParser {
@@ -185,7 +186,7 @@ struct ICSParser {
     static func importEventsFromICSFile(at url: URL) -> [GoogleCalendarEvent] {
         do {
             let content = try String(contentsOf: url, encoding: .utf8)
-            let icsEvents = parseICSContent(content)
+            let icsEvents = ICSParser.parseICSContent(content)
             return icsEvents.map { convertToGoogleCalendarEvent($0) }
         } catch {
             print("Error reading ICS file: \(error)")
@@ -236,36 +237,27 @@ struct EventImportView: View {
     }
     
     var body: some View {
-        NavigationView {
-                    VStack(spacing: 0) {
-            // Import Source Selector
-            importSourceSection
+        ZStack {
+            // Apply pale green pastel theme background
+            PastelTheme.background(isDarkMode: viewModel.isDarkMode)
+                .ignoresSafeArea(.all, edges: .all)
             
-            // Import Options
-            importOptionsSection
-            
-            // Events List
-            eventsListSection
-            
-            // Import Progress
-            if isImporting {
-                importProgressSection
-            }
-        }
-            .navigationTitle("Import Events")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
+            VStack(spacing: 16) {
+                // Custom header
+                headerSection
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Import") {
-                        importSelectedEvents()
-                    }
-                    .disabled(selectedEvents.isEmpty || isImporting)
+                // Import Source Selector
+                importSourceSection
+                
+                // Import Options
+                importOptionsSection
+                
+                // Events List
+                eventsListSection
+                
+                // Import Progress
+                if isImporting {
+                    importProgressSection
                 }
             }
         }
@@ -287,13 +279,41 @@ struct EventImportView: View {
         }
     }
     
+    // MARK: - Header Section
+    
+    private var headerSection: some View {
+        HStack {
+            Button("Cancel") {
+                dismiss()
+            }
+            .foregroundColor(.primary)
+            
+            Spacer()
+            
+            Text("Import Events")
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            Spacer()
+            
+            Button("Import") {
+                importSelectedEvents()
+            }
+            .foregroundColor(.blue)
+            .fontWeight(.semibold)
+            .disabled(selectedEvents.isEmpty || isImporting)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 12)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
+    }
+    
     // MARK: - Import Source Section
     
     private var importSourceSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Import Source")
                 .font(.headline)
-                .padding(.horizontal)
             
             HStack(spacing: 12) {
                 ForEach(ImportSource.allCases, id: \.self) { source in
@@ -323,10 +343,12 @@ struct EventImportView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
-            .padding(.horizontal)
         }
-        .padding(.vertical)
-        .background(Color(.systemGray6))
+        .padding(16)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .padding(.horizontal, 16)
     }
     
     // MARK: - Import Options Section
@@ -335,7 +357,6 @@ struct EventImportView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Import Options")
                 .font(.headline)
-                .padding(.horizontal)
             
             VStack(spacing: 12) {
                 Toggle("Include all-day events", isOn: $importOptions.includeAllDayEvents)
@@ -361,10 +382,12 @@ struct EventImportView: View {
                     .pickerStyle(.menu)
                 }
             }
-            .padding(.horizontal)
         }
-        .padding(.vertical)
-        .background(Color(.systemGray6))
+        .padding(16)
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .padding(.horizontal, 16)
     }
     
     // MARK: - Events List Section
@@ -452,7 +475,7 @@ struct EventImportView: View {
                 .foregroundColor(.secondary)
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
         .cornerRadius(12)
         .padding()
     }
@@ -498,12 +521,12 @@ struct EventImportView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             for (index, event) in eventsToImport.enumerated() {
                 // Convert event to todo and save it
-                let todo = convertEventToTodo(event)
+                let todo = self.convertEventToTodo(event)
                 
                 // Save to view model on main thread
                 DispatchQueue.main.async {
-                    viewModel.addTodo(todo)
-                    importProgress = Double(index + 1) / Double(totalEvents)
+                    self.viewModel.addTodo(todo)
+                    self.importProgress = Double(index + 1) / Double(totalEvents)
                 }
                 
                 // Small delay to prevent UI blocking
@@ -512,8 +535,8 @@ struct EventImportView: View {
             
             // Import complete
             DispatchQueue.main.async {
-                isImporting = false
-                dismiss()
+                self.isImporting = false
+                self.dismiss()
             }
         }
     }
@@ -643,8 +666,8 @@ struct EventImportRowView: View {
                 attendees: ["john@example.com", "jane@example.com"],
                 calendarId: "work",
                 calendarName: "Work",
-                recurringEventId: nil,
-                originalStartTime: nil
+                recurringEventId: nil as String?,
+                originalStartTime: nil as Date?
             )
         ],
         calendarService: GoogleCalendarService(),

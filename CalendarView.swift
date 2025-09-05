@@ -11,6 +11,7 @@ struct CalendarView: View {
     @State private var showingEventDetail: CalendarEvent?
     @State private var showingTodoDetail: Todo?
     @State private var showingDayDetail: DayDetailData?
+    @State private var showingICSImport = false
     
     // MARK: - Calendar Data (Connected to DashboardViewModel)
     // Using computed properties to get real data from viewModel
@@ -30,6 +31,9 @@ struct CalendarView: View {
                 .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
+                    // Custom Page Header with Calendar title and Import button
+                    customPageHeader
+                    
                     // Calendar Header
                     calendarHeader
                     
@@ -42,9 +46,7 @@ struct CalendarView: View {
                     Spacer()
                 }
             }
-            .navigationTitle("Calendar")
-            .navigationBarTitleDisplayMode(.large)
-            // Removed upper right '+' button from toolbar for cleaner UI
+            .navigationBarHidden(true)
         }
         .sheet(isPresented: $showingCreateEvent) {
             CreateEventView(viewModel: viewModel)
@@ -80,9 +82,31 @@ struct CalendarView: View {
                 }
             )
         }
+        .sheet(isPresented: $showingICSImport) {
+            EventImportView(
+                events: [],
+                calendarService: GoogleCalendarService(),
+                viewModel: viewModel
+            )
+        }
         .onAppear {
             // Data is now loaded automatically via computed properties
         }
+    }
+    
+    // MARK: - Custom Page Header
+    private var customPageHeader: some View {
+        HStack {
+            Text("Calendar")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 5)
     }
     
     // MARK: - Calendar Header
@@ -120,30 +144,46 @@ struct CalendarView: View {
             .padding(.horizontal, 20)
             
             // Quick Actions
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 Button(action: { showingCreateEvent = true }) {
-                    HStack {
+                    HStack(spacing: 6) {
                         Image(systemName: "calendar.badge.plus")
                         Text("Event")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 10)
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(8)
+                    .font(.subheadline)
                     .fontWeight(.medium)
                 }
                 
                 Button(action: { showingCreateTodo = true }) {
-                    HStack {
+                    HStack(spacing: 6) {
                         Image(systemName: "checklist")
                         Text("Todo")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 10)
                     .background(Color.purple)
                     .foregroundColor(.white)
                     .cornerRadius(8)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                }
+                
+                Button(action: { showingICSImport = true }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.down")
+                        Text("Import")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Color.teal)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    .font(.subheadline)
                     .fontWeight(.medium)
                 }
             }
