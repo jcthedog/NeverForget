@@ -1,4 +1,7 @@
 import SwiftUI
+import UserNotifications
+import CoreLocation
+import MapKit
 
 // Individual reminder setting struct
 struct ReminderSetting: Identifiable {
@@ -33,7 +36,7 @@ struct CreateEventView: View {
     
     // MARK: - Recurring Pattern
     @State private var isRecurring = false
-    @State private var recurrencePattern: RecurringPattern = .daily(interval: 1)
+    @State private var recurrencePattern: RecurringPatternType = .daily
     @State private var recurrenceInterval = 1
     @State private var selectedDaysOfWeek: Set<Int> = [1, 2, 3, 4, 5, 6, 7] // Default to all days
     
@@ -69,9 +72,6 @@ struct CreateEventView: View {
                         .disabled(eventTitle.isEmpty)
                     }
                 }
-        }
-        .sheet(isPresented: $showingLocationPicker) {
-            LocationPickerView(location: $location)
         }
     }
     
@@ -199,20 +199,7 @@ struct CreateEventView: View {
     
     private var locationSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Location")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            HStack {
-                TextField("Enter location", text: $location)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-                Button(action: { showingLocationPicker = true }) {
-                    Image(systemName: "location.circle.fill")
-                        .foregroundColor(.blue)
-                        .font(.title2)
-                }
-            }
+                                        EnhancedLocationInputView(location: $location)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
@@ -256,17 +243,17 @@ struct CreateEventView: View {
             if isRecurring {
                 VStack(spacing: 12) {
                     Picker("Pattern", selection: $recurrencePattern) {
-                        Text("Daily").tag(RecurringPattern.daily(interval: recurrenceInterval))
-                        Text("Weekly").tag(RecurringPattern.weekly(interval: recurrenceInterval, days: selectedDaysOfWeek))
-                        Text("Monthly").tag(RecurringPattern.monthly(interval: recurrenceInterval))
-                        Text("Yearly").tag(RecurringPattern.yearly(interval: recurrenceInterval))
+                        Text("Daily").tag(RecurringPatternType.daily)
+                        Text("Weekly").tag(RecurringPatternType.weekly)
+                        Text("Monthly").tag(RecurringPatternType.monthly)
+                        Text("Yearly").tag(RecurringPatternType.yearly)
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     
                     HStack {
                         Text("Every")
                         Stepper("\(recurrenceInterval)", value: $recurrenceInterval, in: 1...99)
-                        Text(recurrencePattern.displayName.components(separatedBy: " ").last ?? "days")
+                        Text(recurrencePattern.rawValue.components(separatedBy: " ").last ?? "days")
                     }
                     
                     if case .weekly = recurrencePattern {
@@ -412,17 +399,15 @@ struct CreateEventView: View {
     }
     
     private func createRecurringPatternType() -> RecurringPatternType {
-        switch recurrencePattern.type {
-        case "Daily":
+        switch recurrencePattern {
+        case .daily:
             return .daily
-        case "Weekly":
+        case .weekly:
             return .weekly
-        case "Monthly":
+        case .monthly:
             return .monthly
-        case "Yearly":
+        case .yearly:
             return .yearly
-        default:
-            return .daily
         }
     }
     
@@ -496,55 +481,6 @@ struct DaysOfWeekSelector: View {
                         .cornerRadius(16)
                 }
                 .buttonStyle(PlainButtonStyle())
-            }
-        }
-    }
-}
-
-struct LocationPickerView: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var location: String
-    @State private var searchText = ""
-    
-    // Sample locations for demo
-    private let sampleLocations = [
-        "Home", "Work", "Gym", "Coffee Shop", "Restaurant",
-        "Park", "Shopping Mall", "Airport", "Hotel", "Office"
-    ]
-    
-    var filteredLocations: [String] {
-        if searchText.isEmpty {
-            return sampleLocations
-        }
-        return sampleLocations.filter { $0.localizedCaseInsensitiveContains(searchText) }
-    }
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(filteredLocations, id: \.self) { loc in
-                    Button(action: {
-                        location = loc
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "location.circle.fill")
-                                .foregroundColor(.blue)
-                            Text(loc)
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            .searchable(text: $searchText, prompt: "Search locations")
-            .navigationTitle("Select Location")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
             }
         }
     }

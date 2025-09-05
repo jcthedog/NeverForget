@@ -2,6 +2,8 @@ import Foundation
 import Combine
 import UserNotifications
 import SwiftUI
+import CoreLocation
+import MapKit
 
 @MainActor
 class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
@@ -23,6 +25,9 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     // MARK: - Google Calendar Integration
     @Published var googleCalendarService = GoogleCalendarService()
     // @Published var syncManager: GoogleCalendarSyncManager?
+    
+    // MARK: - Location Management
+    @Published var locationManager = LocationManager()
     
     private var cancellables = Set<AnyCancellable>()
     

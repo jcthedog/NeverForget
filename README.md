@@ -1,23 +1,30 @@
 # Never Forget - Todo Calendar App 📱
 
-## 🚀 Current Version: v4.5.2 - Verified Build Success
+## 🚀 Current Version: v4.6.0 - Location Integration Complete
 **Latest Release**: September 5, 2025  
 **Build Status**: ✅ SUCCESSFUL - Builds and Runs in Simulator  
 **Platform**: iOS 18.5+ (SwiftUI)
 
 ## 📋 Overview
-Never Forget is a comprehensive task management and calendar application built with SwiftUI. It combines todo management with calendar functionality and Google Calendar integration, providing users with a unified productivity experience.
+Never Forget is a comprehensive task management and calendar application built with SwiftUI. It combines todo management with calendar functionality, Google Calendar integration, and advanced location features, providing users with a unified productivity experience.
 
 ## ✨ Features
 
-### 📅 Calendar Integration
+### � Location Integration (NEW in v4.6)
+- **Auto-Completion**: Real-time address suggestions as you type using MapKit
+- **Current Location**: One-tap access to device's current location
+- **Map-Based Selection**: Interactive map interface for precise location picking
+- **Recent Locations**: Quick access to previously used locations
+- **Location Search**: Full MapKit search capabilities for finding addresses
+
+### �📅 Calendar Integration
 - **Google Calendar Sync**: Read and display events from Google Calendar
 - **Multiple Calendar Views**: Today, Week, and Month views
 - **Calendar Selection**: Choose which Google calendars to sync
-- **Event Creation**: Create and manage calendar events with recurring patterns
+- **Event Creation**: Create and manage calendar events with recurring patterns and locations
 
 ### ✅ Task Management
-- **Todo Creation**: Full-featured todo creation with categories, priorities, and deadlines
+- **Todo Creation**: Full-featured todo creation with categories, priorities, deadlines, and locations
 - **Recurring Tasks**: Support for daily, weekly, monthly, and yearly recurring patterns
 - **Priority System**: Color-coded priority levels (Low, Medium, High, Critical)
 - **Categories**: Organize tasks by Work, Personal, Health, Finance categories
@@ -39,10 +46,15 @@ Never Forget is a comprehensive task management and calendar application built w
 ### Core Technologies
 - **SwiftUI**: Modern declarative UI framework
 - **MVVM Pattern**: Model-View-ViewModel architecture
+- **CoreLocation**: GPS and location services
+- **MapKit**: Address search and map integration
 - **UserDefaults**: Local data persistence
 - **Google Calendar API**: External calendar integration
 
 ### Key Components
+- **LocationManager**: Comprehensive location service with MapKit integration
+- **EnhancedLocationInputView**: Auto-completion input component
+- **EnhancedLocationPickerView**: Map-based location picker
 - **DashboardViewModel**: Central data coordination
 - **CalendarEvent**: Core event data model with Google sync capability
 - **Todo**: Task management data model

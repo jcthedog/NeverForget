@@ -1,4 +1,6 @@
 import SwiftUI
+import CoreLocation
+import MapKit
 
 struct CreateTodoView: View {
     @Environment(\.dismiss) private var dismiss
@@ -17,7 +19,7 @@ struct CreateTodoView: View {
     
     // MARK: - Recurring Pattern
     @State private var isRecurring = false
-    @State private var recurrencePattern: RecurringPattern = .daily(interval: 1)
+    @State private var recurrencePattern: RecurringPatternType = .daily
     @State private var recurrenceInterval = 1
     @State private var selectedDaysOfWeek: Set<Int> = [1, 2, 3, 4, 5, 6, 7] // Default to all days
     
@@ -189,20 +191,7 @@ struct CreateTodoView: View {
     
     private var locationSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Location")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            HStack {
-                TextField("Enter location", text: $location)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-                Button(action: { showingLocationPicker = true }) {
-                    Image(systemName: "location.circle.fill")
-                        .foregroundColor(.blue)
-                        .font(.title2)
-                }
-            }
+            EnhancedLocationInputView(location: $location)
         }
         .padding()
         .background(Color.white)
@@ -221,17 +210,17 @@ struct CreateTodoView: View {
             if isRecurring {
                 VStack(spacing: 12) {
                     Picker("Pattern", selection: $recurrencePattern) {
-                        Text("Daily").tag(RecurringPattern.daily(interval: recurrenceInterval))
-                        Text("Weekly").tag(RecurringPattern.weekly(interval: recurrenceInterval, days: selectedDaysOfWeek))
-                        Text("Monthly").tag(RecurringPattern.monthly(interval: recurrenceInterval))
-                        Text("Yearly").tag(RecurringPattern.yearly(interval: recurrenceInterval))
+                        Text("Daily").tag(RecurringPatternType.daily)
+                        Text("Weekly").tag(RecurringPatternType.weekly)
+                        Text("Monthly").tag(RecurringPatternType.monthly)
+                        Text("Yearly").tag(RecurringPatternType.yearly)
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     
                     HStack {
                         Text("Every")
                         Stepper("\(recurrenceInterval)", value: $recurrenceInterval, in: 1...99)
-                        Text(recurrencePattern.displayName.components(separatedBy: " ").last ?? "days")
+                        Text(recurrencePattern.rawValue.components(separatedBy: " ").last ?? "days")
                     }
                     
                     if case .weekly = recurrencePattern {
@@ -432,9 +421,6 @@ struct CreateTodoView: View {
                     .disabled(todoTitle.isEmpty)
                 }
             }
-        }
-        .sheet(isPresented: $showingLocationPicker) {
-            LocationPickerView(location: $location)
         }
         .overlay(
             Group {

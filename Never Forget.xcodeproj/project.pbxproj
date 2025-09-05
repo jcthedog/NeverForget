@@ -33,6 +33,9 @@
 		CC5D15762E596D52007168FF /* GoogleAPIClientForREST_Calendar in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15752E596D52007168FF /* GoogleAPIClientForREST_Calendar */; };
 		CC86DFE02E6600A000196CE2 /* CalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */; };
 		CC9440C02E63905500D64DEF /* PastelTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9440BF2E63905500D64DEF /* PastelTheme.swift */; };
+		CCB02BCF2E6B6C84002FACE0 /* EnhancedLocationInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB02BCC2E6B6C84002FACE0 /* EnhancedLocationInputView.swift */; };
+		CCB02BD02E6B6C84002FACE0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB02BCE2E6B6C84002FACE0 /* LocationManager.swift */; };
+		CCB02BD12E6B6C84002FACE0 /* EnhancedLocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB02BCD2E6B6C84002FACE0 /* EnhancedLocationPickerView.swift */; };
 		CCF29A4D2E5AAF870036BABD /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A4C2E5AAF870036BABD /* CalendarView.swift */; };
 		CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */; };
 		CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A532E5AB63D0036BABD /* CreateEventView.swift */; };
@@ -76,6 +79,9 @@
 		CC6F0B022E5983F4009CE3CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEvent.swift; sourceTree = "<group>"; };
 		CC9440BF2E63905500D64DEF /* PastelTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastelTheme.swift; sourceTree = "<group>"; };
+		CCB02BCC2E6B6C84002FACE0 /* EnhancedLocationInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedLocationInputView.swift; sourceTree = "<group>"; };
+		CCB02BCD2E6B6C84002FACE0 /* EnhancedLocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedLocationPickerView.swift; sourceTree = "<group>"; };
+		CCB02BCE2E6B6C84002FACE0 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		CCF29A4C2E5AAF870036BABD /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_ForgetApp.swift; sourceTree = "<group>"; };
 		CCF29A532E5AB63D0036BABD /* CreateEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventView.swift; sourceTree = "<group>"; };
@@ -141,6 +147,9 @@
 		CC1F3DA62E58076400FC027A = {
 			isa = PBXGroup;
 			children = (
+				CCB02BCC2E6B6C84002FACE0 /* EnhancedLocationInputView.swift */,
+				CCB02BCD2E6B6C84002FACE0 /* EnhancedLocationPickerView.swift */,
+				CCB02BCE2E6B6C84002FACE0 /* LocationManager.swift */,
 				CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */,
 				CCF29A4C2E5AAF870036BABD /* CalendarView.swift */,
 				CC434B7E2E69E7850018DE06 /* ContentView.swift */,
@@ -353,6 +362,9 @@
 				CC434B7A2E69E5900018DE06 /* SharedTypes.swift in Sources */,
 				CC434B7B2E69E5900018DE06 /* TestEventCreation.swift in Sources */,
 				CC9440C02E63905500D64DEF /* PastelTheme.swift in Sources */,
+				CCB02BCF2E6B6C84002FACE0 /* EnhancedLocationInputView.swift in Sources */,
+				CCB02BD02E6B6C84002FACE0 /* LocationManager.swift in Sources */,
+				CCB02BD12E6B6C84002FACE0 /* EnhancedLocationPickerView.swift in Sources */,
 				CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */,
 				CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */,
 				CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */,
