@@ -135,6 +135,7 @@ struct CreateEventView: View {
                             .foregroundColor(.secondary)
                         DatePicker("", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
                             .labelsHidden()
+                            .environment(\.locale, viewModel.datePickerLocale())
                     }
                     
                     Spacer()
@@ -145,6 +146,7 @@ struct CreateEventView: View {
                             .foregroundColor(.secondary)
                         DatePicker("", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
                             .labelsHidden()
+                            .environment(\.locale, viewModel.datePickerLocale())
                     }
                 }
             } else {
@@ -329,6 +331,7 @@ struct CreateEventView: View {
                             }
                             
                             DatePicker("Reminder Time", selection: $reminders[index].customTime, displayedComponents: [.hourAndMinute])
+                                .environment(\.locale, viewModel.datePickerLocale())
                         }
                         .padding()
                         .background(Color.gray.opacity(0.1))

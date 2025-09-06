@@ -291,8 +291,7 @@ struct TodoRowView: View {
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         if Calendar.current.isDateInToday(date) {
-            formatter.timeStyle = .short
-            return formatter.string(from: date)
+            return viewModel.formatTime(date)
         } else if Calendar.current.isDateInTomorrow(date) {
             return "Tomorrow"
         } else {
@@ -444,7 +443,7 @@ struct AlarmRowView: View {
             HStack(spacing: 12) {
                 // Time Display
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(formatTime(alarm.time))
+                    Text(viewModel.formatTime(alarm.time))
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
@@ -533,12 +532,6 @@ struct AlarmRowView: View {
         }
     }
     
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         if Calendar.current.isDateInToday(date) {
@@ -599,6 +592,9 @@ struct SettingsView: View {
     @State private var showingNotificationSettings = false
     @State private var showingAbout = false
     @State private var showingExportData = false
+    @State private var showingAlarmSounds = false
+    @State private var showingSyncInterval = false
+    @State private var showingTextSize = false
     
     var body: some View {
         NavigationView {
@@ -634,13 +630,15 @@ struct SettingsView: View {
                                 Text("Notification Preferences")
                             }
                         }
-                        HStack {
-                            Image(systemName: "alarm.fill")
-                                .foregroundColor(.red)
-                            Text("Alarm Sounds")
-                            Spacer()
-                            Text("Default")
-                                .foregroundColor(.secondary)
+                        Button(action: { showingAlarmSounds = true }) {
+                            HStack {
+                                Image(systemName: "alarm.fill")
+                                    .foregroundColor(.red)
+                                Text("Alarm Sounds")
+                                Spacer()
+                                Text("Default")
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         HStack {
                             Image(systemName: "vibrate")
@@ -658,13 +656,15 @@ struct SettingsView: View {
                                 Text("Google Calendar Settings")
                             }
                         }
-                        HStack {
-                            Image(systemName: "clock.arrow.circlepath")
-                                .foregroundColor(.blue)
-                            Text("Auto-sync Interval")
-                            Spacer()
-                            Text("15 min")
-                                .foregroundColor(.secondary)
+                        Button(action: { showingSyncInterval = true }) {
+                            HStack {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .foregroundColor(.blue)
+                                Text("Auto-sync Interval")
+                                Spacer()
+                                Text("15 min")
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         HStack {
                             Image(systemName: "arrow.triangle.2.circlepath")
@@ -683,39 +683,17 @@ struct SettingsView: View {
                                 Text("Export Data")
                             }
                         }
-                        Button(action: { viewModel.clearAllData() }) {
-                            HStack {
-                                Image(systemName: "trash.fill")
-                                    .foregroundColor(.red)
-                                Text("Clear All Data")
-                            }
-                        }
-                        HStack {
-                            Image(systemName: "lock.fill")
-                                .foregroundColor(.purple)
-                            Text("Data Privacy")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                                .font(.caption)
-                        }
                     }
                     Section("App") {
-                        HStack {
-                            Image(systemName: "paintbrush.fill")
-                                .foregroundColor(.pink)
-                            Text("Theme")
-                            Spacer()
-                            Text("System")
-                                .foregroundColor(.secondary)
-                        }
-                        HStack {
-                            Image(systemName: "textformat.size")
-                                .foregroundColor(.orange)
-                            Text("Text Size")
-                            Spacer()
-                            Text("Medium")
-                                .foregroundColor(.secondary)
+                        Button(action: { showingTextSize = true }) {
+                            HStack {
+                                Image(systemName: "textformat.size")
+                                    .foregroundColor(.orange)
+                                Text("Text Size")
+                                Spacer()
+                                Text("Medium")
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         HStack {
                             Image(systemName: "clock.fill")
@@ -758,25 +736,33 @@ struct SettingsView: View {
                                 Text("About Never Forget Tasks")
                             }
                         }
-                        HStack {
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.yellow)
-                            Text("Rate App")
+                        Button(action: { rateApp() }) {
+                            HStack {
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.yellow)
+                                Text("Rate App")
+                            }
                         }
-                        HStack {
-                            Image(systemName: "envelope.fill")
-                                .foregroundColor(.green)
-                            Text("Contact Support")
+                        Button(action: { contactSupport() }) {
+                            HStack {
+                                Image(systemName: "envelope.fill")
+                                    .foregroundColor(.green)
+                                Text("Contact Support")
+                            }
                         }
-                        HStack {
-                            Image(systemName: "doc.text.fill")
-                                .foregroundColor(.gray)
-                            Text("Privacy Policy")
+                        Button(action: { openPrivacyPolicy() }) {
+                            HStack {
+                                Image(systemName: "doc.text.fill")
+                                    .foregroundColor(.gray)
+                                Text("Privacy Policy")
+                            }
                         }
-                        HStack {
-                            Image(systemName: "doc.text.fill")
-                                .foregroundColor(.gray)
-                            Text("Terms of Service")
+                        Button(action: { openTermsOfService() }) {
+                            HStack {
+                                Image(systemName: "doc.text.fill")
+                                    .foregroundColor(.gray)
+                                Text("Terms of Service")
+                            }
                         }
                     }
                 }
@@ -793,6 +779,44 @@ struct SettingsView: View {
             .sheet(isPresented: $showingExportData) {
                 ExportDataView(viewModel: viewModel)
             }
+            .sheet(isPresented: $showingAlarmSounds) {
+                AlarmSoundsSettingsView()
+            }
+            .sheet(isPresented: $showingSyncInterval) {
+                SyncIntervalSettingsView()
+            }
+            .sheet(isPresented: $showingTextSize) {
+                TextSizeSettingsView()
+            }
+        }
+    }
+    
+    // MARK: - Action Functions
+    private func rateApp() {
+        if let url = URL(string: "https://apps.apple.com/app/id6670490448") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func contactSupport() {
+        let email = "support@neverforgetapp.com"
+        let subject = "Never Forget App Support"
+        let body = "Hi, I need help with the Never Forget app."
+        
+        if let url = URL(string: "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&body=\(body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func openPrivacyPolicy() {
+        if let url = URL(string: "https://neverforgetapp.com/privacy-policy") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func openTermsOfService() {
+        if let url = URL(string: "https://neverforgetapp.com/terms-of-service") {
+            UIApplication.shared.open(url)
         }
     }
 }
@@ -816,7 +840,9 @@ struct NotificationSettingsView: View {
                 
                 if quietHoursEnabled {
                     DatePicker("Start Time", selection: $quietHoursStart, displayedComponents: .hourAndMinute)
+                        .environment(\.locale, DashboardViewModel.datePickerLocale(use24Hour: false))
                     DatePicker("End Time", selection: $quietHoursEnd, displayedComponents: .hourAndMinute)
+                        .environment(\.locale, DashboardViewModel.datePickerLocale(use24Hour: false))
                 }
             }
             
@@ -829,6 +855,133 @@ struct NotificationSettingsView: View {
         }
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - New Settings Views
+struct AlarmSoundsSettingsView: View {
+    @State private var selectedSound = "Default"
+    private let alarmSounds = ["Default", "Classic", "Digital", "Bell", "Chime", "Buzz"]
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section("Select Alarm Sound") {
+                    ForEach(alarmSounds, id: \.self) { sound in
+                        HStack {
+                            Text(sound)
+                            Spacer()
+                            if sound == selectedSound {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedSound = sound
+                        }
+                    }
+                }
+                
+                Section("Preview") {
+                    Button("Test Sound") {
+                        // Play selected sound
+                        print("Playing sound: \(selectedSound)")
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            .navigationTitle("Alarm Sounds")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
+struct SyncIntervalSettingsView: View {
+    @State private var selectedInterval = "15 min"
+    private let intervals = ["5 min", "15 min", "30 min", "1 hour", "Manual only"]
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section("Auto-sync Interval") {
+                    ForEach(intervals, id: \.self) { interval in
+                        HStack {
+                            Text(interval)
+                            Spacer()
+                            if interval == selectedInterval {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedInterval = interval
+                        }
+                    }
+                }
+                
+                Section("Description") {
+                    Text("Choose how often the app should automatically sync with Google Calendar. Manual only disables automatic sync.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .navigationTitle("Sync Interval")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
+struct TextSizeSettingsView: View {
+    @State private var selectedSize = "Medium"
+    private let textSizes = ["Small", "Medium", "Large", "Extra Large"]
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section("Text Size") {
+                    ForEach(textSizes, id: \.self) { size in
+                        HStack {
+                            Text(size)
+                                .font(fontForSize(size))
+                            Spacer()
+                            if size == selectedSize {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedSize = size
+                        }
+                    }
+                }
+                
+                Section("Preview") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Never Forget")
+                            .font(fontForSize(selectedSize))
+                            .fontWeight(.bold)
+                        Text("This is how your app text will appear")
+                            .font(fontForSize(selectedSize))
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+            .navigationTitle("Text Size")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+    
+    private func fontForSize(_ size: String) -> Font {
+        switch size {
+        case "Small": return .caption
+        case "Medium": return .body
+        case "Large": return .title3
+        case "Extra Large": return .title2
+        default: return .body
+        }
     }
 }
 
@@ -1158,6 +1311,7 @@ struct CalendarDatePickerView: View {
                     DatePicker("Time", selection: $selectedDate, displayedComponents: .hourAndMinute)
                         .datePickerStyle(WheelDatePickerStyle())
                         .labelsHidden()
+                        .environment(\.locale, DashboardViewModel.datePickerLocale(use24Hour: false))
                         .padding(.horizontal)
                     
                     Spacer()
@@ -1358,6 +1512,7 @@ struct AddTodoFormView: View {
                     
                     if hasDueDate {
                         DatePicker("Due Date", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+                            .environment(\.locale, viewModel.datePickerLocale())
                     }
                 }
                 
@@ -1506,13 +1661,8 @@ struct AddTodoFormView: View {
                         }
                         
                         if hasDueDate {
-                            if viewModel.use24HourTime {
-                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
-                                    .environment(\.locale, Locale(identifier: "en_GB"))
-                            } else {
-                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
-                                    .environment(\.locale, Locale(identifier: "en_US"))
-                            }
+                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                .environment(\.locale, viewModel.datePickerLocale())
                         }
                     }
                 }
@@ -1792,13 +1942,8 @@ struct EditTodoView: View {
                         }
                         
                         if hasDueDate {
-                            if viewModel.use24HourTime {
-                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
-                                    .environment(\.locale, Locale(identifier: "en_GB"))
-                            } else {
-                                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
-                                    .environment(\.locale, Locale(identifier: "en_US"))
-                            }
+                            DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                .environment(\.locale, viewModel.datePickerLocale())
                         }
                     }
                 }
@@ -1909,6 +2054,7 @@ struct AddAlarmView: View {
                     TextField("Title", text: $title)
                     TextField("Message (optional)", text: $message)
                     DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
+                        .environment(\.locale, viewModel.datePickerLocale())
                 }
                 
                 Section("Notification") {
@@ -2009,7 +2155,7 @@ struct AlarmDetailView: View {
                         HStack {
                             Text("Time")
                             Spacer()
-                            Text(formatTime(alarm.time))
+                            Text(viewModel.formatTime(alarm.time))
                                 .foregroundColor(.secondary)
                         }
                         
@@ -2075,12 +2221,6 @@ struct AlarmDetailView: View {
         }
     }
     
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-    
     private func formatRepeatDays(_ days: Set<Int>) -> String {
         let dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         let sortedDays = days.sorted()
@@ -2126,6 +2266,7 @@ struct EditAlarmView: View {
                     TextField("Title", text: $title)
                     TextField("Message (optional)", text: $message)
                     DatePicker("Time", selection: $time, displayedComponents: .hourAndMinute)
+                        .environment(\.locale, viewModel.datePickerLocale())
                 }
                 
                 Section("Notification") {
@@ -2762,6 +2903,7 @@ struct CreateCalendarEventView: View {
             DatePicker("Start Date", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
                 .datePickerStyle(.compact)
                 .labelsHidden()
+                .environment(\.locale, viewModel.datePickerLocale())
                 .onChange(of: startDate) { oldValue, newStartDate in
                     if endDate <= newStartDate {
                         endDate = newStartDate.addingTimeInterval(3600)
@@ -2779,6 +2921,7 @@ struct CreateCalendarEventView: View {
             DatePicker("End Date", selection: $endDate, displayedComponents: [.date, .hourAndMinute])
                 .datePickerStyle(.compact)
                 .labelsHidden()
+                .environment(\.locale, viewModel.datePickerLocale())
                 .onChange(of: endDate) { oldValue, newEndDate in
                     if newEndDate <= startDate {
                         startDate = newEndDate.addingTimeInterval(-3600)

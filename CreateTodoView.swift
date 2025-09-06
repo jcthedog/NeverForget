@@ -89,6 +89,7 @@ struct CreateTodoView: View {
                         .foregroundColor(.secondary)
                     DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
                         .labelsHidden()
+                        .environment(\.locale, viewModel.datePickerLocale())
                 }
             } else {
                 DatePicker("Due Date", selection: $dueDate, displayedComponents: [.date])
@@ -277,6 +278,7 @@ struct CreateTodoView: View {
                         Text("Remind me at:")
                         DatePicker("", selection: $customReminderTime, displayedComponents: [.hourAndMinute])
                             .labelsHidden()
+                            .environment(\.locale, viewModel.datePickerLocale())
                     }
                 }
                 .padding()

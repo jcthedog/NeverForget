@@ -51,13 +51,32 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     }
     
     func formatTime(_ date: Date) -> String {
+        return Self.formatTime(date, use24Hour: use24HourTime)
+    }
+    
+    static func formatTime(_ date: Date, use24Hour: Bool) -> String {
         let formatter = DateFormatter()
-        if use24HourTime {
+        if use24Hour {
             formatter.dateFormat = "HH:mm"
         } else {
             formatter.dateFormat = "h:mm a"
         }
         return formatter.string(from: date)
+    }
+    
+    // Get locale for DatePicker based on time format preference
+    func datePickerLocale() -> Locale {
+        return Self.datePickerLocale(use24Hour: use24HourTime)
+    }
+    
+    static func datePickerLocale(use24Hour: Bool) -> Locale {
+        if use24Hour {
+            // Force 24-hour format
+            return Locale(identifier: "en_GB") // British English uses 24-hour format
+        } else {
+            // Force 12-hour format
+            return Locale(identifier: "en_US") // US English uses 12-hour format
+        }
     }
     
 
@@ -331,7 +350,13 @@ class DashboardViewModel: NSObject, ObservableObject, UNUserNotificationCenterDe
     func updateLastSyncTime() {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
-        formatter.timeStyle = .short
+        if use24HourTime {
+            formatter.timeStyle = .short
+            formatter.locale = Locale(identifier: "en_GB") // Force 24-hour time
+        } else {
+            formatter.timeStyle = .short
+            formatter.locale = Locale(identifier: "en_US") // Force 12-hour time
+        }
         lastSyncTime = formatter.string(from: Date())
     }
     
