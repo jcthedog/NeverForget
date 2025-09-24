@@ -41,6 +41,8 @@ struct EnhancedLocationInputView: View {
                         .font(.title2)
                 }
                 .disabled(locationManager.authorizationStatus == CLAuthorizationStatus.denied)
+                .accessibilityLabel("Use current location")
+                .accessibilityHint("Tap to use your current location")
                 
                 // Location picker button
                 Button(action: {
@@ -50,6 +52,8 @@ struct EnhancedLocationInputView: View {
                         .foregroundColor(.green)
                         .font(.title2)
                 }
+                .accessibilityLabel("Open location picker")
+                .accessibilityHint("Tap to choose location from map")
             }
             
             // Search results and suggestions

@@ -143,7 +143,7 @@ struct CalendarView: View {
             }
             .padding(.horizontal, 20)
             
-            // Quick Actions
+            // Quick Actions - Liquid Glass Design
             HStack(spacing: 12) {
                 Button(action: { showingCreateEvent = true }) {
                     HStack(spacing: 6) {
@@ -151,13 +151,8 @@ struct CalendarView: View {
                         Text("Event")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
                 }
+                .glassButton(buttonColor: .blue)
                 
                 Button(action: { showingCreateTodo = true }) {
                     HStack(spacing: 6) {
@@ -165,13 +160,8 @@ struct CalendarView: View {
                         Text("Todo")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.purple)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
                 }
+                .glassButton(buttonColor: .purple)
                 
                 Button(action: { showingICSImport = true }) {
                     HStack(spacing: 6) {
@@ -179,20 +169,15 @@ struct CalendarView: View {
                         Text("Import")
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.teal)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
                 }
+                .glassButton(buttonColor: .teal)
             }
             .padding(.horizontal, 20)
         }
         .padding(.top, 20)
     }
     
-    // MARK: - View Selector
+    // MARK: - View Selector - Liquid Glass Design
     private var viewSelector: some View {
         HStack(spacing: 0) {
             ForEach(CalendarViewType.allCases, id: \.self) { viewType in
@@ -202,13 +187,18 @@ struct CalendarView: View {
                         .fontWeight(.medium)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(selectedView == viewType ? Color.blue : Color.clear)
-                        .foregroundColor(selectedView == viewType ? .white : .primary)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(selectedView == viewType ? 
+                                      LinearGradient(colors: [.blue.opacity(0.3), .blue.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing) : 
+                                      LinearGradient(colors: [Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                )
+                        )
+                        .foregroundColor(selectedView == viewType ? .blue : .primary)
                 }
             }
         }
-        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
-        .cornerRadius(8)
+        .glassCard(cornerRadius: 8, padding: 0)
         .padding(.horizontal, 20)
         .padding(.top, 20)
     }
@@ -416,8 +406,7 @@ struct TodayView: View {
                         )
                     }
                 }
-                .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
-                .cornerRadius(12)
+                .glassCard(cornerRadius: 12, padding: 0)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 20)
@@ -463,8 +452,7 @@ struct WeekView: View {
                     onTodoTap: onTodoTap,
                     onDateTap: onDateTap
                 )
-                .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
-                .cornerRadius(12)
+                .glassCard(cornerRadius: 12, padding: 0)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 20)
@@ -495,8 +483,7 @@ struct MonthView: View {
                     onTodoTap: onTodoTap,
                     onDateTap: onDateTap
                 )
-                .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
-                .cornerRadius(12)
+                .glassCard(cornerRadius: 12, padding: 0)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 20)
@@ -552,7 +539,7 @@ struct TimeSlotView: View {
             .padding(.trailing, 8)
         }
         .frame(height: 60)
-        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
+        .glassCard(cornerRadius: 8, padding: 0)
         .onTapGesture {
             // Create a date for this hour on the current day
             let calendar = Calendar.current
@@ -562,10 +549,8 @@ struct TimeSlotView: View {
     }
     
     private var timeLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h a"
         let date = Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
-        return formatter.string(from: date)
+        return viewModel.formatTime(date)
     }
 }
 
@@ -590,7 +575,7 @@ struct EventRowView: View {
                         .lineLimit(1)
                     
                     if !event.isAllDay {
-                        Text(event.formattedStartTime)
+                        Text(viewModel.formatTime(event.startDate))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -628,7 +613,7 @@ struct CalendarTodoRowView: View {
                         .lineLimit(1)
                     
                     if let dueDate = todo.dueDate {
-                        Text(formatTime(dueDate))
+                        Text(viewModel.formatTime(dueDate))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -642,12 +627,6 @@ struct CalendarTodoRowView: View {
             .cornerRadius(6)
         }
         .buttonStyle(PlainButtonStyle())
-    }
-    
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 
@@ -789,14 +768,12 @@ struct WeekTimeSlotView: View {
             }
         }
         .frame(height: 60)
-        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
+        .glassCard(cornerRadius: 8, padding: 0)
     }
     
     private var timeLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h a"
         let date = Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
-        return formatter.string(from: date)
+        return viewModel.formatTime(date)
     }
     
     private func eventsForDayAndHour(_ dayIndex: Int, hour: Int) -> [CalendarEvent] {
@@ -944,7 +921,7 @@ struct MonthDayView: View {
             Spacer(minLength: 0)
         }
         .frame(height: 60)
-        .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
+        .glassCard(cornerRadius: 8, padding: 0)
         .onTapGesture {
             // Always show day detail popup when tapping on a date
             onDateTap(date)
@@ -967,12 +944,8 @@ struct DayDetailView: View {
     let onCreateTodo: () -> Void
     
     private var backgroundGradient: some View {
-        LinearGradient(
-            colors: [Color(red: 0.98, green: 0.97, blue: 0.95), Color(red: 0.96, green: 0.95, blue: 0.93)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
+        LiquidGlassTheme.glassGradient
+            .ignoresSafeArea()
     }
     
     var body: some View {
@@ -1059,14 +1032,9 @@ struct DayDetailView: View {
                                             Image(systemName: "calendar.badge.plus")
                                             Text("Create New Event")
                                         }
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.white)
                                         .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color.blue)
-                                        .cornerRadius(8)
                                     }
+                                    .glassButton(buttonColor: .blue)
                                     
                                     Button(action: {
                                         dismiss()
@@ -1076,14 +1044,9 @@ struct DayDetailView: View {
                                             Image(systemName: "checkmark.circle.badge.plus")
                                             Text("Create New Todo")
                                         }
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.white)
                                         .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(Color.green)
-                                        .cornerRadius(8)
                                     }
+                                    .glassButton(buttonColor: .green)
                                 }
                                 .padding(.horizontal, 40)
                             }
@@ -1106,14 +1069,9 @@ struct DayDetailView: View {
                                         Image(systemName: "calendar.badge.plus")
                                         Text("New Event")
                                     }
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
-                                    .background(Color.blue)
-                                    .cornerRadius(8)
                                 }
+                                .glassButton(buttonColor: .blue)
                                 
                                 Button(action: {
                                     dismiss()
@@ -1123,14 +1081,9 @@ struct DayDetailView: View {
                                         Image(systemName: "checkmark.circle.badge.plus")
                                         Text("New Todo")
                                     }
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.white)
                                     .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
-                                    .background(Color.green)
-                                    .cornerRadius(8)
                                 }
+                                .glassButton(buttonColor: .green)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -1175,7 +1128,7 @@ struct DayDetailEventRow: View {
                         .multilineTextAlignment(.leading)
                     
                     HStack {
-                        Text(event.formattedStartTime)
+                        Text(viewModel.formatTime(event.startDate))
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
@@ -1195,9 +1148,7 @@ struct DayDetailEventRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
-            .cornerRadius(8)
-            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .glassCard(cornerRadius: 8, padding: 0)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -1225,7 +1176,7 @@ struct DayDetailTodoRow: View {
                         .multilineTextAlignment(.leading)
                     
                     if let dueDate = todo.dueDate {
-                        Text(formatTime(dueDate))
+                        Text(viewModel.formatTime(dueDate))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -1239,17 +1190,9 @@ struct DayDetailTodoRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(PastelTheme.cardBackground(isDarkMode: viewModel.isDarkMode))
-            .cornerRadius(8)
-            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .glassCard(cornerRadius: 8, padding: 0)
         }
         .buttonStyle(PlainButtonStyle())
-    }
-    
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 

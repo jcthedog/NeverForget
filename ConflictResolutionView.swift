@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConflictResolutionView: View {
     @ObservedObject var syncManager: GoogleCalendarSyncManager
+    @ObservedObject var viewModel: DashboardViewModel
     @Environment(\.dismiss) private var dismiss
     
     @State private var selectedConflictIndex: Int = 0
@@ -192,7 +193,8 @@ struct ConflictResolutionView: View {
                         startDate: conflict.localEvent.startDate,
                         endDate: conflict.localEvent.endDate,
                         location: conflict.localEvent.location,
-                        isAllDay: conflict.localEvent.isAllDay
+                        isAllDay: conflict.localEvent.isAllDay,
+                        use24HourTime: viewModel.use24HourTime
                     )
                 }
                 .frame(maxWidth: .infinity)
@@ -214,7 +216,8 @@ struct ConflictResolutionView: View {
                         startDate: conflict.remoteEvent.startDate,
                         endDate: conflict.remoteEvent.endDate,
                         location: conflict.remoteEvent.location,
-                        isAllDay: conflict.remoteEvent.isAllDay
+                        isAllDay: conflict.remoteEvent.isAllDay,
+                        use24HourTime: viewModel.use24HourTime
                     )
                 }
                 .frame(maxWidth: .infinity)
@@ -368,6 +371,7 @@ struct EventComparisonCard: View {
     let endDate: Date
     let location: String?
     let isAllDay: Bool
+    let use24HourTime: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -420,7 +424,11 @@ struct EventComparisonCard: View {
     
     private var timeFormatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.timeStyle = .short
+        if use24HourTime {
+            formatter.dateFormat = "HH:mm"
+        } else {
+            formatter.dateFormat = "h:mm a"
+        }
         return formatter
     }
 }
@@ -476,6 +484,7 @@ struct ResolutionOptionButton: View {
         syncManager: GoogleCalendarSyncManager(
             calendarService: GoogleCalendarService(),
             viewModel: DashboardViewModel()
-        )
+        ),
+        viewModel: DashboardViewModel()
     )
 }

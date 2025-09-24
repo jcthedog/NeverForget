@@ -41,7 +41,7 @@ struct EnhancedGoogleCalendarSettingsView: View {
         }
         .sheet(isPresented: $showingConflictResolution) {
             if let syncManager = viewModel.syncManager {
-                ConflictResolutionView(syncManager: syncManager)
+                ConflictResolutionView(syncManager: syncManager, viewModel: viewModel)
             }
         }
         .sheet(isPresented: $showingEventImport) {

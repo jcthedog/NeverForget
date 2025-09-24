@@ -126,7 +126,7 @@ struct TodoListView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+                LiquidGlassTheme.glassGradient
                     .ignoresSafeArea()
                 VStack(spacing: 0) {
                     // Filter Pills
@@ -193,9 +193,7 @@ struct FilterPill: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(isSelected ? Color.purple : Color(.systemGray5))
-            .foregroundColor(isSelected ? .white : .primary)
-            .cornerRadius(16)
+            .glassButton(buttonColor: isSelected ? .purple : .gray, cornerRadius: 16)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -326,7 +324,7 @@ struct AlarmCenterView: View {
         NavigationView {
             ZStack {
                 // Use the same pastel theme as other screens
-                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+                LiquidGlassTheme.glassGradient
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -427,8 +425,7 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .glassCard(cornerRadius: 12, padding: 0)
     }
 }
 
@@ -599,7 +596,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+                LiquidGlassTheme.glassGradient
                     .ignoresSafeArea()
                 List {
                     Section("Account") {
@@ -1023,8 +1020,7 @@ struct GoogleSignInView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
+                        .glassButton(buttonColor: .blue, cornerRadius: 12)
                     }
                     
                     Button("Cancel") {
@@ -1164,8 +1160,7 @@ struct ExportDataView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isExporting ? Color.gray : Color.green)
-                        .cornerRadius(12)
+                        .glassButton(buttonColor: isExporting ? .gray : .green, cornerRadius: 12)
                     }
                     .disabled(isExporting)
                     
@@ -2046,7 +2041,7 @@ struct AddAlarmView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+                LiquidGlassTheme.glassGradient
                     .ignoresSafeArea()
                 
                 Form {
@@ -2132,7 +2127,7 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                PastelTheme.primaryGradient(isDarkMode: viewModel.isDarkMode)
+                LiquidGlassTheme.glassGradient
                     .ignoresSafeArea()
                 List {
                     Section("Alarm Details") {
