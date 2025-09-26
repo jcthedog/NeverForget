@@ -65,6 +65,14 @@ class LocationManager: NSObject, ObservableObject {
         loadRecentLocations()
     }
     
+    deinit {
+        // Proper cleanup to prevent memory leaks
+        locationManager.stopUpdatingLocation()
+        locationManager.delegate = nil
+        searchTask?.cancel()
+        ProductionLogger.log("LocationManager deallocated", category: "Memory")
+    }
+    
     // MARK: - Setup
     private func setupLocationManager() {
         locationManager.delegate = self
@@ -101,6 +109,7 @@ class LocationManager: NSObject, ObservableObject {
         guard query.count >= 2 else {
             searchResults = []
             isSearching = false
+            errorMessage = nil
             return
         }
         
@@ -118,12 +127,38 @@ class LocationManager: NSObject, ObservableObject {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = error.localizedDescription
+                    // Use our custom error handling
+                    let locationError = self.mapToLocationError(error)
+                    self.errorMessage = locationError.errorDescription
                     self.searchResults = []
                     self.isSearching = false
+                    
+                    ProductionLogger.logError(error, category: "LocationSearch")
                 }
             }
         }
+    }
+    
+    // MARK: - Error Mapping Helper
+    private func mapToLocationError(_ error: Error) -> LocationError {
+        if let locationError = error as? LocationError {
+            return locationError
+        }
+        
+        if let clError = error as? CLError {
+            switch clError.code {
+            case .denied:
+                return .permissionDenied
+            case .locationUnknown:
+                return .locationUnavailable
+            case .network:
+                return .networkError
+            default:
+                return .unknown(error.localizedDescription)
+            }
+        }
+        
+        return .unknown(error.localizedDescription)
     }
     
     func getCurrentLocationAddress() async -> LocationSearchResult? {
@@ -189,15 +224,39 @@ class LocationManager: NSObject, ObservableObject {
         }
         
         let search = MKLocalSearch(request: request)
-        let response = try await search.start()
         
-        return response.mapItems.map { mapItem in
-            LocationSearchResult(
-                title: mapItem.name ?? "",
-                subtitle: formatPlacemarkAddress(mapItem.placemark),
-                coordinate: mapItem.placemark.coordinate,
-                placemark: mapItem.placemark
-            )
+        do {
+            let response = try await search.start()
+            
+            let results = response.mapItems.map { mapItem in
+                LocationSearchResult(
+                    title: mapItem.name ?? "",
+                    subtitle: formatPlacemarkAddress(mapItem.placemark),
+                    coordinate: mapItem.placemark.coordinate,
+                    placemark: mapItem.placemark
+                )
+            }
+            
+            // Log successful search for debugging
+            ProductionLogger.log("Location search completed with \(results.count) results", category: "LocationSearch")
+            
+            return results
+        } catch {
+            // Convert to our custom error types
+            ProductionLogger.logError(error, category: "LocationSearch")
+            
+            if let nsError = error as NSError? {
+                switch nsError.code {
+                case CLError.network.rawValue:
+                    throw LocationError.networkError
+                case CLError.locationUnknown.rawValue:
+                    throw LocationError.locationUnavailable
+                default:
+                    throw LocationError.searchFailed(error.localizedDescription)
+                }
+            }
+            
+            throw LocationError.unknown(error.localizedDescription)
         }
     }
     

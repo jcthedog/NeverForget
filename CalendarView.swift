@@ -1,5 +1,59 @@
 import SwiftUI
 
+// MARK: - Conditional Glass Effect Extensions
+extension View {
+    @ViewBuilder
+    func conditionalGlassButton(buttonColor: Color) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassButton(buttonColor: buttonColor)
+        } else {
+            self
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(buttonColor.opacity(0.2))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(buttonColor.opacity(0.3), lineWidth: 1)
+                        )
+                )
+                .foregroundColor(buttonColor)
+        }
+    }
+    
+    @ViewBuilder
+    func conditionalGlassCard(cornerRadius: CGFloat = 12, padding: CGFloat = 16, shadowRadius: CGFloat = 8) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassCard(cornerRadius: cornerRadius, padding: padding, shadowRadius: shadowRadius)
+        } else {
+            self
+                .padding(padding)
+                .background(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(.regularMaterial)
+                        .shadow(radius: shadowRadius)
+                )
+        }
+    }
+    
+    // Temporary functions to replace the remaining glassCard instances
+    @ViewBuilder
+    func replaceRemainingGlassCards() -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassCard(cornerRadius: 8, padding: 0)
+        } else {
+            self
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.regularMaterial)
+                        .shadow(radius: 8)
+                )
+        }
+    }
+
+}
+
 struct CalendarView: View {
     @ObservedObject var viewModel: DashboardViewModel
     
@@ -152,7 +206,7 @@ struct CalendarView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .glassButton(buttonColor: .blue)
+                .conditionalGlassButton(buttonColor: .blue)
                 
                 Button(action: { showingCreateTodo = true }) {
                     HStack(spacing: 6) {
@@ -161,7 +215,7 @@ struct CalendarView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .glassButton(buttonColor: .purple)
+                .conditionalGlassButton(buttonColor: .purple)
                 
                 Button(action: { showingICSImport = true }) {
                     HStack(spacing: 6) {
@@ -170,7 +224,7 @@ struct CalendarView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .glassButton(buttonColor: .teal)
+                .conditionalGlassButton(buttonColor: .teal)
             }
             .padding(.horizontal, 20)
         }
@@ -198,7 +252,7 @@ struct CalendarView: View {
                 }
             }
         }
-        .glassCard(cornerRadius: 8, padding: 0)
+        .conditionalGlassCard(cornerRadius: 8, padding: 0)
         .padding(.horizontal, 20)
         .padding(.top, 20)
     }
@@ -406,7 +460,7 @@ struct TodayView: View {
                         )
                     }
                 }
-                .glassCard(cornerRadius: 12, padding: 0)
+                .conditionalGlassCard(cornerRadius: 12, padding: 0)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 20)
@@ -452,7 +506,7 @@ struct WeekView: View {
                     onTodoTap: onTodoTap,
                     onDateTap: onDateTap
                 )
-                .glassCard(cornerRadius: 12, padding: 0)
+                .conditionalGlassCard(cornerRadius: 12, padding: 0)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 20)
@@ -483,7 +537,7 @@ struct MonthView: View {
                     onTodoTap: onTodoTap,
                     onDateTap: onDateTap
                 )
-                .glassCard(cornerRadius: 12, padding: 0)
+                .conditionalGlassCard(cornerRadius: 12, padding: 0)
                 .padding(.horizontal, 20)
             }
             .padding(.vertical, 20)
@@ -539,7 +593,7 @@ struct TimeSlotView: View {
             .padding(.trailing, 8)
         }
         .frame(height: 60)
-        .glassCard(cornerRadius: 8, padding: 0)
+        .conditionalGlassCard(cornerRadius: 8, padding: 0)
         .onTapGesture {
             // Create a date for this hour on the current day
             let calendar = Calendar.current
@@ -768,7 +822,7 @@ struct WeekTimeSlotView: View {
             }
         }
         .frame(height: 60)
-        .glassCard(cornerRadius: 8, padding: 0)
+        .replaceRemainingGlassCards()
     }
     
     private var timeLabel: String {
@@ -921,7 +975,7 @@ struct MonthDayView: View {
             Spacer(minLength: 0)
         }
         .frame(height: 60)
-        .glassCard(cornerRadius: 8, padding: 0)
+        .replaceRemainingGlassCards()
         .onTapGesture {
             // Always show day detail popup when tapping on a date
             onDateTap(date)
@@ -944,8 +998,17 @@ struct DayDetailView: View {
     let onCreateTodo: () -> Void
     
     private var backgroundGradient: some View {
-        LiquidGlassTheme.glassGradient
+        if #available(iOS 26.0, *) {
+            LiquidGlassTheme.glassGradient
+                .ignoresSafeArea()
+        } else {
+            LinearGradient(
+                gradient: Gradient(colors: [Color.clear, Color.gray.opacity(0.1)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
             .ignoresSafeArea()
+        }
     }
     
     var body: some View {
@@ -1034,7 +1097,7 @@ struct DayDetailView: View {
                                         }
                                         .frame(maxWidth: .infinity)
                                     }
-                                    .glassButton(buttonColor: .blue)
+                                    .conditionalGlassButton(buttonColor: .blue)
                                     
                                     Button(action: {
                                         dismiss()
@@ -1046,7 +1109,7 @@ struct DayDetailView: View {
                                         }
                                         .frame(maxWidth: .infinity)
                                     }
-                                    .glassButton(buttonColor: .green)
+                                    .conditionalGlassButton(buttonColor: .green)
                                 }
                                 .padding(.horizontal, 40)
                             }
@@ -1071,7 +1134,7 @@ struct DayDetailView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                 }
-                                .glassButton(buttonColor: .blue)
+                                .conditionalGlassButton(buttonColor: .blue)
                                 
                                 Button(action: {
                                     dismiss()
@@ -1083,7 +1146,7 @@ struct DayDetailView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                 }
-                                .glassButton(buttonColor: .green)
+                                .conditionalGlassButton(buttonColor: .green)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -1148,7 +1211,7 @@ struct DayDetailEventRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .glassCard(cornerRadius: 8, padding: 0)
+            .conditionalGlassCard(cornerRadius: 8, padding: 0)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -1190,7 +1253,7 @@ struct DayDetailTodoRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .glassCard(cornerRadius: 8, padding: 0)
+            .conditionalGlassCard(cornerRadius: 8, padding: 0)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -1199,3 +1262,4 @@ struct DayDetailTodoRow: View {
 #Preview {
     CalendarView(viewModel: DashboardViewModel())
 }
+

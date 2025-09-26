@@ -4,4 +4,22 @@
    <FileRef
       location = "self:">
    </FileRef>
+   <FileRef
+      location = "group:iOS26_CONFIGURATION.md">
+   </FileRef>
+   <FileRef
+      location = "group:iOS26_MIGRATION_COMPLETE.md">
+   </FileRef>
+   <FileRef
+      location = "group:LiquidGlassAdvancedComponents_Fixed.swift">
+   </FileRef>
+   <FileRef
+      location = "group:QUICK_FIX_GUIDE.md">
+   </FileRef>
+   <FileRef
+      location = "group:QUICK_FIXES_APPLIED.md">
+   </FileRef>
+   <FileRef
+      location = "group:COMPREHENSIVE_FIXES_ROUND_2.md">
+   </FileRef>
 </Workspace>

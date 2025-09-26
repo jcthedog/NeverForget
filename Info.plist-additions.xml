@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Add these entries to your Info.plist file -->
+<dict>
+    <!-- Location Permissions -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app uses your location to help you create location-based reminders and find nearby places for your tasks.</string>
+    
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>This app uses your location to help you create location-based reminders and find nearby places for your tasks.</string>
+    
+    <!-- Calendar Permissions -->
+    <key>NSCalendarUsageDescription</key>
+    <string>This app needs access to your calendar to sync events and help manage your schedule alongside your tasks.</string>
+    
+    <!-- Notifications -->
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>This app sends notifications for task reminders and alarms to help you stay organized.</string>
+    
+    <!-- Contacts (if using location search with contact addresses) -->
+    <key>NSContactsUsageDescription</key>
+    <string>This app accesses your contacts to help you quickly find addresses for location-based tasks.</string>
+    
+    <!-- Network Security for Google Calendar -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>googleapis.com</key>
+            <dict>
+                <key>NSExceptionRequiresForwardSecrecy</key>
+                <false/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.0</string>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+    
+    <!-- Background Modes (if needed for alarms) -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>background-processing</string>
+        <string>background-fetch</string>
+    </array>
+    
+    <!-- Supported Interface Orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- App Category -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+</dict>

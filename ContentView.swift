@@ -126,8 +126,18 @@ struct TodoListView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlassTheme.glassGradient
+                if #available(iOS 26.0, *) {
+                    LiquidGlassTheme.glassGradient
+                        .ignoresSafeArea()
+                } else {
+                    // Fallback gradient or Material
+                    LinearGradient(
+                        colors: [.white.opacity(0.6), .white.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                     .ignoresSafeArea()
+                }
                 VStack(spacing: 0) {
                     // Filter Pills
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -193,7 +203,7 @@ struct FilterPill: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .glassButton(buttonColor: isSelected ? .purple : .gray, cornerRadius: 16)
+            .conditionalGlassButton(buttonColor: isSelected ? .purple : .gray)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -323,9 +333,18 @@ struct AlarmCenterView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Use the same pastel theme as other screens
-                LiquidGlassTheme.glassGradient
+                if #available(iOS 26.0, *) {
+                    LiquidGlassTheme.glassGradient
+                        .ignoresSafeArea()
+                } else {
+                    // Fallback gradient or Material
+                    LinearGradient(
+                        colors: [.white.opacity(0.6), .white.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                     .ignoresSafeArea()
+                }
                 
                 VStack(spacing: 0) {
                 // Quick Stats
@@ -425,7 +444,7 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .glassCard(cornerRadius: 12, padding: 0)
+        .conditionalGlassCard(cornerRadius: 12, padding: 0)
     }
 }
 
@@ -596,8 +615,18 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlassTheme.glassGradient
+                if #available(iOS 26.0, *) {
+                    LiquidGlassTheme.glassGradient
+                        .ignoresSafeArea()
+                } else {
+                    // Fallback gradient or Material
+                    LinearGradient(
+                        colors: [.white.opacity(0.6), .white.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                     .ignoresSafeArea()
+                }
                 List {
                     Section("Account") {
                         HStack {
@@ -1020,7 +1049,7 @@ struct GoogleSignInView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .glassButton(buttonColor: .blue, cornerRadius: 12)
+                        .conditionalGlassButton(buttonColor: .blue)
                     }
                     
                     Button("Cancel") {
@@ -1160,7 +1189,7 @@ struct ExportDataView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .glassButton(buttonColor: isExporting ? .gray : .green, cornerRadius: 12)
+                        .conditionalGlassButton(buttonColor: isExporting ? .gray : .green)
                     }
                     .disabled(isExporting)
                     
@@ -2041,8 +2070,18 @@ struct AddAlarmView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlassTheme.glassGradient
+                if #available(iOS 26.0, *) {
+                    LiquidGlassTheme.glassGradient
+                        .ignoresSafeArea()
+                } else {
+                    // Fallback gradient or Material
+                    LinearGradient(
+                        colors: [.white.opacity(0.6), .white.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                     .ignoresSafeArea()
+                }
                 
                 Form {
                     Section("Alarm Details") {
@@ -2127,8 +2166,18 @@ struct AlarmDetailView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LiquidGlassTheme.glassGradient
+                if #available(iOS 26.0, *) {
+                    LiquidGlassTheme.glassGradient
+                        .ignoresSafeArea()
+                } else {
+                    // Fallback gradient or Material
+                    LinearGradient(
+                        colors: [.white.opacity(0.6), .white.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                     .ignoresSafeArea()
+                }
                 List {
                     Section("Alarm Details") {
                         HStack {
@@ -3228,3 +3277,4 @@ struct PastelButtonStyle: ButtonStyle {
             )
     }
 }
+

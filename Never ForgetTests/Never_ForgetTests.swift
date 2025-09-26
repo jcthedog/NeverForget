@@ -5,13 +5,14 @@
 //  Created by Tomas Cora on 8/21/2025.
 //
 
-import Testing
+import XCTest
 @testable import Never_Forget
 
-struct Never_ForgetTests {
+final class Never_ForgetTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    func testExample() async throws {
+        // Write your test here and use APIs like `XCTAssert(...)` to check expected conditions.
+        XCTAssertTrue(true, "Example test should pass")
     }
 
 }

@@ -31,12 +31,36 @@
 		CC5D15722E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15712E596D52007168FF /* GoogleAPIClientForREST_Acceleratedmobilepageurl */; };
 		CC5D15742E596D52007168FF /* GoogleAPIClientForREST_AccessApproval in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15732E596D52007168FF /* GoogleAPIClientForREST_AccessApproval */; };
 		CC5D15762E596D52007168FF /* GoogleAPIClientForREST_Calendar in Frameworks */ = {isa = PBXBuildFile; productRef = CC5D15752E596D52007168FF /* GoogleAPIClientForREST_Calendar */; };
+		CC80AE8F2E838D3D0066DD50 /* PerformanceOptimizations.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC80AE8E2E838D3D0066DD50 /* PerformanceOptimizations.swift */; };
+		CC80AE912E838D590066DD50 /* AppStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC80AE902E838D590066DD50 /* AppStoreTests.swift */; };
+		CC80AE932E838D730066DD50 /* AppStoreSubmissionChecklist.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AE922E838D730066DD50 /* AppStoreSubmissionChecklist.md */; };
+		CC80AE952E838DC20066DD50 /* Info 2.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC80AE942E838DC20066DD50 /* Info 2.plist */; };
+		CC80AE972E838E2B0066DD50 /* LocationErrorHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC80AE962E838E2B0066DD50 /* LocationErrorHandling.swift */; };
+		CC80AE992E838F140066DD50 /* ComprehensiveAppStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC80AE982E838F140066DD50 /* ComprehensiveAppStoreTests.swift */; };
+		CC80AE9B2E838F870066DD50 /* FinalAppStoreGuide.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AE9A2E838F870066DD50 /* FinalAppStoreGuide.md */; };
+		CC80AE9D2E8390820066DD50 /* README 2.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AE9C2E8390820066DD50 /* README 2.md */; };
+		CC80AE9F2E8391010066DD50 /* DEVELOPMENT_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AE9E2E8391010066DD50 /* DEVELOPMENT_SUMMARY.md */; };
+		CC80AEA12E83910A0066DD50 /* LICENSE 2 in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEA02E83910A0066DD50 /* LICENSE 2 */; };
+		CC80AEA32E83911D0066DD50 /* .gitignore 2 in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEA22E83911D0066DD50 /* .gitignore 2 */; };
+		CC80AEA52E83914A0066DD50 /* .githubworkflowsci.yml in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEA42E83914A0066DD50 /* .githubworkflowsci.yml */; };
+		CC80AEA72E8391660066DD50 /* .github-workflows-ci.yml in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEA62E8391660066DD50 /* .github-workflows-ci.yml */; };
+		CC80AEA92E8391960066DD50 /* PROJECT_STATUS.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEA82E8391960066DD50 /* PROJECT_STATUS.md */; };
+		CC80AEAB2E8391A80066DD50 /* QUICK_SETUP.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEAA2E8391A80066DD50 /* QUICK_SETUP.md */; };
+		CC80AEAD2E8395C10066DD50 /* Info.plist-additions.xml in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEAC2E8395C10066DD50 /* Info.plist-additions.xml */; };
+		CC80AEAF2E8395E40066DD50 /* AppStoreAssets.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEAE2E8395E40066DD50 /* AppStoreAssets.md */; };
+		CC80AEB12E8395F70066DD50 /* AppStoreDescription.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEB02E8395F70066DD50 /* AppStoreDescription.md */; };
+		CC80AEB32E8396130066DD50 /* FinalSubmissionChecklist.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEB22E8396130066DD50 /* FinalSubmissionChecklist.md */; };
+		CC80AEB52E83967B0066DD50 /* Step1-InfoPlist-Guide.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEB42E83967B0066DD50 /* Step1-InfoPlist-Guide.md */; };
+		CC80AEB72E8396B80066DD50 /* Step3-AppStore-Assets-Guide.md in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEB62E8396B80066DD50 /* Step3-AppStore-Assets-Guide.md */; };
+		CC80AEB92E8397EB0066DD50 /* Info 3.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC80AEB82E8397EB0066DD50 /* Info 3.plist */; };
 		CC86DFE02E6600A000196CE2 /* CalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */; };
 		CC9440C02E63905500D64DEF /* PastelTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9440BF2E63905500D64DEF /* PastelTheme.swift */; };
 		CC9440C12E63905500D64DEF /* LiquidGlassTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9440C22E63905500D64DEF /* LiquidGlassTheme.swift */; };
 		CCB02BCF2E6B6C84002FACE0 /* EnhancedLocationInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB02BCC2E6B6C84002FACE0 /* EnhancedLocationInputView.swift */; };
 		CCB02BD02E6B6C84002FACE0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB02BCE2E6B6C84002FACE0 /* LocationManager.swift */; };
 		CCB02BD12E6B6C84002FACE0 /* EnhancedLocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB02BCD2E6B6C84002FACE0 /* EnhancedLocationPickerView.swift */; };
+		CCCE379A2E848EDD00D9114B /* LiquidGlassAdvancedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCE37992E848EDD00D9114B /* LiquidGlassAdvancedComponents.swift */; };
+		CCCE379C2E848F0A00D9114B /* LIQUID_GLASS_ENHANCEMENTS.md in Resources */ = {isa = PBXBuildFile; fileRef = CCCE379B2E848F0A00D9114B /* LIQUID_GLASS_ENHANCEMENTS.md */; };
 		CCF29A4D2E5AAF870036BABD /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A4C2E5AAF870036BABD /* CalendarView.swift */; };
 		CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */; };
 		CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF29A532E5AB63D0036BABD /* CreateEventView.swift */; };
@@ -78,12 +102,36 @@
 		CC434B792E69E5900018DE06 /* TestEventCreation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestEventCreation.swift; sourceTree = "<group>"; };
 		CC434B7E2E69E7850018DE06 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CC6F0B022E5983F4009CE3CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CC80AE8E2E838D3D0066DD50 /* PerformanceOptimizations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceOptimizations.swift; sourceTree = "<group>"; };
+		CC80AE902E838D590066DD50 /* AppStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreTests.swift; sourceTree = "<group>"; };
+		CC80AE922E838D730066DD50 /* AppStoreSubmissionChecklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AppStoreSubmissionChecklist.md; sourceTree = "<group>"; };
+		CC80AE942E838DC20066DD50 /* Info 2.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info 2.plist"; sourceTree = "<group>"; };
+		CC80AE962E838E2B0066DD50 /* LocationErrorHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationErrorHandling.swift; sourceTree = "<group>"; };
+		CC80AE982E838F140066DD50 /* ComprehensiveAppStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComprehensiveAppStoreTests.swift; sourceTree = "<group>"; };
+		CC80AE9A2E838F870066DD50 /* FinalAppStoreGuide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FinalAppStoreGuide.md; sourceTree = "<group>"; };
+		CC80AE9C2E8390820066DD50 /* README 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README 2.md"; sourceTree = "<group>"; };
+		CC80AE9E2E8391010066DD50 /* DEVELOPMENT_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = DEVELOPMENT_SUMMARY.md; sourceTree = "<group>"; };
+		CC80AEA02E83910A0066DD50 /* LICENSE 2 */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE 2"; sourceTree = "<group>"; };
+		CC80AEA22E83911D0066DD50 /* .gitignore 2 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ".gitignore 2"; sourceTree = "<group>"; };
+		CC80AEA42E83914A0066DD50 /* .githubworkflowsci.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .githubworkflowsci.yml; sourceTree = "<group>"; };
+		CC80AEA62E8391660066DD50 /* .github-workflows-ci.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = ".github-workflows-ci.yml"; sourceTree = "<group>"; };
+		CC80AEA82E8391960066DD50 /* PROJECT_STATUS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PROJECT_STATUS.md; sourceTree = "<group>"; };
+		CC80AEAA2E8391A80066DD50 /* QUICK_SETUP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICK_SETUP.md; sourceTree = "<group>"; };
+		CC80AEAC2E8395C10066DD50 /* Info.plist-additions.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info.plist-additions.xml"; sourceTree = "<group>"; };
+		CC80AEAE2E8395E40066DD50 /* AppStoreAssets.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AppStoreAssets.md; sourceTree = "<group>"; };
+		CC80AEB02E8395F70066DD50 /* AppStoreDescription.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AppStoreDescription.md; sourceTree = "<group>"; };
+		CC80AEB22E8396130066DD50 /* FinalSubmissionChecklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FinalSubmissionChecklist.md; sourceTree = "<group>"; };
+		CC80AEB42E83967B0066DD50 /* Step1-InfoPlist-Guide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Step1-InfoPlist-Guide.md"; sourceTree = "<group>"; };
+		CC80AEB62E8396B80066DD50 /* Step3-AppStore-Assets-Guide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Step3-AppStore-Assets-Guide.md"; sourceTree = "<group>"; };
+		CC80AEB82E8397EB0066DD50 /* Info 3.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info 3.plist"; sourceTree = "<group>"; };
 		CC86DFDF2E6600A000196CE2 /* CalendarEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEvent.swift; sourceTree = "<group>"; };
 		CC9440BF2E63905500D64DEF /* PastelTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastelTheme.swift; sourceTree = "<group>"; };
 		CC9440C22E63905500D64DEF /* LiquidGlassTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassTheme.swift; sourceTree = "<group>"; };
 		CCB02BCC2E6B6C84002FACE0 /* EnhancedLocationInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedLocationInputView.swift; sourceTree = "<group>"; };
 		CCB02BCD2E6B6C84002FACE0 /* EnhancedLocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedLocationPickerView.swift; sourceTree = "<group>"; };
 		CCB02BCE2E6B6C84002FACE0 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		CCCE37992E848EDD00D9114B /* LiquidGlassAdvancedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlassAdvancedComponents.swift; sourceTree = "<group>"; };
+		CCCE379B2E848F0A00D9114B /* LIQUID_GLASS_ENHANCEMENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LIQUID_GLASS_ENHANCEMENTS.md; sourceTree = "<group>"; };
 		CCF29A4C2E5AAF870036BABD /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		CCF29A502E5AB63D0036BABD /* Never_ForgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Never_ForgetApp.swift; sourceTree = "<group>"; };
 		CCF29A532E5AB63D0036BABD /* CreateEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventView.swift; sourceTree = "<group>"; };
@@ -177,6 +225,30 @@
 				CC434B782E69E5900018DE06 /* SharedTypes.swift */,
 				CC434B792E69E5900018DE06 /* TestEventCreation.swift */,
 				CC1F3DDA2E58080700FC027A /* Todo.swift */,
+				CC80AE8E2E838D3D0066DD50 /* PerformanceOptimizations.swift */,
+				CC80AE902E838D590066DD50 /* AppStoreTests.swift */,
+				CC80AE922E838D730066DD50 /* AppStoreSubmissionChecklist.md */,
+				CC80AE942E838DC20066DD50 /* Info 2.plist */,
+				CC80AE962E838E2B0066DD50 /* LocationErrorHandling.swift */,
+				CC80AE982E838F140066DD50 /* ComprehensiveAppStoreTests.swift */,
+				CC80AE9A2E838F870066DD50 /* FinalAppStoreGuide.md */,
+				CC80AE9C2E8390820066DD50 /* README 2.md */,
+				CC80AE9E2E8391010066DD50 /* DEVELOPMENT_SUMMARY.md */,
+				CC80AEA02E83910A0066DD50 /* LICENSE 2 */,
+				CC80AEA22E83911D0066DD50 /* .gitignore 2 */,
+				CC80AEA42E83914A0066DD50 /* .githubworkflowsci.yml */,
+				CC80AEA62E8391660066DD50 /* .github-workflows-ci.yml */,
+				CC80AEA82E8391960066DD50 /* PROJECT_STATUS.md */,
+				CC80AEAA2E8391A80066DD50 /* QUICK_SETUP.md */,
+				CC80AEAC2E8395C10066DD50 /* Info.plist-additions.xml */,
+				CC80AEAE2E8395E40066DD50 /* AppStoreAssets.md */,
+				CC80AEB02E8395F70066DD50 /* AppStoreDescription.md */,
+				CC80AEB22E8396130066DD50 /* FinalSubmissionChecklist.md */,
+				CC80AEB42E83967B0066DD50 /* Step1-InfoPlist-Guide.md */,
+				CC80AEB62E8396B80066DD50 /* Step3-AppStore-Assets-Guide.md */,
+				CC80AEB82E8397EB0066DD50 /* Info 3.plist */,
+				CCCE37992E848EDD00D9114B /* LiquidGlassAdvancedComponents.swift */,
+				CCCE379B2E848F0A00D9114B /* LIQUID_GLASS_ENHANCEMENTS.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -327,6 +399,25 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC80AEB52E83967B0066DD50 /* Step1-InfoPlist-Guide.md in Resources */,
+				CC80AEB72E8396B80066DD50 /* Step3-AppStore-Assets-Guide.md in Resources */,
+				CC80AEAF2E8395E40066DD50 /* AppStoreAssets.md in Resources */,
+				CCCE379C2E848F0A00D9114B /* LIQUID_GLASS_ENHANCEMENTS.md in Resources */,
+				CC80AE952E838DC20066DD50 /* Info 2.plist in Resources */,
+				CC80AEAB2E8391A80066DD50 /* QUICK_SETUP.md in Resources */,
+				CC80AEAD2E8395C10066DD50 /* Info.plist-additions.xml in Resources */,
+				CC80AE9B2E838F870066DD50 /* FinalAppStoreGuide.md in Resources */,
+				CC80AEB92E8397EB0066DD50 /* Info 3.plist in Resources */,
+				CC80AEA92E8391960066DD50 /* PROJECT_STATUS.md in Resources */,
+				CC80AE9F2E8391010066DD50 /* DEVELOPMENT_SUMMARY.md in Resources */,
+				CC80AEB12E8395F70066DD50 /* AppStoreDescription.md in Resources */,
+				CC80AEA32E83911D0066DD50 /* .gitignore 2 in Resources */,
+				CC80AEB32E8396130066DD50 /* FinalSubmissionChecklist.md in Resources */,
+				CC80AE932E838D730066DD50 /* AppStoreSubmissionChecklist.md in Resources */,
+				CC80AEA12E83910A0066DD50 /* LICENSE 2 in Resources */,
+				CC80AE9D2E8390820066DD50 /* README 2.md in Resources */,
+				CC80AEA52E83914A0066DD50 /* .githubworkflowsci.yml in Resources */,
+				CC80AEA72E8391660066DD50 /* .github-workflows-ci.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,16 +453,21 @@
 				CC434B7F2E69E7850018DE06 /* ContentView.swift in Sources */,
 				CC1F3DDC2E58080700FC027A /* Todo.swift in Sources */,
 				CC1F3DE62E5809A900FC027A /* GoogleCalendarEvent.swift in Sources */,
+				CC80AE992E838F140066DD50 /* ComprehensiveAppStoreTests.swift in Sources */,
 				CC434B7A2E69E5900018DE06 /* SharedTypes.swift in Sources */,
+				CC80AE972E838E2B0066DD50 /* LocationErrorHandling.swift in Sources */,
 				CC434B7B2E69E5900018DE06 /* TestEventCreation.swift in Sources */,
 				CC9440C02E63905500D64DEF /* PastelTheme.swift in Sources */,
 				CC9440C12E63905500D64DEF /* LiquidGlassTheme.swift in Sources */,
 				CCB02BCF2E6B6C84002FACE0 /* EnhancedLocationInputView.swift in Sources */,
 				CCB02BD02E6B6C84002FACE0 /* LocationManager.swift in Sources */,
+				CC80AE912E838D590066DD50 /* AppStoreTests.swift in Sources */,
+				CCCE379A2E848EDD00D9114B /* LiquidGlassAdvancedComponents.swift in Sources */,
 				CCB02BD12E6B6C84002FACE0 /* EnhancedLocationPickerView.swift in Sources */,
 				CC1F3DF02E5809FA00FC027A /* GoogleCalendarService.swift in Sources */,
 				CCF29A512E5AB63D0036BABD /* Never_ForgetApp.swift in Sources */,
 				CCF29A522E5AB63D0036BABD /* CreateEventView.swift in Sources */,
+				CC80AE8F2E838D3D0066DD50 /* PerformanceOptimizations.swift in Sources */,
 				CCF29A542E5AB63D0036BABD /* CreateTodoView.swift in Sources */,
 				CCF29A562E5AB63D0036BABD /* EventDetailView.swift in Sources */,
 			);

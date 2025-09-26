@@ -1,6 +1,7 @@
 import SwiftUI
 
-// MARK: - Liquid Glass Design System for iOS 26
+// MARK: - Enhanced Liquid Glass Theme for iOS 26
+@available(iOS 26.0, *)
 struct LiquidGlassTheme {
     
     // MARK: - Liquid Glass Core Colors
@@ -90,6 +91,7 @@ struct LiquidGlassTheme {
     static let glassSpringAnimation = Animation.spring(response: 0.4, dampingFraction: 0.8)
     
     // MARK: - Liquid Glass View Modifiers
+    @available(iOS 26.0, *)
     struct GlassCard: ViewModifier {
         let cornerRadius: CGFloat
         let padding: CGFloat
@@ -117,6 +119,7 @@ struct LiquidGlassTheme {
         }
     }
     
+    @available(iOS 26.0, *)
     struct GlassButton: ViewModifier {
         let buttonColor: Color
         let cornerRadius: CGFloat
@@ -154,6 +157,7 @@ struct LiquidGlassTheme {
         }
     }
     
+    @available(iOS 26.0, *)
     struct GlassModal: ViewModifier {
         let cornerRadius: CGFloat
         let padding: CGFloat
@@ -178,6 +182,7 @@ struct LiquidGlassTheme {
         }
     }
     
+    @available(iOS 26.0, *)
     struct GlassNavigation: ViewModifier {
         func body(content: Content) -> some View {
             content
@@ -192,6 +197,7 @@ struct LiquidGlassTheme {
         }
     }
     
+    @available(iOS 26.0, *)
     struct GlassInput: ViewModifier {
         let isFocused: Bool
         
@@ -216,6 +222,7 @@ struct LiquidGlassTheme {
 }
 
 // MARK: - Liquid Glass View Extensions
+@available(iOS 26.0, *)
 extension View {
     func glassCard(cornerRadius: CGFloat = LiquidGlassTheme.glassCornerRadiusMedium, 
                    padding: CGFloat = LiquidGlassTheme.glassSpacingMedium,
@@ -244,6 +251,7 @@ extension View {
 }
 
 // MARK: - Liquid Glass Color Extensions
+@available(iOS 26.0, *)
 extension Color {
     static let glassBase = LiquidGlassTheme.glassBase
     static let glassHighlight = LiquidGlassTheme.glassHighlight
@@ -258,6 +266,7 @@ extension Color {
 }
 
 // MARK: - Liquid Glass Animation Extensions
+@available(iOS 26.0, *)
 extension Animation {
     static let glassAnimation = LiquidGlassTheme.glassAnimation
     static let glassSpringAnimation = LiquidGlassTheme.glassSpringAnimation

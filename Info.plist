@@ -35,12 +35,46 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
 	<key>NSDocumentsFolderUsageDescription</key>
 	<string>This app needs access to documents to import ICS calendar files.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses location services to provide automatic location suggestions when creating events.</string>
 	<key>NSLocationUsageDescription</key>
 	<string>Location access helps provide accurate address suggestions for your events.</string>
+	<key>NSCalendarUsageDescription</key>
+	<string>This app needs access to your calendar to create and manage events, and to sync with Google Calendar.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>This app uses notifications to remind you about important tasks and events with persistent alarms.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This app can access your contacts to add attendees to calendar events.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>googleapis.com</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>googleusercontent.com</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
